@@ -5,8 +5,8 @@ const handleGlobalFilters = require("../middleware/filtersHandler");
 
 const getLeads = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM leads";
-  const GlobalFiltersQuery = handleGlobalFilters(req.query);
-  sql = sql + GlobalFiltersQuery;
+  const filtersQuery = handleGlobalFilters(req.query);
+  sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       throw err;

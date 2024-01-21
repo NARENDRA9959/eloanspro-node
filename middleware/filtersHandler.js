@@ -1,7 +1,7 @@
 const mysql = require("mysql");
 
 const handleFilters = (queryParams) => {
-    let querySuffix = " "
+    let querySuffix = " ";
     if (queryParams && Object.keys(queryParams) && Object.keys(queryParams).length > 0) {
         let conditionalQuery = handleConditionalFilters(queryParams);
         querySuffix += conditionalQuery;
