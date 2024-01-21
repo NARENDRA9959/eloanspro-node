@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-  getFacultys,
+  getFaculty,
   getFacultyById,
   createFaculty,
   updateFaculty,
@@ -10,11 +10,11 @@ const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();
 
-router.route("/").get(getFacultys).post(validateToken, createFaculty);
+router.route("/").get(getFaculty).post(validateToken, createFaculty);
 
 router
   .route("/:id")
-  .get(getFacultyById)
+  .get(validateToken, getFacultyById)
   .put(validateToken, updateFaculty)
   .delete(validateToken, deleteFaculty);
 

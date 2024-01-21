@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const dbConnect = require("../config/dbConnection");
 
 const getNotices = asyncHandler(async (req, res) => {
-  const sql = "SELECT * FROM notice";
+  const sql = "SELECT * FROM notice ORDER BY created_at";
   dbConnect.query(sql, (err, result) => {
     if (err) {
       throw err;
