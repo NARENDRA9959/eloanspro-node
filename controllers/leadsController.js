@@ -1,8 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const dbConnect = require("../config/dbConnection");
 
-const getEvents = asyncHandler(async (req, res) => {
-  const sql = "SELECT * FROM events";
+const getLeads = asyncHandler(async (req, res) => {
+  const sql = "SELECT * FROM leads";
   dbConnect.query(sql, (err, result) => {
     if (err) {
       throw err;
@@ -13,8 +13,8 @@ const getEvents = asyncHandler(async (req, res) => {
 
 
 
-const getEventById = asyncHandler((req, res) => {
-  const sql = `SELECT * FROM events WHERE id = ${req.params.id}`;
+const getLeadById = asyncHandler((req, res) => {
+  const sql = `SELECT * FROM leads WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       throw err;
@@ -23,17 +23,17 @@ const getEventById = asyncHandler((req, res) => {
   });
 });
 
-const createEvent = asyncHandler((req, res) => {
+const createLead = asyncHandler((req, res) => {
   const sql = `INSERT INTO EVENTS(event_name) VALUES('${req.body.name}')`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       throw err;
     }
-    res.status(200).send("Event Created Successfully");
+    res.status(200).send("Lead Created Successfully");
   });
 });
 
-const updateEvent = asyncHandler((req, res) => {
+const updateLead = asyncHandler((req, res) => {
   const sql = `UPDATE EVENTS SET event_name = "${req.body.name}" WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
@@ -43,20 +43,20 @@ const updateEvent = asyncHandler((req, res) => {
   });
 });
 
-const deleteEvent = asyncHandler((req, res) => {
-  const sql = `DELETE FROM EVENTS WHERE id = ${req.params.id}`;
+const deleteLead = asyncHandler((req, res) => {
+  const sql = `DELETE FROM leads WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       throw err;
     }
-    res.status(200).send("Event Deleted Successfully");
+    res.status(200).send("Lead Deleted Successfully");
   });
 });
 
 module.exports = {
-  getEvents,
-  getEventById,
-  createEvent,
-  updateEvent,
-  deleteEvent,
+  getLeads,
+  getLeadById,
+  createLead,
+  updateLead,
+  deleteLead,
 };
