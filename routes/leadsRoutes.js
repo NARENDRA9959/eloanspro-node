@@ -10,7 +10,7 @@ const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();
 
-router.route("/").get(getLeads).post(validateToken, createLead);
+router.route("/").get(validateToken,getLeads).post(validateToken, createLead);
 
 router
   .route("/:id")

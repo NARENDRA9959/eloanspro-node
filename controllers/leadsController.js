@@ -1,8 +1,12 @@
 const asyncHandler = require("express-async-handler");
 const dbConnect = require("../config/dbConnection");
+const handleGlobalFilters = require("../middleware/filtersHandler");
+
 
 const getLeads = asyncHandler(async (req, res) => {
-  const sql = "SELECT * FROM leads";
+  let sql = "SELECT * FROM leads";
+  const GlobalFiltersQuery = handleGlobalFilters(req.query);
+  sql = sql + GlobalFiltersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       throw err;
@@ -10,8 +14,6 @@ const getLeads = asyncHandler(async (req, res) => {
     res.status(200).send(result);
   });
 });
-
-
 
 const getLeadById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM leads WHERE id = ${req.params.id}`;
