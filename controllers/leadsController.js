@@ -1,7 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const dbConnect = require("../config/dbConnection");
 const handleGlobalFilters = require("../middleware/filtersHandler");
-
+const { createClauseHandler, updateClauseHandler } = require("../middleware/clauseHandler");
+const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 
 const getLeads = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM leads";
@@ -26,7 +27,13 @@ const getLeadById = asyncHandler((req, res) => {
 });
 
 const createLead = asyncHandler((req, res) => {
-  const sql = `INSERT INTO EVENTS(event_name) VALUES('${req.body.name}')`;
+  const createClause = createClauseHandler(req.body);
+  const checkRequiredFields = handleRequiredFields('leads', req.body);
+  if (!checkRequiredFields) {
+    res.status(422).send("Please Fill all required fields");
+    return;
+  }
+  const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       throw err;
@@ -36,7 +43,14 @@ const createLead = asyncHandler((req, res) => {
 });
 
 const updateLead = asyncHandler((req, res) => {
-  const sql = `UPDATE EVENTS SET event_name = "${req.body.name}" WHERE id = ${req.params.id}`;
+  const id = req.params.id;
+  const checkRequiredFields = handleRequiredFields('leads', req.body);
+  if (!checkRequiredFields) {
+    res.status(422).send("Please Fill all required fields");
+    return;
+  }
+  const updateClause = updateClauseHandler(req.body);
+  const sql = `UPDATE EVENTS SET ${updateClause} WHERE id = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       throw err;
