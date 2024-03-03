@@ -38,44 +38,6 @@ const adminLogin = asyncHandler(async (req, res) => {
   });
 });
 
-
-const studentLogin = asyncHandler(async (req, res) => {
-  const { username, password, type } = req.body;
-  if (!username || !password || !type) {
-    res.status(400);
-    throw new Error("Please Enter Username and Password");
-  }
-  const sql = `SELECT * FROM students WHERE email = "${username}" OR name = "${username}"`;
-  dbConnect.query(sql, async (err, result) => {
-    if (err) {
-      throw err;
-    }
-    if (
-      result &&
-      result.length == 1 &&
-      (await bcrypt.compare(password, result[0].password))
-    ) {
-      const user = result[0];
-      const accessToken = jwt.sign(
-        {
-          user: {
-            id: user.id,
-            username: user.name,
-            email: user.email,
-            type: type
-          },
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "30m" }
-      );
-      res.status(200).json({ accessToken });
-    } else {
-      res.status(401).send("Username or Password Incorrect");
-      //   throw new Error("Username or Password Incorrect");
-    }
-  });
-});
-
 const userLogout = asyncHandler(async (req, res) => {
   const expiredToken = (req.headers.authorization || req.headers.Authorization).replace("Bearer ", "");
   const decodedToken = jwt.decode(expiredToken);
@@ -84,4 +46,5 @@ const userLogout = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Logout successful' });
 });
 
-module.exports = { adminLogin, userLogout, studentLogin };
+
+module.exports = { adminLogin, userLogout };

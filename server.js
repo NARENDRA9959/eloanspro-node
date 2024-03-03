@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const path = require('path');
+const validateToken = require("./middleware/validateTokenHandler");
 const app = express();
 app.use(express.json());
 app.use(cors({
@@ -9,6 +11,10 @@ app.use(cors({
 app.use("/user", require("./routes/userRoutes"));
 
 app.use("/leads", require("./routes/leadsRoutes"));
+
+app.use("/files", require("./routes/fileHandlerRoutes"));
+
+app.use("/uploads", express.static(path.join(__dirname, 'uploads')));
 
 app.listen(process.env.PORT, () => {
   console.log("Server Running Peacefully");
