@@ -12,7 +12,8 @@ const createDirectoryIfNotExists = (directory) => {
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const userId = req.user.id;
-    const userUploadsDir = path.join('uploads', userId.toString());
+    const type = req.query.type;
+    const userUploadsDir = path.join('uploads', userId.toString(), type);
     createDirectoryIfNotExists(userUploadsDir);
     cb(null, userUploadsDir);
   },
