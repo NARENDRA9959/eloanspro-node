@@ -1,6 +1,13 @@
 const createClauseHandler = (body) => {
     const columns = Object.keys(body).join(', ');
-    const values = Object.values(body).map(value => `"${value}"`).join(', ');
+    const values = Object.keys(body).map(key => {
+        if (Array.isArray(body[key])) {
+            const arrayValues = JSON.stringify(body[key].map(value => value.replace(/\\/g, '/')));
+            return `'${arrayValues}'`;
+        } else {
+            return `"${body[key]}"`;
+        }
+    }).join(', ');
     return [columns, values];
 }
 
@@ -8,7 +15,23 @@ const updateClauseHandler = (body) => {
     // return Object.keys(body).map(key => `${key} = "${body[key]}"`).join(', ');
     return Object.keys(body).map(key => {
         if (Array.isArray(body[key])) {
-            const arrayValues = JSON.stringify(body[key].map(value => value.replace(/\\/g, '/')));
+            const arrayValues = JSON.stringify(body[key].map(value => {
+                if (typeof value == 'object') {
+                    for (let keyElement in value) {
+                        if (Array.isArray(value[keyElement])) {
+                            value[keyElement] = value[keyElement].map(valueElement => valueElement.replace(/\\/g, '/'));
+                            console.log("value[key]", value[keyElement])
+                        }
+                        else {
+                            value[keyElement] = value[keyElement].replace(/\\/g, '/');
+                        }
+                    }
+                }
+                else {
+                    value = value.replace(/\\/g, '/');
+                }
+                return value
+            }));
             return `${key} = '${arrayValues}'`;
         } else {
             return `${key} = "${body[key]}"`;

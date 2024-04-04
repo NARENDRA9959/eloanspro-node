@@ -7,7 +7,10 @@ const {
   updateLead,
   deleteLead,
   getLeadSources,
-  getLeadUsers
+  getLeadUsers,
+  changeLeadStatus,
+  getLeadDocumentsById,
+  addDocumentData
 } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -19,7 +22,11 @@ router.route("/total").get(validateToken, getLeadsCount);
 
 router.route("/sources").get(validateToken, getLeadSources);
 
+router.route("/:leadId/changestatus/:statusId").put(validateToken, changeLeadStatus);
+
 router.route("/users").get(validateToken, getLeadUsers);
+
+router.route("/documents/:leadId").get(validateToken, getLeadDocumentsById).put(validateToken, addDocumentData);
 
 
 router

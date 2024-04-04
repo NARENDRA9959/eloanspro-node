@@ -1,5 +1,6 @@
 const databaseRequiredFields = {
-    'leads': ['businessName']
+    'leads': ['businessName'],
+    'callbacks': ['businessName']
 }
 
 const handleRequiredFields = (database, body) => {

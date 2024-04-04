@@ -12,6 +12,8 @@ app.use("/user", require("./routes/userRoutes"));
 
 app.use("/leads", require("./routes/leadsRoutes"));
 
+app.use("/callbacks", require("./routes/callbackRoutes"));
+
 app.use("/files", require("./routes/fileHandlerRoutes"));
 
 app.use("/uploads", express.static(path.join(__dirname, 'uploads')));
