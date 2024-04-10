@@ -28,7 +28,6 @@ router.route("/users").get(validateToken, getLeadUsers);
 
 router.route("/documents/:leadId").get(validateToken, getLeadDocumentsById).put(validateToken, addDocumentData);
 
-
 router
   .route("/:id")
   .get(validateToken, getLeadById)
