@@ -16,9 +16,9 @@ const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();
 
-router.route("/").get(validateToken, getLeads, getLeadsCount).post(validateToken, createLead);
+router.route("/").get(validateToken, getLeads).post(validateToken, createLead);
 
-router.route("/total").get(validateToken, getLeadsCount);
+router.route("/total").get(validateToken,  getLeadsCount); 
 
 router.route("/sources").get(validateToken, getLeadSources);
 

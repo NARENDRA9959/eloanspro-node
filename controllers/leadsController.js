@@ -12,7 +12,7 @@ const getLeadsCount = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err;
+      throw err; 
     }
     const leadsCount = result[0]['leadsCount'];
     res.status(200).send(String(leadsCount))
