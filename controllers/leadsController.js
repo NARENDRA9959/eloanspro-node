@@ -8,11 +8,12 @@ const { generateRandomNumber } = require("../middleware/valueGenerator");
 
 const getLeadsCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as leadsCount FROM leads";
-  const filtersQuery = handleGlobalFilters(req.query);
+  const filtersQuery = handleGlobalFilters(req.query,true);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err; 
+      // throw err;
+      console.log("getLeadsCount error in controller")
     }
     const leadsCount = result[0]['leadsCount'];
     res.status(200).send(String(leadsCount))
@@ -26,8 +27,10 @@ const getLeads = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err;
+      // throw err;
+      console.log("getLeads Error in controller")
     }
+
     result = parseNestedJSON(result);
     res.status(200).send(result);
   });
@@ -40,7 +43,8 @@ const getLeadSources = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err;
+      // throw err;
+      console.log("getLeadSourcs Error in Controller")
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
@@ -53,7 +57,8 @@ const getLeadUsers = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err;
+      // throw err;
+      console.log("getLeadUsers error in controller")
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
@@ -65,18 +70,22 @@ const getLeadById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM leads WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err;
+      // throw err;
+      console.log("getLeadById error in controller")
     }
     result = parseNestedJSON(result);
+    //console.log(result)
     res.status(200).send(result[0]);
   });
 });
+
 
 const getLeadDocumentsById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM leaddocuments WHERE leadId = ${req.params.leadId}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err;
+      // throw err;
+      console.log("getLeadDocumentsById Error in controller")
     }
     result = parseNestedJSON(result);
     res.status(200).send(result[0] || {});
@@ -89,33 +98,76 @@ const addDocumentData = asyncHandler((req, res) => {
   const sql = `UPDATE leaddocuments SET ${updateClause} WHERE id = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err;
+      // throw err;
+      console.log("addDocumentData error in controller")
     }
     res.status(200).send(result);
   });
 });
+
+// const createLead = asyncHandler((req, res) => {
+//   let leadId = 'L-' + generateRandomNumber(6);
+//   req.body['leadId'] = leadId;
+//   req.body['leadInternalStatus'] = 1;
+//   req.body['lastLeadInternalStatus'] = 1;
+//   // req.body['createdBy'] = createdBy;
+//   // req.body['lastUpdatedBy'] = lastUpdatedBy;
+//   const createClause = createClauseHandler(req.body);
+//   // const checkRequiredFields = handleRequiredFields('leads', req.body);
+//   // if (!checkRequiredFields) {
+//   //   res.status(422).send("Please Fill all required fields");
+//   //   return;
+//   // }
+//   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       // throw err;
+
+//       console.log("createLead error in controller")
+//     }
+//     res.status(200).send(true);
+//   });
+// });
+
+
 
 const createLead = asyncHandler((req, res) => {
   let leadId = 'L-' + generateRandomNumber(6);
   req.body['leadId'] = leadId;
   req.body['leadInternalStatus'] = 1;
   req.body['lastLeadInternalStatus'] = 1;
-  // req.body['createdBy'] = createdBy;
-  // req.body['lastUpdatedBy'] = lastUpdatedBy;
+
   const createClause = createClauseHandler(req.body);
-  // const checkRequiredFields = handleRequiredFields('leads', req.body);
-  // if (!checkRequiredFields) {
-  //   res.status(422).send("Please Fill all required fields");
-  //   return;
-  // }
   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err;
+      console.error("Error creating lead:", err);
+      res.status(500).send("Internal Server Error");
+      return;
     }
-    res.status(200).send(true);
+    const id = result.insertId;
+    // Insert leadId into leaddocuments table
+    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
+    dbConnect.query(leaddocumentsSql, (leaddocumentsErr, leaddocumentsResult) => {
+      if (leaddocumentsErr) {
+        console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
+        // Rollback lead insertion in leads table
+        const rollbackSql = `DELETE FROM leads WHERE leadId = '${id}'`;
+        dbConnect.query(rollbackSql, rollbackErr => {
+          if (rollbackErr) {
+            console.error("Error rolling back lead insertion in leads table:", rollbackErr);
+          }
+          res.status(500).send("Internal Server Error");
+        });
+        return;
+      }
+
+      res.status(200).send(true);
+    });
   });
 });
+
 
 const updateLead = asyncHandler((req, res) => {
   const id = req.params.id;
@@ -128,7 +180,8 @@ const updateLead = asyncHandler((req, res) => {
   const sql = `UPDATE leads SET ${updateClause} WHERE id = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err;
+      // throw err;
+      console.log("updateLead error in controller")
     }
     res.status(200).send(result);
   });
@@ -138,7 +191,8 @@ const deleteLead = asyncHandler((req, res) => {
   const sql = `DELETE FROM leads WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      throw err;
+      // throw err;
+      console.log("deleteLead error in controller")
     }
     res.status(200).send("Lead Deleted Successfully");
   });
@@ -150,7 +204,8 @@ const changeLeadStatus = asyncHandler((req, res) => {
   const createSql = `SELECT * FROM leads WHERE id = ${id}`;
   dbConnect.query(createSql, (err, result) => {
     if (err) {
-      throw err;
+      // throw err;
+      console.log("changeLeadStatus error in controller")
     }
     if (result && result[0] && statusId) {
       let statusData = {
@@ -161,7 +216,8 @@ const changeLeadStatus = asyncHandler((req, res) => {
       const sql = `UPDATE leads SET ${updateClause} WHERE id = ${id}`;
       dbConnect.query(sql, (err, result) => {
         if (err) {
-          throw err;
+          // throw err;
+          console.log("changeLeadStatus error in controller")
         }
         res.status(200).send(true);
       });

@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const path = require('path');
+const path = require("path");
 
 const uploadFiles = asyncHandler(async (req, res) => {
   try {
@@ -8,18 +8,27 @@ const uploadFiles = asyncHandler(async (req, res) => {
     const type = req.query.type;
     const domain = req.hostname;
     const port = process.env.PORT;
-    let domainWithPort = port ? domain + ':' + port : domain;
+    let domainWithPort = port ? domain + ":" + port : domain;
+    console.log(domainWithPort);
     const fileLinks = [];
     for (const file of files) {
-      const filePath = path.join(domainWithPort, 'uploads', userId.toString(), type, file.filename);
+      const filePath = path.join(
+        domainWithPort,
+        "uploads",
+        userId.toString(),
+        type,
+        file.filename
+      );
+
       fileLinks.push(filePath);
     }
+
     res.json({ links: fileLinks });
   } catch (error) {
-    res.status(500).json('Error uploading files');
+    res.status(500).json("Error uploading files");
   }
 });
 
 module.exports = {
-  uploadFiles
+  uploadFiles,
 };

@@ -29,7 +29,8 @@ function handleDisconnect() {
       handleDisconnect();
     }
     else {
-      throw err;
+      // throw err;
+      console.log("database connection error:")
     }
   });
 }

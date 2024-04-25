@@ -1,6 +1,6 @@
 const mysql = require("mysql");
 
-const handleFilters = (queryParams) => {
+const handleFilters = (queryParams,isCountUrl=false) => {
     let querySuffix = " ";
     if (queryParams && Object.keys(queryParams) && Object.keys(queryParams).length > 0) {
         let conditionalQuery = handleConditionalFilters(queryParams);
@@ -9,10 +9,10 @@ const handleFilters = (queryParams) => {
             const [column, order = 'asc'] = queryParams['sort'].split(',');
             querySuffix += ` ORDER BY ${column} ${order.toUpperCase()}`;
         }
-        if (queryParams['count']) {
+        if (queryParams['count'] && !isCountUrl) {
             querySuffix += ' LIMIT ' + queryParams['count'];
         }
-        if (queryParams['from']) {
+        if (queryParams['from'] && !isCountUrl) {
             querySuffix += ' OFFSET ' + queryParams['from'];
         }
     }

@@ -11,7 +11,8 @@ const adminLogin = asyncHandler(async (req, res) => {
   const sql = `SELECT * FROM admin WHERE email = "${username}" OR name = "${username}"`;
   dbConnect.query(sql, async (err, result) => {
     if (err) {
-      throw err;
+      // throw err;
+      console.log("adminlogin error in controller")
     }
     if (
       result &&

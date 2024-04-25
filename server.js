@@ -16,6 +16,8 @@ app.use("/callbacks", require("./routes/callbackRoutes"));
 
 app.use("/files", require("./routes/fileHandlerRoutes"));
 
+app.use("/counts",require("./routes/allCountRoutes"));
+
 app.use("/uploads", express.static(path.join(__dirname, 'uploads')));
 
 app.listen(process.env.PORT, () => {
