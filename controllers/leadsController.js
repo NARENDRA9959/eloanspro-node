@@ -95,12 +95,15 @@ const getLeadDocumentsById = asyncHandler((req, res) => {
 const addDocumentData = asyncHandler((req, res) => {
   const id = req.params.leadId;
   const updateClause = updateClauseHandler(req.body);
-  const sql = `UPDATE leaddocuments SET ${updateClause} WHERE id = ${id}`;
+  console.log(updateClause)
+  console.log(id)
+  const sql = `UPDATE leaddocuments SET ${updateClause} WHERE leadId = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
       console.log("addDocumentData error in controller")
     }
+    console.log(result)
     res.status(200).send(result);
   });
 });

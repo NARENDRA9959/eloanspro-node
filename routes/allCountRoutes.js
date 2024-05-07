@@ -13,7 +13,9 @@ const {
   getLast6MonthsLeadCountStatus,
   getLast6MonthsCallBacksCount,
   getLastYearCallBacksCount,
-  getLastYearLeadCountStatus
+  getLastYearLeadCountStatus,
+  getDaywiseLeadsCount,
+  getDaywiseCallBacksCount
 } = require("../controllers/allCountsController");
 const { getCallBacksCount } = require("../controllers/callbacksController");
 const router = express.Router();
@@ -29,6 +31,9 @@ router.route("/credit").get(validateToken, getCreditEvaluationCountStatus);
 
 router.route("/month/callback").get(validateToken, getMonthWiseCallBacksCount);
 router.route("/month/leads").get(validateToken, getMonthWiseLeadCountStatus);
+
+router.route("/daywise/leads").get(validateToken, getDaywiseLeadsCount);
+router.route("/daywise/callback").get(validateToken, getDaywiseCallBacksCount);
 
 
 router.route("/week/leads").get(validateToken, getPast7DaysLeadCountStatus);

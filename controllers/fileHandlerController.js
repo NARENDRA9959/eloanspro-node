@@ -9,7 +9,7 @@ const uploadFiles = asyncHandler(async (req, res) => {
     const domain = req.hostname;
     const port = process.env.PORT;
     let domainWithPort = port ? domain + ":" + port : domain;
-    console.log(domainWithPort);
+    //console.log(domainWithPort);
     const fileLinks = [];
     for (const file of files) {
       const filePath = path.join(

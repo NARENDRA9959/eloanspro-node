@@ -14,5 +14,4 @@ const generateRandomNumber = (value) => {
     }
     return randomNumber;
 }
-
 module.exports = {generateRandomNumber};
