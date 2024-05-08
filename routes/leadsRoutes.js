@@ -16,22 +16,22 @@ const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();
 
-router.route("/").get(getLeads).post(createLead);
+router.route("/").get(validateToken, getLeads).post(validateToken, createLead);
 
-router.route("/total").get(getLeadsCount);
+router.route("/total").get(validateToken,  getLeadsCount); 
 
-router.route("/sources").get(getLeadSources);
+router.route("/sources").get(validateToken, getLeadSources);
 
-router.route("/:leadId/changestatus/:statusId").put(changeLeadStatus);
+router.route("/:leadId/changestatus/:statusId").put(validateToken, changeLeadStatus);
 
-router.route("/users").get(getLeadUsers);
+router.route("/users").get(validateToken, getLeadUsers);
 
-router.route("/documents/:leadId").get(getLeadDocumentsById).put(addDocumentData);
+router.route("/documents/:leadId").get(validateToken, getLeadDocumentsById).put(validateToken, addDocumentData);
 
 router
   .route("/:id")
-  .get(getLeadById)
-  .put(updateLead)
-  .delete(deleteLead);
+  .get(validateToken, getLeadById)
+  .put(validateToken, updateLead)
+  .delete(validateToken, deleteLead);
 
 module.exports = router;
