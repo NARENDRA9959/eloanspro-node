@@ -8,7 +8,7 @@ const { generateRandomNumber } = require("../middleware/valueGenerator");
 
 const getLeadsCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as leadsCount FROM leads";
-  const filtersQuery = handleGlobalFilters(req.query,true);
+  const filtersQuery = handleGlobalFilters(req.query, true);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
@@ -46,7 +46,7 @@ const getLeadSources = asyncHandler(async (req, res) => {
       // throw err;
       console.log("getLeadSourcs Error in Controller")
     }
-    result = parseNestedJSON(result);
+    // result = parseNestedJSON(result);
     res.status(200).send(result);
   });
 });
