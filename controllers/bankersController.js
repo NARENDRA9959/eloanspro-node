@@ -56,9 +56,11 @@ const createBanker = asyncHandler((req, res) => {
   req.body["lastBankerInternalStatus"] = 1;
   
   const createClause = createClauseHandler(req.body);
+  console.log(createClause)
   const sql = `INSERT INTO bankers (${createClause[0]}) VALUES (${createClause[1]})`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
+      
       console.log("createBanker error:");
     }
     res.status(200).send(true);
