@@ -38,17 +38,15 @@ const getLeads = asyncHandler(async (req, res) => {
 
 
 const getLeadSources = asyncHandler(async (req, res) => {
-  let sql = "SELECT * FROM leadSources";
+  let sql = "SELECT * FROM users";
   const filtersQuery = handleGlobalFilters(req.query);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("getLeadSourcs Error in Controller")
+      console.log("getLeadUsers error in controller")
     }
-    //console.log(result)
-    //result = parseNestedJSON(result);
-    //console.log(result)
+    result = parseNestedJSON(result);
     res.status(200).send(result);
   });
 });
