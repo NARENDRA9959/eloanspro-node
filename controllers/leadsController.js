@@ -38,7 +38,7 @@ const getLeads = asyncHandler(async (req, res) => {
 
 
 const getLeadSources = asyncHandler(async (req, res) => {
-  let sql = "SELECT * FROM users";
+  let sql = "SELECT * FROM leadsources";
   const filtersQuery = handleGlobalFilters(req.query);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
