@@ -114,11 +114,13 @@ FROM
 LEFT JOIN 
   leads ON YEAR(leads.createdOn) = YEAR(dates.date) AND MONTH(leads.createdOn) = MONTH(dates.date) AND leadInternalStatus = 1
 WHERE 
-  dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH)
+  dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH) ${handleGlobalFilters(
+    req.query
+  )}
 GROUP BY 
   YEAR(dates.date), MONTH(dates.date)
 ORDER BY 
-  YEAR(dates.date) DESC, MONTH(dates.date) DESC;
+  YEAR(dates.date) DESC, MONTH(dates.date) DESC ;
 `;
 
   dbConnect.query(sql, (err, result) => {
@@ -155,11 +157,13 @@ const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
     LEFT JOIN 
       callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) AND MONTH(callbacks.createdOn) = MONTH(dates.date)
     WHERE 
-      dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH)
+      dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH) ${handleGlobalFilters(
+        req.query
+      )}
     GROUP BY 
       YEAR(dates.date), MONTH(dates.date)
     ORDER BY 
-      YEAR(dates.date) DESC, MONTH(dates.date) DESC;
+      YEAR(dates.date) DESC, MONTH(dates.date) DESC ;
   `;
 
   dbConnect.query(sql, (err, result) => {
