@@ -46,7 +46,9 @@ const getLeadSources = asyncHandler(async (req, res) => {
       // throw err;
       console.log("getLeadSourcs Error in Controller")
     }
-    // result = parseNestedJSON(result);
+    //console.log(result)
+    result = parseNestedJSON(result);
+    //console.log(result)
     res.status(200).send(result);
   });
 });

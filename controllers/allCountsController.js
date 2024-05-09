@@ -175,6 +175,7 @@ const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
 
     // Process the query result
     const monthWiseCallbacksCountList = result;
+    //console.log(monthWiseCallbacksCountList)
 
     // Send the result in the response
     res.status(200).json(monthWiseCallbacksCountList);
