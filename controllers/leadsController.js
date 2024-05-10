@@ -261,21 +261,23 @@ const createLead = asyncHandler((req, res) => {
       res.status(500).send("Internal Server Error");
       return;
     }
-    const id = result.insertId; // Obtain the insertId from the result object
-    console.log("Inserted lead ID:", id);
-    // Insert leadId into leaddocuments table
-    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (${id})`;
-    console.log("leaddocumentsSql:", leaddocumentsSql); // Log the leaddocuments SQL query
-    dbConnect.query(leaddocumentsSql, (leaddocumentsErr, leaddocumentsResult) => {
-      if (leaddocumentsErr) {
-        console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
-        res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
-        return;
-      } else {
-        console.log("Lead ID inserted into leaddocuments successfully:", id);
-        res.status(200).send(true);
-      }
-    });
+    // const id = result.insertId; // Obtain the insertId from the result object
+    // console.log("Inserted lead ID:", id);
+    // // Insert leadId into leaddocuments table
+    // const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (${id})`;
+    // console.log("leaddocumentsSql:", leaddocumentsSql); // Log the leaddocuments SQL query
+    // dbConnect.query(leaddocumentsSql, (leaddocumentsErr, leaddocumentsResult) => {
+    //   if (leaddocumentsErr) {
+    //     console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
+    //     res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
+    //     return;
+    //   } else {
+    //     console.log("Lead ID inserted into leaddocuments successfully:", id);
+    //     res.status(200).send(true);
+    //   }
+  // });
+    res.status(200).send(true);
+  
   });
 });
 
