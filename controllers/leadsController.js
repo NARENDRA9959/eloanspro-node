@@ -267,19 +267,8 @@ const createLead = asyncHandler((req, res) => {
     dbConnect.query(leaddocumentsSql, (leaddocumentsErr, leaddocumentsResult) => {
       if (leaddocumentsErr) {
         console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
-        // Rollback lead insertion in leads table
-        const rollbackSql = `DELETE FROM leads WHERE id = '${id}'`;
-        dbConnect.query(rollbackSql, (rollbackErr) => {
-          if (rollbackErr) {
-            console.error("Error rolling back lead insertion in leads table:", rollbackErr);
-          }
-          // Rollback the entire transaction
-          dbConnect.rollback(() => {
-            console.error("Transaction rolled back due to leaddocuments insertion error.");
-            res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
-          });
-        });
-        return; // Exit the function to prevent further execution
+        res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
+        return;
       } else {
         res.status(200).send(true);
       }
