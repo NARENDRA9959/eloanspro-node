@@ -280,8 +280,7 @@ const createLead = asyncHandler((req, res) => {
           });
         });
         return; // Exit the function to prevent further execution
-      }
-       else {
+      } else {
         res.status(200).send(true);
       }
     });
