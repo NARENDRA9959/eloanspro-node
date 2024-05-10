@@ -236,7 +236,7 @@ const createLead = asyncHandler((req, res) => {
           if (rollbackErr) {
             console.error("Error rolling back lead insertion in leads table:", rollbackErr);
           }
-          res.status(500).send("Internal Server Error");
+          res.status(500).send("Internal Server Error:",id);
         });
         return;
       }
