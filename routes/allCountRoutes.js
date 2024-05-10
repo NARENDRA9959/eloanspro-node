@@ -29,8 +29,8 @@ router.route("/files").get(validateToken, getFilesCountStatus);
 router.route("/partial").get(validateToken, getPartialCountStatus);
 router.route("/credit").get(validateToken, getCreditEvaluationCountStatus);
 
-router.route("/month/callback").get(validateToken, getMonthWiseCallBacksCount);
-router.route("/month/leads").get(validateToken, getMonthWiseLeadCountStatus);
+router.route("/monthcallbacks").get(validateToken, getMonthWiseCallBacksCount);
+router.route("/monthleads").get(validateToken, getMonthWiseLeadCountStatus);
 
 router.route("/daywise/leads").get(validateToken, getDaywiseLeadsCount);
 router.route("/daywise/callback").get(validateToken, getDaywiseCallBacksCount);
