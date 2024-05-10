@@ -244,36 +244,75 @@ const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
   try {
   let sql=`SELECT 
   YEAR(dates.date) AS year,
-  DATE_FORMAT(dates.date, '%b') AS month,
+  CASE 
+      WHEN MONTH(dates.date) = 1 THEN 'Jan'
+      WHEN MONTH(dates.date) = 2 THEN 'Feb'
+      WHEN MONTH(dates.date) = 3 THEN 'Mar'
+      WHEN MONTH(dates.date) = 4 THEN 'Apr'
+      WHEN MONTH(dates.date) = 5 THEN 'May'
+      WHEN MONTH(dates.date) = 6 THEN 'Jun'
+      WHEN MONTH(dates.date) = 7 THEN 'Jul'
+      WHEN MONTH(dates.date) = 8 THEN 'Aug'
+      WHEN MONTH(dates.date) = 9 THEN 'Sep'
+      WHEN MONTH(dates.date) = 10 THEN 'Oct'
+      WHEN MONTH(dates.date) = 11 THEN 'Nov'
+      WHEN MONTH(dates.date) = 12 THEN 'Dec'
+  END AS month,
   COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
 FROM 
   (
       SELECT 
-          CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()), 2, '0'), '-01') AS date
+          DATE(CONCAT(
+              YEAR(NOW()), 
+              '-', 
+              SUBSTRING(CONCAT('00', MONTH(NOW())), -2), 
+              '-01'
+          )) AS date
       UNION ALL 
       SELECT 
-          CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 1, 2, '0'), '-01') AS date
+          DATE(CONCAT(
+              YEAR(NOW()), 
+              '-', 
+              SUBSTRING(CONCAT('00', MONTH(NOW()) - 1), -2), 
+              '-01'
+          )) AS date
       UNION ALL 
       SELECT 
-          CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 2, 2, '0'), '-01') AS date
+          DATE(CONCAT(
+              YEAR(NOW()), 
+              '-', 
+              SUBSTRING(CONCAT('00', MONTH(NOW()) - 2), -2), 
+              '-01'
+          )) AS date
       UNION ALL 
       SELECT 
-          CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 3, 2, '0'), '-01') AS date
+          DATE(CONCAT(
+              YEAR(NOW()), 
+              '-', 
+              SUBSTRING(CONCAT('00', MONTH(NOW()) - 3), -2), 
+              '-01'
+          )) AS date
       UNION ALL 
       SELECT 
-          CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 4, 2, '0'), '-01') AS date
+          DATE(CONCAT(
+              YEAR(NOW()), 
+              '-', 
+              SUBSTRING(CONCAT('00', MONTH(NOW()) - 4), -2), 
+              '-01'
+          )) AS date
   ) AS dates
 LEFT JOIN 
   callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) 
       AND MONTH(callbacks.createdOn) = MONTH(dates.date)
 WHERE 
-  dates.date >= CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 5, 2, '0'), '-01')
+  dates.date >= DATE(CONCAT(YEAR(NOW()), '-', SUBSTRING(CONCAT('00', MONTH(NOW()) - 5), -2), '-01'))
 GROUP BY 
   YEAR(dates.date), 
   MONTH(dates.date)
 ORDER BY 
   YEAR(dates.date) DESC, 
   MONTH(dates.date) DESC;
+
 `;
     dbConnect.query(sql, (err, result) => {
       if (err) {
