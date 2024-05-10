@@ -221,7 +221,7 @@ const createLead = asyncHandler((req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Create lead error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Internal severe Error");
       return;
     }
     const id = result.insertId;
