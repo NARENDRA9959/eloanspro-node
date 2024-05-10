@@ -138,50 +138,99 @@ ORDER BY
   });
 });
 
+// const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
+//   let sql = `
+//     SELECT 
+//       YEAR(dates.date) AS year,
+//       DATE_FORMAT(dates.date, '%b') AS month,
+//       COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
+//     FROM 
+//       (
+//           SELECT LAST_DAY(DATE_SUB(CURDATE(), INTERVAL (a.a + (10 * b.a) + (100 * c.a)) MONTH)) AS date
+//           FROM 
+//               (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS a
+//           CROSS JOIN 
+//               (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS b
+//           CROSS JOIN 
+//               (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS c
+//       ) AS dates
+//     LEFT JOIN 
+//       callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) AND MONTH(callbacks.createdOn) = MONTH(dates.date)
+//     WHERE 
+//       dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH) ${handleGlobalFilters(
+//         req.query
+//       )}
+//     GROUP BY 
+//       YEAR(dates.date), MONTH(dates.date)
+//     ORDER BY 
+//       YEAR(dates.date) DESC, MONTH(dates.date) DESC ;
+//   `;
+
+//   dbConnect.query(sql, (err, result) => {
+//     console.log(result)
+//     if (err) {
+//       console.error("Error:", err);
+//       res.status(500).send("Internal Server Error");
+//       return;
+//     }
+
+//     // Process the query result
+//     const monthWiseCallbacksCountList = result;
+//     //console.log(monthWiseCallbacksCountList)
+
+//     // Send the result in the response
+//     res.status(200).json(monthWiseCallbacksCountList);
+//   });
+// });
+
+
 const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
-  let sql = `
-    SELECT 
-      YEAR(dates.date) AS year,
-      DATE_FORMAT(dates.date, '%b') AS month,
-      COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
-    FROM 
-      (
-          SELECT LAST_DAY(DATE_SUB(CURDATE(), INTERVAL (a.a + (10 * b.a) + (100 * c.a)) MONTH)) AS date
-          FROM 
-              (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS a
-          CROSS JOIN 
-              (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS b
-          CROSS JOIN 
-              (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS c
-      ) AS dates
-    LEFT JOIN 
-      callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) AND MONTH(callbacks.createdOn) = MONTH(dates.date)
-    WHERE 
-      dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH) ${handleGlobalFilters(
-        req.query
-      )}
-    GROUP BY 
-      YEAR(dates.date), MONTH(dates.date)
-    ORDER BY 
-      YEAR(dates.date) DESC, MONTH(dates.date) DESC ;
-  `;
+  try {
+    let sql = `
+      SELECT 
+        YEAR(dates.date) AS year,
+        DATE_FORMAT(dates.date, '%b') AS month,
+        COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
+      FROM 
+        (
+            SELECT LAST_DAY(DATE_SUB(CURDATE(), INTERVAL (a.a + (10 * b.a) + (100 * c.a)) MONTH)) AS date
+            FROM 
+                (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS a
+            CROSS JOIN 
+                (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS b
+            CROSS JOIN 
+                (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS c
+        ) AS dates
+      LEFT JOIN 
+        callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) AND MONTH(callbacks.createdOn) = MONTH(dates.date)
+      WHERE 
+        dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH) ${handleGlobalFilters(
+          req.query
+        )}
+      GROUP BY 
+        YEAR(dates.date), MONTH(dates.date)
+      ORDER BY 
+        YEAR(dates.date) DESC, MONTH(dates.date) DESC;
+    `;
 
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
+    dbConnect.query(sql, (err, result) => {
+      if (err) {
+        console.error("Database Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      // Process the query result
+      const monthWiseCallbacksCountList = result;
+      console.log(monthWiseCallbacksCountList)
 
-    // Process the query result
-    const monthWiseCallbacksCountList = result;
-    //console.log(monthWiseCallbacksCountList)
-
-    // Send the result in the response
-    res.status(200).json(monthWiseCallbacksCountList);
-  });
+      // Send the result in the response
+      res.status(200).json(monthWiseCallbacksCountList);
+    });
+  } catch (error) {
+    console.error("Server Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
-
 
 
 const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
