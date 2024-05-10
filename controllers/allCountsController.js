@@ -142,7 +142,7 @@ const getCreditEvaluationCountStatus = asyncHandler(async (req, res) => {
 
 const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
   try {
-    `SELECT 
+    let sql=`SELECT 
     YEAR(dates.date) AS year,
     DATE_FORMAT(dates.date, '%b') AS month,
     COALESCE(COUNT(leads.id), 0) AS leadCount
@@ -185,7 +185,7 @@ ORDER BY
 
       // Process the query result
       const monthWiseLeadCountList = result;
-      console.log(monthWiseLeadCountList);
+      console.log("monthWiseLeadCountList:",monthWiseLeadCountList);
 
       // Send the result in the response
       res.status(200).json(monthWiseLeadCountList);
@@ -242,7 +242,7 @@ ORDER BY
 
 const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
   try {
-  `SELECT 
+  let sql=`SELECT 
   YEAR(dates.date) AS year,
   DATE_FORMAT(dates.date, '%b') AS month,
   COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
@@ -284,6 +284,7 @@ ORDER BY
       
       // Process the query result
       const monthWiseCallbacksCountList = result;
+      console.log("monthWiseCallbacksCountList:",monthWiseCallbacksCountList)
       res.status(200).json(monthWiseCallbacksCountList);
     });
   } catch (error) {
