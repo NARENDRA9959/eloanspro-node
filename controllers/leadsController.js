@@ -2,7 +2,10 @@ const asyncHandler = require("express-async-handler");
 const dbConnect = require("../config/dbConnection");
 const handleGlobalFilters = require("../middleware/filtersHandler");
 const parseNestedJSON = require("../middleware/parseHandler");
-const { createClauseHandler, updateClauseHandler } = require("../middleware/clauseHandler");
+const {
+  createClauseHandler,
+  updateClauseHandler,
+} = require("../middleware/clauseHandler");
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
 
@@ -13,13 +16,12 @@ const getLeadsCount = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("getLeadsCount error in controller")
+      console.log("getLeadsCount error in controller");
     }
-    const leadsCount = result[0]['leadsCount'];
-    res.status(200).send(String(leadsCount))
+    const leadsCount = result[0]["leadsCount"];
+    res.status(200).send(String(leadsCount));
   });
 });
-
 
 const getLeads = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM leads";
@@ -28,14 +30,13 @@ const getLeads = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("getLeads Error in controller")
+      console.log("getLeads Error in controller");
     }
 
     result = parseNestedJSON(result);
     res.status(200).send(result);
   });
 });
-
 
 const getLeadSources = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM leadsources";
@@ -44,7 +45,7 @@ const getLeadSources = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("getLeadUSoucres error in controller")
+      console.log("getLeadUSoucres error in controller");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
@@ -58,20 +59,19 @@ const getLeadUsers = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("getLeadUsers error in controller")
+      console.log("getLeadUsers error in controller");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
   });
 });
 
-
 const getLeadById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM leads WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("getLeadById error in controller")
+      console.log("getLeadById error in controller");
     }
     result = parseNestedJSON(result);
     //console.log(result)
@@ -79,13 +79,12 @@ const getLeadById = asyncHandler((req, res) => {
   });
 });
 
-
 const getLeadDocumentsById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM leaddocuments WHERE leadId = ${req.params.leadId}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("getLeadDocumentsById Error in controller")
+      console.log("getLeadDocumentsById Error in controller");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result[0] || {});
@@ -95,15 +94,15 @@ const getLeadDocumentsById = asyncHandler((req, res) => {
 const addDocumentData = asyncHandler((req, res) => {
   const id = req.params.leadId;
   const updateClause = updateClauseHandler(req.body);
-  console.log(updateClause)
-  console.log(id)
+  console.log(updateClause);
+  console.log(id);
   const sql = `UPDATE leaddocuments SET ${updateClause} WHERE leadId = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("addDocumentData error in controller")
+      console.log("addDocumentData error in controller");
     }
-    console.log(result)
+    console.log(result);
     res.status(200).send(result);
   });
 });
@@ -131,8 +130,6 @@ const addDocumentData = asyncHandler((req, res) => {
 //     res.status(200).send(true);
 //   });
 // });
-
-
 
 // const createLead = asyncHandler((req, res) => {
 //   let leadId = 'L-' + generateRandomNumber(6);
@@ -171,7 +168,6 @@ const addDocumentData = asyncHandler((req, res) => {
 //   });
 // });
 
-
 const createLead = asyncHandler((req, res) => {
   let leadId = "L-" + generateRandomNumber(6);
   req.body["leadId"] = leadId;
@@ -183,14 +179,41 @@ const createLead = asyncHandler((req, res) => {
     if (err) {
       console.log("Create lead  error:");
     }
-    
+    const id = result.insertId;
+    // Insert leadId into leaddocuments table
+    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
+    dbConnect.query(
+      leaddocumentsSql,
+      (leaddocumentsErr, leaddocumentsResult) => {
+        if (leaddocumentsErr) {
+          console.error(
+            "Error inserting leadId into leaddocuments table:",
+            leaddocumentsErr
+          );
+          // Rollback lead insertion in leads table
+          const rollbackSql = `DELETE FROM leads WHERE id = '${id}'`;
+          dbConnect.query(rollbackSql, (rollbackErr) => {
+            if (rollbackErr) {
+              console.error(
+                "Error rolling back lead insertion in leads table:",
+                rollbackErr
+              );
+            }
+            res.status(500).send("Internal Server Error");
+          });
+          return;
+        }
+
+        res.status(200).send(true);
+      }
+    );
     res.status(200).send(true);
   });
 });
 
 const updateLead = asyncHandler((req, res) => {
   const id = req.params.id;
-  const checkRequiredFields = handleRequiredFields('leads', req.body);
+  const checkRequiredFields = handleRequiredFields("leads", req.body);
   if (!checkRequiredFields) {
     res.status(422).send("Please Fill all required fields");
     return;
@@ -200,7 +223,7 @@ const updateLead = asyncHandler((req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("updateLead error in controller")
+      console.log("updateLead error in controller");
     }
     res.status(200).send(result);
   });
@@ -211,7 +234,7 @@ const deleteLead = asyncHandler((req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("deleteLead error in controller")
+      console.log("deleteLead error in controller");
     }
     res.status(200).send("Lead Deleted Successfully");
   });
@@ -224,24 +247,23 @@ const changeLeadStatus = asyncHandler((req, res) => {
   dbConnect.query(createSql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("changeLeadStatus error in controller")
+      console.log("changeLeadStatus error in controller");
     }
     if (result && result[0] && statusId) {
       let statusData = {
         lastLeadInternalStatus: result[0].leadInternalStatus,
-        leadInternalStatus: statusId
-      }
+        leadInternalStatus: statusId,
+      };
       const updateClause = updateClauseHandler(statusData);
       const sql = `UPDATE leads SET ${updateClause} WHERE id = ${id}`;
       dbConnect.query(sql, (err, result) => {
         if (err) {
           // throw err;
-          console.log("changeLeadStatus error in controller")
+          console.log("changeLeadStatus error in controller");
         }
         res.status(200).send(true);
       });
-    }
-    else {
+    } else {
       res.status(422).send("No Leads Found");
     }
     // const updateClause = updateClauseHandler(req.body);
@@ -255,7 +277,6 @@ const changeLeadStatus = asyncHandler((req, res) => {
   });
 });
 
-
 module.exports = {
   getLeads,
   getLeadSources,
@@ -267,5 +288,5 @@ module.exports = {
   updateLead,
   deleteLead,
   changeLeadStatus,
-  addDocumentData
+  addDocumentData,
 };
