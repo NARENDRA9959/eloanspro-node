@@ -142,21 +142,44 @@ const getCreditEvaluationCountStatus = asyncHandler(async (req, res) => {
 
 const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
   try {
-    let sql = "SELECT YEAR(dates.date) AS year, DATE_FORMAT(dates.date, '%b') AS month, COALESCE(COUNT(leads.id), 0) AS leadCount FROM (";
-    sql += "SELECT YEAR(NOW()) AS year, MONTH(NOW()) AS month UNION ALL ";
-    sql += "SELECT YEAR(NOW()) AS year, MONTH(NOW()) - 1 AS month UNION ALL ";
-    sql += "SELECT YEAR(NOW()) AS year, MONTH(NOW()) - 2 AS month UNION ALL ";
-    sql += "SELECT YEAR(NOW()) AS year, MONTH(NOW()) - 3 AS month UNION ALL ";
-    sql += "SELECT YEAR(NOW()) AS year, MONTH(NOW()) - 4 AS month) AS dates ";
-    sql += "LEFT JOIN leads ON YEAR(leads.createdOn) = dates.year AND MONTH(leads.createdOn) = dates.month AND leadInternalStatus = 1 ";
-    sql += "WHERE (dates.year * 100 + dates.month) >= (YEAR(NOW()) * 100 + MONTH(NOW()) - 5) ";
-    sql += handleGlobalFilters(req.query);
-    sql += "GROUP BY YEAR(dates.date), MONTH(dates.date) ORDER BY YEAR(dates.date) DESC, MONTH(dates.date) DESC;";
-
+    `SELECT 
+    YEAR(dates.date) AS year,
+    DATE_FORMAT(dates.date, '%b') AS month,
+    COALESCE(COUNT(leads.id), 0) AS leadCount
+FROM 
+    (
+        SELECT 
+            CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()), 2, '0'), '-01') AS date
+        UNION ALL 
+        SELECT 
+            CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 1, 2, '0'), '-01') AS date
+        UNION ALL 
+        SELECT 
+            CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 2, 2, '0'), '-01') AS date
+        UNION ALL 
+        SELECT 
+            CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 3, 2, '0'), '-01') AS date
+        UNION ALL 
+        SELECT 
+            CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 4, 2, '0'), '-01') AS date
+    ) AS dates
+LEFT JOIN 
+    leads ON YEAR(leads.createdOn) = YEAR(dates.date) 
+        AND MONTH(leads.createdOn) = MONTH(dates.date) 
+        AND leadInternalStatus = 1
+WHERE 
+    dates.date >= CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 5, 2, '0'), '-01')
+GROUP BY 
+    YEAR(dates.date), 
+    MONTH(dates.date)
+ORDER BY 
+    YEAR(dates.date) DESC, 
+    MONTH(dates.date) DESC;
+`
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Internal Severver Error");
         return;
       }
 
@@ -219,21 +242,43 @@ const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
 
 const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
   try {
-    let sql = "SELECT YEAR(dates.date) AS year, DATE_FORMAT(dates.date, '%b') AS month, COALESCE(COUNT(callbacks.id), 0) AS callbacksCount FROM (";
-    sql += "SELECT YEAR(NOW()) AS year, 1 AS month UNION ALL ";
-    sql += "SELECT YEAR(NOW()) AS year, 2 AS month UNION ALL ";
-    sql += "SELECT YEAR(NOW()) AS year, 3 AS month UNION ALL ";
-    sql += "SELECT YEAR(NOW()) AS year, 4 AS month UNION ALL ";
-    sql += "SELECT YEAR(NOW()) AS year, 5 AS month) AS dates ";
-    sql += "LEFT JOIN callbacks ON YEAR(callbacks.createdOn) = dates.year AND MONTH(callbacks.createdOn) = dates.month ";
-    sql += "WHERE (dates.year * 100 + dates.month) >= (YEAR(NOW()) * 100 + MONTH(NOW()) - 5) ";
-    sql += handleGlobalFilters(req.query);
-    sql += "GROUP BY YEAR(dates.date), MONTH(dates.date) ORDER BY YEAR(dates.date) DESC, MONTH(dates.date) DESC;";
-
+  `SELECT 
+  YEAR(dates.date) AS year,
+  DATE_FORMAT(dates.date, '%b') AS month,
+  COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
+FROM 
+  (
+      SELECT 
+          CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()), 2, '0'), '-01') AS date
+      UNION ALL 
+      SELECT 
+          CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 1, 2, '0'), '-01') AS date
+      UNION ALL 
+      SELECT 
+          CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 2, 2, '0'), '-01') AS date
+      UNION ALL 
+      SELECT 
+          CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 3, 2, '0'), '-01') AS date
+      UNION ALL 
+      SELECT 
+          CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 4, 2, '0'), '-01') AS date
+  ) AS dates
+LEFT JOIN 
+  callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) 
+      AND MONTH(callbacks.createdOn) = MONTH(dates.date)
+WHERE 
+  dates.date >= CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 5, 2, '0'), '-01')
+GROUP BY 
+  YEAR(dates.date), 
+  MONTH(dates.date)
+ORDER BY 
+  YEAR(dates.date) DESC, 
+  MONTH(dates.date) DESC;
+`
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Internal Sevwerrver Error");
         return;
       }
       
