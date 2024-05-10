@@ -211,7 +211,6 @@ const addDocumentData = asyncHandler((req, res) => {
 //   });
 // });
 
-
 const createLead = asyncHandler((req, res) => {
   let leadId = "L-" + generateRandomNumber(6);
   req.body["leadId"] = leadId;
@@ -245,6 +244,7 @@ const createLead = asyncHandler((req, res) => {
     });
   });
 });
+
 
 const updateLead = asyncHandler((req, res) => {
   const id = req.params.id;
