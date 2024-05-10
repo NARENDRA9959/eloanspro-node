@@ -255,54 +255,38 @@ const createLead = asyncHandler((req, res) => {
   req.body["lastLeadInternalStatus"] = 1;
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-  
-  dbConnect.beginTransaction((beginErr) => {
-    if (beginErr) {
-      console.error("Transaction begin error:", beginErr);
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Create lead error:", err);
       res.status(500).send("Internal Server Error");
       return;
     }
-    
-    dbConnect.query(sql, (err, result) => {
-      if (err) {
-        console.error("Create lead error:", err);
-        dbConnect.rollback(() => {
-          console.error("Transaction rolled back due to lead insertion error.");
-          res.status(500).send("Internal Server Error");
-        });
-        return;
-      }
-      
-      const id = result.insertId;
-      const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
-      
-      dbConnect.query(leaddocumentsSql, (leaddocumentsErr, leaddocumentsResult) => {
-        if (leaddocumentsErr) {
-          console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
+    const id = result.insertId;
+    // Insert leadId into leaddocuments table
+    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
+    dbConnect.query(leaddocumentsSql, (leaddocumentsErr, leaddocumentsResult) => {
+      if (leaddocumentsErr) {
+        console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
+        // Rollback lead insertion in leads table
+        const rollbackSql = `DELETE FROM leads WHERE id = '${id}'`;
+        dbConnect.query(rollbackSql, (rollbackErr) => {
+          if (rollbackErr) {
+            console.error("Error rolling back lead insertion in leads table:", rollbackErr);
+          }
+          // Rollback the entire transaction
           dbConnect.rollback(() => {
             console.error("Transaction rolled back due to leaddocuments insertion error.");
-            res.status(500).send("Internal Server Error");
+            res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
           });
-          return;
-        }
-        
-        dbConnect.commit((commitErr) => {
-          if (commitErr) {
-            console.error("Commit error:", commitErr);
-            dbConnect.rollback(() => {
-              console.error("Transaction rolled back due to commit error.");
-              res.status(500).send("Internal Server Error");
-            });
-            return;
-          }
-          
-          res.status(200).send(true);
         });
-      });
+        return; // Exit the function to prevent further execution
+      }
+       else {
+        res.status(200).send(true);
+      }
     });
   });
 });
-
 
 
 const updateLead = asyncHandler((req, res) => {
