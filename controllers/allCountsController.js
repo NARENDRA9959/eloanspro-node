@@ -175,7 +175,7 @@ GROUP BY
 ORDER BY 
     YEAR(dates.date) DESC, 
     MONTH(dates.date) DESC;
-`
+`;
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error:", err);
@@ -274,7 +274,7 @@ GROUP BY
 ORDER BY 
   YEAR(dates.date) DESC, 
   MONTH(dates.date) DESC;
-`
+`;
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error:", err);
