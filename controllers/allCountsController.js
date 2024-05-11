@@ -95,242 +95,242 @@ const getCreditEvaluationCountStatus = asyncHandler(async (req, res) => {
   });
 });
 
-// const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
-//   let sql = `
-//   SELECT 
-//   YEAR(dates.date) AS year,
-//   DATE_FORMAT(dates.date, '%b') AS month,
-//   COALESCE(COUNT(leads.id), 0) AS leadCount
-// FROM 
-//   (
-//       SELECT LAST_DAY(DATE_SUB(CURDATE(), INTERVAL (a.a + (10 * b.a) + (100 * c.a)) MONTH)) AS date
-//       FROM 
-//           (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS a
-//       CROSS JOIN 
-//           (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS b
-//       CROSS JOIN 
-//           (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS c
-//   ) AS dates
-// LEFT JOIN 
-//   leads ON YEAR(leads.createdOn) = YEAR(dates.date) AND MONTH(leads.createdOn) = MONTH(dates.date) AND leadInternalStatus = 1
-// WHERE 
-//   dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH) ${handleGlobalFilters(
-//     req.query
-//   )}
-// GROUP BY 
-//   YEAR(dates.date), MONTH(dates.date)
-// ORDER BY 
-//   YEAR(dates.date) DESC, MONTH(dates.date) DESC ;
-// `;
-
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.error("Error:", err);
-//       res.status(500).send("Internal Server Error");
-//       return;
-//     }
-
-//     // Process the query result
-//     const monthWiseLeadCountList = result;
-//     console.log(monthWiseLeadCountList)
-
-//     // Send the result in the response
-//     res.status(200).json(monthWiseLeadCountList);
-//   });
-// });
-
-
 const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
-  try {
-    let sql=`SELECT 
-    YEAR(dates.date) AS year,
-    DATE_FORMAT(dates.date, '%b') AS month,
-    COALESCE(COUNT(leads.id), 0) AS leadCount
-FROM 
-    (
-        SELECT 
-            CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()), 2, '0'), '-01') AS date
-        UNION ALL 
-        SELECT 
-            CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 1, 2, '0'), '-01') AS date
-        UNION ALL 
-        SELECT 
-            CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 2, 2, '0'), '-01') AS date
-        UNION ALL 
-        SELECT 
-            CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 3, 2, '0'), '-01') AS date
-        UNION ALL 
-        SELECT 
-            CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 4, 2, '0'), '-01') AS date
-    ) AS dates
-LEFT JOIN 
-    leads ON YEAR(leads.createdOn) = YEAR(dates.date) 
-        AND MONTH(leads.createdOn) = MONTH(dates.date) 
-        AND leadInternalStatus = 1
-WHERE 
-    dates.date >= CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 5, 2, '0'), '-01')
-GROUP BY 
-    YEAR(dates.date), 
-    MONTH(dates.date)
-ORDER BY 
-    YEAR(dates.date) DESC, 
-    MONTH(dates.date) DESC;
-`;
-    dbConnect.query(sql, (err, result) => {
-      if (err) {
-        console.error("Error:", err);
-        res.status(500).send("Internal Severver Error");
-        return;
-      }
-
-      // Process the query result
-      const monthWiseLeadCountList = result;
-      console.log("monthWiseLeadCountList:",monthWiseLeadCountList);
-
-      // Send the result in the response
-      res.status(200).json(monthWiseLeadCountList);
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-// const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
-//   let sql = `
-//     SELECT 
-//       YEAR(dates.date) AS year,
-//       DATE_FORMAT(dates.date, '%b') AS month,
-//       COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
-//     FROM 
-//       (
-//           SELECT LAST_DAY(DATE_SUB(CURDATE(), INTERVAL (a.a + (10 * b.a) + (100 * c.a)) MONTH)) AS date
-//           FROM 
-//               (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS a
-//           CROSS JOIN 
-//               (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS b
-//           CROSS JOIN 
-//               (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS c
-//       ) AS dates
-//     LEFT JOIN 
-//       callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) AND MONTH(callbacks.createdOn) = MONTH(dates.date)
-//     WHERE 
-//       dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH) ${handleGlobalFilters(
-//         req.query
-//       )}
-//     GROUP BY 
-//       YEAR(dates.date), MONTH(dates.date)
-//     ORDER BY 
-//       YEAR(dates.date) DESC, MONTH(dates.date) DESC ;
-//   `;
-
-//   dbConnect.query(sql, (err, result) => {
-//     console.log(result)
-//     if (err) {
-//       console.error("Error:", err);
-//       res.status(500).send("Internal Server Error");
-//       return;
-//     }
-//     // Process the query result
-//     const monthWiseCallbacksCountList = result;
-//     //console.log(monthWiseCallbacksCountList)
-//     // Send the result in the response
-//     res.status(200).json(monthWiseCallbacksCountList);
-//   });
-// });
-
-
-const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
-  try {
-  let sql=`SELECT 
+  let sql = `
+  SELECT 
   YEAR(dates.date) AS year,
-  CASE 
-      WHEN MONTH(dates.date) = 1 THEN 'Jan'
-      WHEN MONTH(dates.date) = 2 THEN 'Feb'
-      WHEN MONTH(dates.date) = 3 THEN 'Mar'
-      WHEN MONTH(dates.date) = 4 THEN 'Apr'
-      WHEN MONTH(dates.date) = 5 THEN 'May'
-      WHEN MONTH(dates.date) = 6 THEN 'Jun'
-      WHEN MONTH(dates.date) = 7 THEN 'Jul'
-      WHEN MONTH(dates.date) = 8 THEN 'Aug'
-      WHEN MONTH(dates.date) = 9 THEN 'Sep'
-      WHEN MONTH(dates.date) = 10 THEN 'Oct'
-      WHEN MONTH(dates.date) = 11 THEN 'Nov'
-      WHEN MONTH(dates.date) = 12 THEN 'Dec'
-  END AS month,
-  COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
+  DATE_FORMAT(dates.date, '%b') AS month,
+  COALESCE(COUNT(leads.id), 0) AS leadCount
 FROM 
   (
-      SELECT 
-          DATE(CONCAT(
-              YEAR(NOW()), 
-              '-', 
-              SUBSTRING(CONCAT('00', MONTH(NOW())), -2), 
-              '-01'
-          )) AS date
-      UNION ALL 
-      SELECT 
-          DATE(CONCAT(
-              YEAR(NOW()), 
-              '-', 
-              SUBSTRING(CONCAT('00', MONTH(NOW()) - 1), -2), 
-              '-01'
-          )) AS date
-      UNION ALL 
-      SELECT 
-          DATE(CONCAT(
-              YEAR(NOW()), 
-              '-', 
-              SUBSTRING(CONCAT('00', MONTH(NOW()) - 2), -2), 
-              '-01'
-          )) AS date
-      UNION ALL 
-      SELECT 
-          DATE(CONCAT(
-              YEAR(NOW()), 
-              '-', 
-              SUBSTRING(CONCAT('00', MONTH(NOW()) - 3), -2), 
-              '-01'
-          )) AS date
-      UNION ALL 
-      SELECT 
-          DATE(CONCAT(
-              YEAR(NOW()), 
-              '-', 
-              SUBSTRING(CONCAT('00', MONTH(NOW()) - 4), -2), 
-              '-01'
-          )) AS date
+      SELECT LAST_DAY(DATE_SUB(CURDATE(), INTERVAL (a.a + (10 * b.a) + (100 * c.a)) MONTH)) AS date
+      FROM 
+          (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS a
+      CROSS JOIN 
+          (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS b
+      CROSS JOIN 
+          (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS c
   ) AS dates
 LEFT JOIN 
-  callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) 
-      AND MONTH(callbacks.createdOn) = MONTH(dates.date)
+  leads ON YEAR(leads.createdOn) = YEAR(dates.date) AND MONTH(leads.createdOn) = MONTH(dates.date) AND leadInternalStatus = 1
 WHERE 
-  dates.date >= DATE(CONCAT(YEAR(NOW()), '-', SUBSTRING(CONCAT('00', MONTH(NOW()) - 5), -2), '-01'))
+  dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH) ${handleGlobalFilters(
+    req.query
+  )}
 GROUP BY 
-  YEAR(dates.date), 
-  MONTH(dates.date)
+  YEAR(dates.date), MONTH(dates.date)
 ORDER BY 
-  YEAR(dates.date) DESC, 
-  MONTH(dates.date) DESC;
-
+  YEAR(dates.date) DESC, MONTH(dates.date) DESC ;
 `;
-    dbConnect.query(sql, (err, result) => {
-      if (err) {
-        console.error("Error:", err);
-        res.status(500).send("Internal Sevwerrver Error");
-        return;
-      }
-      
-      // Process the query result
-      const monthWiseCallbacksCountList = result;
-      console.log("monthWiseCallbacksCountList:",monthWiseCallbacksCountList)
-      res.status(200).json(monthWiseCallbacksCountList);
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
-  }
+
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+
+    // Process the query result
+    const monthWiseLeadCountList = result;
+    console.log(monthWiseLeadCountList)
+
+    // Send the result in the response
+    res.status(200).json(monthWiseLeadCountList);
+  });
 });
+
+
+// const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
+//   try {
+//     let sql=`SELECT 
+//     YEAR(dates.date) AS year,
+//     DATE_FORMAT(dates.date, '%b') AS month,
+//     COALESCE(COUNT(leads.id), 0) AS leadCount
+// FROM 
+//     (
+//         SELECT 
+//             CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()), 2, '0'), '-01') AS date
+//         UNION ALL 
+//         SELECT 
+//             CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 1, 2, '0'), '-01') AS date
+//         UNION ALL 
+//         SELECT 
+//             CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 2, 2, '0'), '-01') AS date
+//         UNION ALL 
+//         SELECT 
+//             CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 3, 2, '0'), '-01') AS date
+//         UNION ALL 
+//         SELECT 
+//             CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 4, 2, '0'), '-01') AS date
+//     ) AS dates
+// LEFT JOIN 
+//     leads ON YEAR(leads.createdOn) = YEAR(dates.date) 
+//         AND MONTH(leads.createdOn) = MONTH(dates.date) 
+//         AND leadInternalStatus = 1
+// WHERE 
+//     dates.date >= CONCAT(YEAR(NOW()), '-', LPAD(MONTH(NOW()) - 5, 2, '0'), '-01')
+// GROUP BY 
+//     YEAR(dates.date), 
+//     MONTH(dates.date)
+// ORDER BY 
+//     YEAR(dates.date) DESC, 
+//     MONTH(dates.date) DESC;
+// `;
+//     dbConnect.query(sql, (err, result) => {
+//       if (err) {
+//         console.error("Error:", err);
+//         res.status(500).send("Internal Severver Error");
+//         return;
+//       }
+
+//       // Process the query result
+//       const monthWiseLeadCountList = result;
+//       console.log("monthWiseLeadCountList:",monthWiseLeadCountList);
+
+//       // Send the result in the response
+//       res.status(200).json(monthWiseLeadCountList);
+//     });
+//   } catch (error) {
+//     console.error("Error:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
+
+const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
+  let sql = `
+    SELECT 
+      YEAR(dates.date) AS year,
+      DATE_FORMAT(dates.date, '%b') AS month,
+      COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
+    FROM 
+      (
+          SELECT LAST_DAY(DATE_SUB(CURDATE(), INTERVAL (a.a + (10 * b.a) + (100 * c.a)) MONTH)) AS date
+          FROM 
+              (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS a
+          CROSS JOIN 
+              (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS b
+          CROSS JOIN 
+              (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS c
+      ) AS dates
+    LEFT JOIN 
+      callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) AND MONTH(callbacks.createdOn) = MONTH(dates.date)
+    WHERE 
+      dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH) ${handleGlobalFilters(
+        req.query
+      )}
+    GROUP BY 
+      YEAR(dates.date), MONTH(dates.date)
+    ORDER BY 
+      YEAR(dates.date) DESC, MONTH(dates.date) DESC ;
+  `;
+
+  dbConnect.query(sql, (err, result) => {
+    console.log(result)
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    // Process the query result
+    const monthWiseCallbacksCountList = result;
+    //console.log(monthWiseCallbacksCountList)
+    // Send the result in the response
+    res.status(200).json(monthWiseCallbacksCountList);
+  });
+});
+
+
+// const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
+//   try {
+//   let sql=`SELECT 
+//   YEAR(dates.date) AS year,
+//   CASE 
+//       WHEN MONTH(dates.date) = 1 THEN 'Jan'
+//       WHEN MONTH(dates.date) = 2 THEN 'Feb'
+//       WHEN MONTH(dates.date) = 3 THEN 'Mar'
+//       WHEN MONTH(dates.date) = 4 THEN 'Apr'
+//       WHEN MONTH(dates.date) = 5 THEN 'May'
+//       WHEN MONTH(dates.date) = 6 THEN 'Jun'
+//       WHEN MONTH(dates.date) = 7 THEN 'Jul'
+//       WHEN MONTH(dates.date) = 8 THEN 'Aug'
+//       WHEN MONTH(dates.date) = 9 THEN 'Sep'
+//       WHEN MONTH(dates.date) = 10 THEN 'Oct'
+//       WHEN MONTH(dates.date) = 11 THEN 'Nov'
+//       WHEN MONTH(dates.date) = 12 THEN 'Dec'
+//   END AS month,
+//   COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
+// FROM 
+//   (
+//       SELECT 
+//           DATE(CONCAT(
+//               YEAR(NOW()), 
+//               '-', 
+//               SUBSTRING(CONCAT('00', MONTH(NOW())), -2), 
+//               '-01'
+//           )) AS date
+//       UNION ALL 
+//       SELECT 
+//           DATE(CONCAT(
+//               YEAR(NOW()), 
+//               '-', 
+//               SUBSTRING(CONCAT('00', MONTH(NOW()) - 1), -2), 
+//               '-01'
+//           )) AS date
+//       UNION ALL 
+//       SELECT 
+//           DATE(CONCAT(
+//               YEAR(NOW()), 
+//               '-', 
+//               SUBSTRING(CONCAT('00', MONTH(NOW()) - 2), -2), 
+//               '-01'
+//           )) AS date
+//       UNION ALL 
+//       SELECT 
+//           DATE(CONCAT(
+//               YEAR(NOW()), 
+//               '-', 
+//               SUBSTRING(CONCAT('00', MONTH(NOW()) - 3), -2), 
+//               '-01'
+//           )) AS date
+//       UNION ALL 
+//       SELECT 
+//           DATE(CONCAT(
+//               YEAR(NOW()), 
+//               '-', 
+//               SUBSTRING(CONCAT('00', MONTH(NOW()) - 4), -2), 
+//               '-01'
+//           )) AS date
+//   ) AS dates
+// LEFT JOIN 
+//   callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) 
+//       AND MONTH(callbacks.createdOn) = MONTH(dates.date)
+// WHERE 
+//   dates.date >= DATE(CONCAT(YEAR(NOW()), '-', SUBSTRING(CONCAT('00', MONTH(NOW()) - 5), -2), '-01'))
+// GROUP BY 
+//   YEAR(dates.date), 
+//   MONTH(dates.date)
+// ORDER BY 
+//   YEAR(dates.date) DESC, 
+//   MONTH(dates.date) DESC;
+
+// `;
+//     dbConnect.query(sql, (err, result) => {
+//       if (err) {
+//         console.error("Error:", err);
+//         res.status(500).send("Internal Sevwerrver Error");
+//         return;
+//       }
+      
+//       // Process the query result
+//       const monthWiseCallbacksCountList = result;
+//       console.log("monthWiseCallbacksCountList:",monthWiseCallbacksCountList)
+//       res.status(200).json(monthWiseCallbacksCountList);
+//     });
+//   } catch (error) {
+//     console.error("Error:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
 
 const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
   let sql = `SELECT 
@@ -376,7 +376,7 @@ const getPast7DaysCallBacksCount = asyncHandler(async (req, res) => {
       res.status(500).send("Internal Server Error");
       return;
     }
-
+    
     // Process the query result
     const past7DaysCallBacksCount = result[0].count; // Get the count directly from the result
 

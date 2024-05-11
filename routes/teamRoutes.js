@@ -7,12 +7,13 @@ const { createUsers,
   getUsers,
   changeUsersStatus,
   getUsersCount,
+  getActiveUsers,
   getUserRoles,updateUserStatus} =require("../controllers/teamController");
 const {changeLeadStatus} =require("../controllers/leadsController")
 const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();
-
+router.route("/active").get(validateToken,  getActiveUsers); 
 router.route("/").get(validateToken, getUsers).post(validateToken, createUsers);
 router.route("/total").get(validateToken,  getUsersCount); 
 router.route("/:userId/changestatus/:statusId").put(validateToken, changeUsersStatus);
