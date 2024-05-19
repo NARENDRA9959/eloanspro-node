@@ -75,7 +75,7 @@ const getLeadById = asyncHandler((req, res) => {
     }
     result = parseNestedJSON(result);
     //console.log(result)
-    res.status(200).send(result[0]);
+    res.status(200).send(result);
   });
 });
 
