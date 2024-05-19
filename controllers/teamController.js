@@ -28,7 +28,7 @@ const createUsers = asyncHandler((req, res) => {
   });
 });
 
-const updateUsers= asyncHandler((req, res) => {
+const updateUsers = asyncHandler((req, res) => {
   const id = req.params.id;
   const checkRequiredFields = handleRequiredFields("users", req.body);
   if (!checkRequiredFields) {
@@ -58,15 +58,14 @@ const deleteUsers = asyncHandler((req, res) => {
 });
 
 const getUsersById = asyncHandler((req, res) => {
-  const sql = `SELECT * FROM users WHERE id = ${req.params.id}`;
+  const sql = `SELECT * FROM users`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
       console.log("getUsersById error in controller");
     }
     result = parseNestedJSON(result);
-    //console.log(result)
-    res.status(200).send(result[0]);
+    res.status(200).send(result);
   });
 });
 
@@ -112,52 +111,52 @@ const changeUsersStatus = asyncHandler((req, res) => {
 });
 
 const getUsersCount = asyncHandler(async (req, res) => {
-    let sql = "SELECT count(*) as usersCount FROM users";
-    const filtersQuery = handleGlobalFilters(req.query, true);
-    sql += filtersQuery;
-    //console.log(sql)
-    dbConnect.query(sql, (err, result) => {
-      if (err) {
-        console.log("Error in getUsersCount:", err);
-        res.status(500).send("Internal Server Error");
-      } else {
-        const usersCount = result[0]["usersCount"];
-        //console.log(usersCount);
-        res.status(200).send(String(usersCount));
-      }
-    });
+  let sql = "SELECT count(*) as usersCount FROM users";
+  const filtersQuery = handleGlobalFilters(req.query, true);
+  sql += filtersQuery;
+  //console.log(sql)
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("Error in getUsersCount:", err);
+      res.status(500).send("Internal Server Error");
+    } else {
+      const usersCount = result[0]["usersCount"];
+      //console.log(usersCount);
+      res.status(200).send(String(usersCount));
+    }
   });
+});
 
 
-  const getUserRoles = asyncHandler(async (req, res) => {
-    let sql = "SELECT * FROM userrole";
-    const filtersQuery = handleGlobalFilters(req.query);
-    sql += filtersQuery;
-    dbConnect.query(sql, (err, result) => {
-      if (err) {
-        // throw err;
-        console.log("getUserRoles Error in Controller")
-      }
-      result = parseNestedJSON(result);
-      res.status(200).send(result);
-    });
+const getUserRoles = asyncHandler(async (req, res) => {
+  let sql = "SELECT * FROM userrole";
+  const filtersQuery = handleGlobalFilters(req.query);
+  sql += filtersQuery;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      // throw err;
+      console.log("getUserRoles Error in Controller")
+    }
+    result = parseNestedJSON(result);
+    res.status(200).send(result);
   });
+});
 
 
- const  updateUserStatus =asyncHandler(async (req, res) => {
-    const userId = req.params.userId;
-    const { status } = req.body;
-  
-    // Update user status in the database
-    const sql = 'UPDATE users SET status = ? WHERE id = ?';
-    dbConnect.query(sql, [status, userId], (err, result) => {
-      if (err) {
-        console.error('Error updating user status:', err);
-        return res.status(500).json({ error: 'Failed to update user status' });
-      }
-      res.status(200).json({ message: 'User status updated successfully' });
-    });
+const updateUserStatus = asyncHandler(async (req, res) => {
+  const userId = req.params.userId;
+  const { status } = req.body;
+
+  // Update user status in the database
+  const sql = 'UPDATE users SET status = ? WHERE id = ?';
+  dbConnect.query(sql, [status, userId], (err, result) => {
+    if (err) {
+      console.error('Error updating user status:', err);
+      return res.status(500).json({ error: 'Failed to update user status' });
+    }
+    res.status(200).json({ message: 'User status updated successfully' });
   });
+});
 module.exports = {
   createUsers,
   deleteUsers,
