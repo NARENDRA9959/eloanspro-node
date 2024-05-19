@@ -102,7 +102,6 @@ const addDocumentData = asyncHandler((req, res) => {
       // throw err;
       console.log("addDocumentData error in controller");
     }
-    console.log(result)
     res.status(200).send({ success: "Documents Saved Successfully" });
   });
 });
@@ -237,7 +236,7 @@ const createLead = asyncHandler((req, res) => {
           if (rollbackErr) {
             console.error("Error rolling back lead insertion in leads table:", rollbackErr);
           }
-          res.status(500).send("Internal Server Error:",id);
+          res.status(500).send("Internal Server Error:", id);
         });
         return;
       }
@@ -277,7 +276,7 @@ const createLead = asyncHandler((req, res) => {
 //       }
 //   });
 //     res.status(200).send(true);
-  
+
 //   });
 // });
 
