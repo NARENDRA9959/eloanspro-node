@@ -103,7 +103,7 @@ const addDocumentData = asyncHandler((req, res) => {
       console.log("addDocumentData error in controller");
     }
     console.log(result)
-    res.status(200).send({ success:   "Documents Saved Successfully" });
+    res.status(200).send({ success: "Documents Saved Successfully" });
   });
 });
 
