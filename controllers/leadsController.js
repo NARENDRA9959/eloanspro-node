@@ -227,10 +227,10 @@ const createLead = asyncHandler((req, res) => {
     const id = result.insertId;
     console.log("Inserted lead ID:", id);
     
-    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id.toString()}')`;
+    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`; // Enclose leadId in single quotes
     dbConnect.query(
       leaddocumentsSql,
-      (leaddocumentsErr, leaddocumentsResult) => {
+      (leaddocumentsErr) => {
         if (leaddocumentsErr) {
           console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
           res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
