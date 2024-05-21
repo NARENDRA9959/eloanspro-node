@@ -114,28 +114,23 @@ const createLead = asyncHandler((req, res) => {
   req.body["leadInternalStatus"] = 1;
   req.body["lastLeadInternalStatus"] = 1;
   const createClause = createClauseHandler(req.body);
-  const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+  const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
 
-  // Execute the SQL query to insert data into the "leads" table
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.error("Error inserting data into leads table:", err);
-      res.status(500).send("Internal server error");
+  dbConnect.query(leaddocumentsSql, (err, result) => {
+    if (leaddocumentsErr) {
+      console.error("Error inserting id into leaddocuments table:", leaddocumentsErr);
+      res.status(500).send(`Failed to insert id ${id} into leaddocuments table`);
       return;
     }
+    const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
 
-    // Construct the SQL query for inserting the unique ID into the "leaddocuments" table
-    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
-
-    // Execute the SQL query to insert the unique ID into the "leaddocuments" table
-    dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
-      if (leaddocumentsErr) {
-        console.error("Error inserting unique ID into leaddocuments table:", leaddocumentsErr);
-        res.status(500).send(`Failed to insert unique ID ${id} into leaddocuments table`);
+    dbConnect.query(sql, (leaddocumentsErr) => {
+      if (err) {
+        console.error("Error inserting data into leads table:", err);
+        res.status(500).send("Internal server error");
         return;
       }
-
-      console.log("Unique ID inserted into leaddocuments successfully:", id);
+      //console.log("ID inserted into leaddocuments successfully:", id);
       res.status(200).send(true); // Send response after both insertions are complete
     });
   });
