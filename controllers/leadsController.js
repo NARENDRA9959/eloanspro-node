@@ -240,14 +240,8 @@ function insertLeadDocument(leadId, res) {
       console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
       
       // Rollback lead insertion in leads table
-      const rollbackSql = `DELETE FROM leads WHERE id = ?`;
-      dbConnect.query(rollbackSql, [leadId], (rollbackErr) => {
-        if (rollbackErr) {
-          console.error("Error rolling back lead insertion in leads table:", rollbackErr);
-        }
-        res.status(500).send("Internal Server Error:");
-      });
-      return;
+      res.status(500).send("Internal ServeGGFFr Error:");
+      
     }
 
     // Send success response if everything is inserted successfully
