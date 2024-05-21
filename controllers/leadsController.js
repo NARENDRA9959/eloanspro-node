@@ -115,30 +115,65 @@ const createLead = asyncHandler((req, res) => {
   req.body["lastLeadInternalStatus"] = 1;
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+
+  // Execute the SQL query to insert data into the "leads" table
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      console.error("createLead error in controller:", err);
-      res.status(500).send("Internal severerver error");
-      return; // Return to prevent further execution
+      console.error("Error inserting data into leads table:", err);
+      res.status(500).send("Internal server error");
+      return;
     }
+
+    // Construct the SQL query for inserting the unique ID into the "leaddocuments" table
     const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
-    console.log("leaddocumentsSql:", leaddocumentsSql);
+
+    // Execute the SQL query to insert the unique ID into the "leaddocuments" table
     dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
       if (leaddocumentsErr) {
-        console.error(
-          "Error inserting leadId into leaddocuments table:",
-          leaddocumentsErr
-        );
-        res
-          .status(500)
-          .send(`Failed to insert leadId ${id} into leaddocuments table`);
+        console.error("Error inserting unique ID into leaddocuments table:", leaddocumentsErr);
+        res.status(500).send(`Failed to insert unique ID ${id} into leaddocuments table`);
         return;
       }
-      console.log("Lead ID inserted into leaddocuments successfully:", id);
+
+      console.log("Unique ID inserted into leaddocuments successfully:", id);
       res.status(200).send(true); // Send response after both insertions are complete
     });
   });
 });
+
+// const createLead = asyncHandler((req, res) => {
+//   let leadId = "L-" + generateRandomNumber(6);
+//   let id = generateRandomNumber(9);
+//   req.body["id"] = id;
+//   req.body["leadId"] = leadId;
+//   req.body["leadInternalStatus"] = 1;
+//   req.body["lastLeadInternalStatus"] = 1;
+//   const createClause = createClauseHandler(req.body);
+//   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.error("createLead error in controller:", err);
+//       res.status(500).send("Internal severerver error");
+//       return; // Return to prevent further execution
+//     }
+//     const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
+//     console.log("leaddocumentsSql:", leaddocumentsSql);
+//     dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
+//       if (leaddocumentsErr) {
+//         console.error(
+//           "Error inserting leadId into leaddocuments table:",
+//           leaddocumentsErr
+//         );
+//         res
+//           .status(500)
+//           .send(`Failed to insert leadId ${id} into leaddocuments table`);
+//         return;
+//       }
+//       console.log("Lead ID inserted into leaddocuments successfully:", id);
+//       res.status(200).send(true); // Send response after both insertions are complete
+//     });
+//   });
+// });
 
 // const createLead = asyncHandler((req, res) => {
 //   let leadId = 'L-' + generateRandomNumber(6);
