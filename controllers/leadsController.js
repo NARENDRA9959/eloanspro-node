@@ -113,29 +113,31 @@ const createLead = asyncHandler((req, res) => {
   req.body["leadId"] = leadId;
   req.body["leadInternalStatus"] = 1;
   req.body["lastLeadInternalStatus"] = 1;
-  //const createClause = createClauseHandler(req.body);
-  const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
+  const createClause = createClauseHandler(req.body);
+  const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
 
-  dbConnect.query(leaddocumentsSql, (err) => {
+  // Execute the SQL query to insert data into the "leads" table
+  dbConnect.query(sql, (err, result) => {
     if (err) {
-      console.error("Error inserting id into leaddocuments table:", err);
-      res
-        .status(500)
-        .send(`Failed to insert id ${id} into leaddocuments table`);
+      console.error("Error inserting data into leads table:", err);
+      res.status(500).send("Internal server error");
       return;
     }
-    // const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
 
-    // dbConnect.query(sql, (err) => {
-    //   if (err) {
-    //     console.error("Error inserting data into leads table:", err);
-    //     res.status(500).send("Internal server error");
-    //     return;
-    //   }
-    //console.log("ID inserted into leaddocuments successfully:", id);
-    //   res.status(200).send(true); // Send response after both insertions are complete
-    // } );
-    res.status(200).send(true);
+    // Construct the SQL query for inserting the id into the "leaddocuments" table
+    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
+
+    // Execute the SQL query to insert the id into the "leaddocuments" table
+    dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
+      if (leaddocumentsErr) {
+        console.error("Error inserting id into leaddocuments table:", leaddocumentsErr);
+        res.status(500).send(`Failed to insert id ${id} into leaddocuments table`);
+        return;
+      }
+
+      console.log("ID inserted into leaddocuments successfully:", id);
+      res.status(200).send(true); // Send response after both insertions are complete
+    });
   });
 });
 
