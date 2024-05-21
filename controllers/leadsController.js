@@ -106,29 +106,41 @@ const addDocumentData = asyncHandler((req, res) => {
   });
 });
 
-// const createLead = asyncHandler((req, res) => {
-//   let leadId = 'L-' + generateRandomNumber(6);
-//   req.body['leadId'] = leadId;
-//   req.body['leadInternalStatus'] = 1;
-//   req.body['lastLeadInternalStatus'] = 1;
-//   // req.body['createdBy'] = createdBy;
-//   // req.body['lastUpdatedBy'] = lastUpdatedBy;
-//   const createClause = createClauseHandler(req.body);
-//   // const checkRequiredFields = handleRequiredFields('leads', req.body);
-//   // if (!checkRequiredFields) {
-//   //   res.status(422).send("Please Fill all required fields");
-//   //   return;
-//   // }
-//   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       // throw err;
+const createLead = asyncHandler((req, res) => {
+  let leadId = "L-" + generateRandomNumber(6);
+  let id = generateRandomNumber(9);
+  req.body["id"] = id;
+  req.body["leadId"] = leadId;
+  req.body["leadInternalStatus"] = 1;
+  req.body["lastLeadInternalStatus"] = 1;
 
-//       console.log("createLead error in controller")
-//     }
-//     res.status(200).send(true);
-//   });
-// });
+  const createClause = createClauseHandler(req.body);
+  const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("createLead error in controller:", err);
+      res.status(500).send("Internal server error");
+      return; // Return to prevent further execution
+    }
+
+    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (${id})`;
+
+    console.log("leaddocumentsSql:", leaddocumentsSql);
+
+    dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
+      if (leaddocumentsErr) {
+        console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
+        res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
+        return;
+      }
+
+      console.log("Lead ID inserted into leaddocuments successfully:", id);
+      res.status(200).send(true); // Send response after both insertions are complete
+    });
+  });
+});
+
 
 // const createLead = asyncHandler((req, res) => {
 //   let leadId = 'L-' + generateRandomNumber(6);
@@ -210,39 +222,36 @@ const addDocumentData = asyncHandler((req, res) => {
 //   });
 // });
 
-const createLead = asyncHandler((req, res) => {
-  let leadId = "L-" + generateRandomNumber(6);
-  req.body["leadId"] = leadId;
-  req.body["leadInternalStatus"] = 1;
-  req.body["lastLeadInternalStatus"] = 1;
-  const createClause = createClauseHandler(req.body);
-  const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+// const createLead = asyncHandler((req, res) => {
+//   let leadId = "L-" + generateRandomNumber(6);
+//   req.body["leadId"] = leadId;
+//   req.body["leadInternalStatus"] = 1;
+//   req.body["lastLeadInternalStatus"] = 1;
+//   const createClause = createClauseHandler(req.body);
+//   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
 
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.error("Create lead error:", err);
-      return res.status(500).send("Internal severe Error");
-    }
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.error("Create lead error:", err);
+//       return res.status(500).send("Internal severe Error");
+//     }
 
-    const id = LAST_INSERT_ID();
-    console.log("Inserted lead ID:", id);
-    // Use LAST_INSERT_ID() to retrieve the last inserted ID
-    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (${id})`;
-    dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
-      if (leaddocumentsErr) {
-        console.error(
-          "Error inserting leadId into leaddocuments table:",
-          leaddocumentsErr
-        );
-        return res
-          .status(500)
-          .send(`Failed to insert leadId ${id} into leaddocuments table`);
-      }
-      // Both insertions succeeded, send response
-      res.status(200).send(true);
-    });
-  });
-});
+//     const id = result.insertId;
+//     console.log("Inserted lead ID:", id);
+
+//     // Use LAST_INSERT_ID() to retrieve the last inserted ID
+//     const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (LAST_INSERT_ID())`;
+//     dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
+//       if (leaddocumentsErr) {
+//         console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
+//         return res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
+//       }
+
+//       // Both insertions succeeded, send response
+//       res.status(200).send(true);
+//     });
+//   });
+// });
 
 // const createLead = asyncHandler((req, res) => {
 //   let leadId = "L-" + generateRandomNumber(6);
