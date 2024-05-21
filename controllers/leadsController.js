@@ -240,7 +240,7 @@ function insertLeadDocument(leadId, res) {
       console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
       
       // Rollback lead insertion in leads table
-      res.status(500).send("Internal ServeGGFFr Error:");
+      res.status(500).send("Internal ServeGGFFr Error:", {leadId});
       
     }
 
