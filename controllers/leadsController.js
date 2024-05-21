@@ -226,6 +226,7 @@ const createLead = asyncHandler((req, res) => {
 
     const id = result.insertId;
     console.log("Inserted lead ID:", id);
+    res.status(500).send("Internal ServeGGFFr Error:", id);
 
     // Call the function to insert lead ID into leaddocuments table
     insertLeadDocument(id, res);
