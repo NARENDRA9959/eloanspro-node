@@ -224,7 +224,6 @@ const createLead = asyncHandler((req, res) => {
       return;
     }
     const id = result.insertId;
-    // Insert leadId into leaddocuments table
     console.log(id);
     const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (${id})`;
     dbConnect.query(
