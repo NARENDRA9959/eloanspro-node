@@ -217,29 +217,29 @@ const createLead = asyncHandler((req, res) => {
   req.body["lastLeadInternalStatus"] = 1;
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Create lead error:", err);
-      res.status(500).send("Internal severe Error");
-      return;
+      return res.status(500).send("Internal severe Error");
     }
+    
     const id = result.insertId;
-    console.log(id);
-    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (${id})`;
+    console.log("Inserted lead ID:", id);
+    
+    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`; // Enclose leadId in single quotes
     dbConnect.query(
       leaddocumentsSql,
       (leaddocumentsErr, leaddocumentsResult) => {
         if (leaddocumentsErr) {
-          console.error(
-            "Error inserting leadId into leaddocuments table:",
-            leaddocumentsErr
-          );
+          console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
           res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
           return;
         }
+        
+        res.status(200).send(true);
       }
     );
-    res.status(200).send(true);
   });
 });
 
