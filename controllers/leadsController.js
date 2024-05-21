@@ -226,7 +226,7 @@ const createLead = asyncHandler((req, res) => {
 
     const id = result.insertId;
     console.log("Inserted lead ID:", id);
-    res.status(500).send("Failed to insert leadId ${id} into leaddocuments table");
+    res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
 
     // Call the function to insert lead ID into leaddocuments table
     //insertLeadDocument(id, res);
