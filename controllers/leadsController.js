@@ -125,8 +125,13 @@ const createLead = asyncHandler((req, res) => {
     console.log("leaddocumentsSql:", leaddocumentsSql);
     dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
       if (leaddocumentsErr) {
-        console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
-        res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
+        console.error(
+          "Error inserting leadId into leaddocuments table:",
+          leaddocumentsErr
+        );
+        res
+          .status(500)
+          .send(`Failed to insert leadId ${id} into leaddocuments table`);
         return;
       }
       console.log("Lead ID inserted into leaddocuments successfully:", id);
@@ -134,7 +139,6 @@ const createLead = asyncHandler((req, res) => {
     });
   });
 });
-
 
 // const createLead = asyncHandler((req, res) => {
 //   let leadId = 'L-' + generateRandomNumber(6);
