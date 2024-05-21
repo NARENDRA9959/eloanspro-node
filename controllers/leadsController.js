@@ -120,7 +120,7 @@ const createLead = asyncHandler((req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("createLead error in controller:", err);
-      res.status(500).send("Internal server error");
+      res.status(500).send("Internal severerver error");
       return; // Return to prevent further execution
     }
 
