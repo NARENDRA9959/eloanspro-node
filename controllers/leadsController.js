@@ -124,7 +124,7 @@ const createLead = asyncHandler((req, res) => {
     }
     const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
 
-    dbConnect.query(sql, (leaddocumentsErr) => {
+    dbConnect.query(sql, (err) => {
       if (err) {
         console.error("Error inserting data into leads table:", err);
         res.status(500).send("Internal server error");
