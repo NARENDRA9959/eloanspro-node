@@ -223,24 +223,26 @@ const createLead = asyncHandler((req, res) => {
       console.error("Create lead error:", err);
       return res.status(500).send("Internal severe Error");
     }
-    
-    const id = result.insertId;
+
+    const id = LAST_INSERT_ID();
     console.log("Inserted lead ID:", id);
-    
     // Use LAST_INSERT_ID() to retrieve the last inserted ID
-    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (LAST_INSERT_ID())`;
+    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (${id})`;
     dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
       if (leaddocumentsErr) {
-        console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
-        return res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
+        console.error(
+          "Error inserting leadId into leaddocuments table:",
+          leaddocumentsErr
+        );
+        return res
+          .status(500)
+          .send(`Failed to insert leadId ${id} into leaddocuments table`);
       }
-      
       // Both insertions succeeded, send response
       res.status(200).send(true);
     });
   });
 });
-
 
 // const createLead = asyncHandler((req, res) => {
 //   let leadId = "L-" + generateRandomNumber(6);
