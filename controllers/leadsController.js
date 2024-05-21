@@ -245,7 +245,7 @@ function insertLeadDocument(leadId, res) {
         if (rollbackErr) {
           console.error("Error rolling back lead insertion in leads table:", rollbackErr);
         }
-        res.status(500).send("Internal Server Error:", leadId);
+        res.status(500).send("Internal Server Error:");
       });
       return;
     }
