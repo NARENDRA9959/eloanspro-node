@@ -218,30 +218,54 @@ const createLead = asyncHandler((req, res) => {
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
 
-  dbConnect.query(sql, (err, result) => {
+  // Begin a transaction
+  dbConnect.beginTransaction((err) => {
     if (err) {
-      console.error("Create lead error:", err);
-      return res.status(500).send("Internal severe Error");
+      console.error('Transaction start error:', err);
+      return res.status(500).send('Internal severe Error');
     }
-    
-    const id = result.insertId;
-    console.log("Inserted lead ID:", id);
-    
-    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`; // Enclose leadId in single quotes
-    dbConnect.query(
-      leaddocumentsSql,
-      (leaddocumentsErr) => {
+
+    dbConnect.query(sql, (err, result) => {
+      if (err) {
+        console.error("Create lead error:", err);
+        // Rollback the transaction if an error occurs
+        return dbConnect.rollback(() => {
+          console.error('Transaction rollback error:', err);
+          res.status(500).send("Internal severe Error");
+        });
+      }
+
+      const id = result.insertId;
+      console.log("Inserted lead ID:", id);
+      const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`; // Enclose leadId in single quotes
+      dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
         if (leaddocumentsErr) {
           console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
-          res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
-          return;
+          // Rollback the transaction if an error occurs
+          return dbConnect.rollback(() => {
+            console.error('Transaction rollback error:', leaddocumentsErr);
+            res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
+          });
         }
         
-        res.status(200).send(true);
-      }
-    );
+        // Commit the transaction if both insertions succeed
+        dbConnect.commit((commitErr) => {
+          if (commitErr) {
+            console.error('Transaction commit error:', commitErr);
+            return dbConnect.rollback(() => {
+              console.error('Transaction rollback error:', commitErr);
+              res.status(500).send('Internal severe Error');
+            });
+          }
+          
+          // Both insertions succeeded, send response
+          res.status(200).send(true);
+        });
+      });
+    });
   });
 });
+
 
 // const createLead = asyncHandler((req, res) => {
 //   let leadId = "L-" + generateRandomNumber(6);
