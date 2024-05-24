@@ -511,27 +511,27 @@ const getDaywiseLeadsCount = asyncHandler(async (req, res) => {
   //     DATE(dateList.date) DESC; -- Order by date in descending order to get the last 7 days
   // `;
 
-  let sql = `SELECT 
-  DATE_FORMAT(dateList.date, '%a') AS dayName,
-  DATE(dateList.date) AS date,
+ let sql=` WITH RECURSIVE DateList AS (
+  SELECT CURDATE() - INTERVAL 6 DAY AS date
+  UNION ALL
+  SELECT date + INTERVAL 1 DAY
+  FROM DateList
+  WHERE date < CURDATE() - INTERVAL 1 DAY
+)
+SELECT 
+  DATE_FORMAT(DateList.date, '%a') AS dayName,
+
   COALESCE(COUNT(leads.id), 0) AS leadCount
 FROM 
-  (
-    SELECT CURDATE() - INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS date
-    FROM 
-      (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS a
-      CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS b
-      CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS c
-  ) AS dateList
-LEFT JOIN leads ON DATE(leads.createdOn) = dateList.date
+  DateList
+LEFT JOIN leads ON DATE(leads.createdOn) = DateList.date
 WHERE 
-  dateList.date BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE()
-  AND dateList.date < CURDATE()
+  DateList.date BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE() - INTERVAL 1 DAY
   ${handleGlobalFilters(req.query)}
 GROUP BY 
-  DATE(dateList.date)
+  DATE(DateList.date)
 ORDER BY
-  DATE(dateList.date) DESC;`;
+DATE(DateList.date) DESC;`
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
