@@ -83,6 +83,20 @@ const getUsers = asyncHandler(async (req, res) => {
   });
 });
 
+const getActiveUsers = asyncHandler(async (req, res) => {
+  let sql = "SELECT * FROM users WHERE status = 'Active'";
+  const filtersQuery = handleGlobalFilters(req.query);
+  sql += filtersQuery;
+
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("getUsers Error in controller");
+      return res.status(500).send({ error: "Database query failed" });
+    }
+    result = parseNestedJSON(result);
+    res.status(200).send(result);
+  });
+});
 const changeUsersStatus = asyncHandler((req, res) => {
   const id = req.params.userId;
   const statusId = req.params.statusId;
@@ -166,5 +180,6 @@ module.exports = {
   changeUsersStatus,
   getUsersCount,
   getUserRoles,
-  updateUserStatus
+  updateUserStatus,
+  getActiveUsers
 };
