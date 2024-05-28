@@ -58,13 +58,13 @@ const deleteUsers = asyncHandler((req, res) => {
 });
 
 const getUsersById = asyncHandler((req, res) => {
-  const sql = `SELECT * FROM users`;
+  const sql = `SELECT * FROM users WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
       console.log("getUsersById error in controller");
     }
-    result = parseNestedJSON(result);
+    result = parseNestedJSON(result[0]);
     res.status(200).send(result);
   });
 });

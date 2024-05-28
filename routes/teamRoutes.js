@@ -10,7 +10,7 @@ const {
   getUsersCount,
   getUserRoles,
   updateUserStatus,
-  getActiveUsers
+  getActiveUsers,
 } = require("../controllers/teamController");
 const { changeLeadStatus } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
@@ -23,8 +23,8 @@ router
   .route("/:userId/changestatus/:statusId")
   .put(validateToken, changeUsersStatus);
 
-  router.route("/userroles").get(validateToken, getUserRoles);
-  router.route("/active").get(validateToken, getActiveUsers);
+router.route("/userroles").get(validateToken, getUserRoles);
+router.route("/active").get(validateToken, getActiveUsers);
 router.route("/:userId/status").put(validateToken, updateUserStatus);
 
 router
