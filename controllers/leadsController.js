@@ -130,8 +130,13 @@ const createLead = asyncHandler((req, res) => {
     // Execute the SQL query to insert the id into the "leaddocuments" table
     dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
       if (leaddocumentsErr) {
-        console.error("Error inserting id into leaddocuments table:", leaddocumentsErr);
-        res.status(500).send(`Failed to insert id ${id} into leaddocuments table`);
+        console.error(
+          "Error inserting id into leaddocuments table:",
+          leaddocumentsErr
+        );
+        res
+          .status(500)
+          .send(`Failed to insert id ${id} into leaddocuments table`);
         return;
       }
 

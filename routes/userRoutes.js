@@ -3,10 +3,10 @@ const { adminLogin, userLogout , userLogin} = require("../controllers/userContro
 const { getActiveUsers } = require("../controllers/teamController");
 const router = express.Router();
 
-router.route("/admin/login").post(adminLogin);
-//router.route("/users/login").post(userLogin);
+
+router.route("/login").post(userLogin);
 router.route("/logout").post(userLogout);
-router.route("/sources").get(getActiveUsers);
+
 
 module.exports = router;
 
