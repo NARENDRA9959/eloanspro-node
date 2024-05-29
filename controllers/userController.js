@@ -2,7 +2,6 @@ const dbConnect = require("../config/dbConnection");
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-
 const userLogin = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -15,7 +14,7 @@ const userLogin = asyncHandler(async (req, res) => {
       //throw err;
       console.log("adminlogin error in controller");
     }
-   // console.log(result)
+    // console.log(result)
     if (
       result &&
       result.length == 1 &&
@@ -23,24 +22,21 @@ const userLogin = asyncHandler(async (req, res) => {
     ) {
       const user = result[0];
       //console.log(result);
-     
       const accessToken = jwt.sign(
         {
           user: user,
         },
-
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "30m" }
       );
-   // console.log(user);
+      // console.log(user);
       //console.log(accessToken);
-      res.status(200).json({ accessToken });
+      res.status(200).json({ accessToken, user });
     } else {
       res.status(401).send("Username or Password Incorrect");
     }
   });
 });
-
 const userLogout = asyncHandler(async (req, res) => {
   const expiredToken = (
     req.headers.authorization || req.headers.Authorization
@@ -53,5 +49,4 @@ const userLogout = asyncHandler(async (req, res) => {
   );
   res.status(200).json({ message: "Logout successful" });
 });
-
 module.exports = { userLogout, userLogin };

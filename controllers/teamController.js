@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const dbConnect = require("../config/dbConnection");
 const handleGlobalFilters = require("../middleware/filtersHandler");
 const parseNestedJSON = require("../middleware/parseHandler");
@@ -29,18 +29,17 @@ const { generateRandomNumber } = require("../middleware/valueGenerator");
 //   });
 // });
 
-
 const createUsers = asyncHandler(async (req, res) => {
   let userId = "U-" + generateRandomNumber(6);
   let phoneNumber = req.body.phone; // Assuming phone number is in the request body
-  console.log(phoneNumber)
+  //console.log(phoneNumber);
   let encryptedPassword = await bcrypt.hash(phoneNumber, 12); // Hashing the phone number
 
   req.body["userId"] = userId;
   req.body["userInternalStatus"] = 1;
   req.body["lastUserInternalStatus"] = 1;
   req.body["password"] = encryptedPassword; // Setting the hashed phone number as password
-console.log(encryptedPassword)
+  //console.log(encryptedPassword);
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
 
@@ -166,7 +165,6 @@ const getUsersCount = asyncHandler(async (req, res) => {
   });
 });
 
-
 const getUserRoles = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM userrole";
   const filtersQuery = handleGlobalFilters(req.query);
@@ -174,26 +172,25 @@ const getUserRoles = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       // throw err;
-      console.log("getUserRoles Error in Controller")
+      console.log("getUserRoles Error in Controller");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
   });
 });
 
-
 const updateUserStatus = asyncHandler(async (req, res) => {
   const userId = req.params.userId;
   const { status } = req.body;
 
   // Update user status in the database
-  const sql = 'UPDATE users SET status = ? WHERE id = ?';
+  const sql = "UPDATE users SET status = ? WHERE id = ?";
   dbConnect.query(sql, [status, userId], (err, result) => {
     if (err) {
-      console.error('Error updating user status:', err);
-      return res.status(500).json({ error: 'Failed to update user status' });
+      console.error("Error updating user status:", err);
+      return res.status(500).json({ error: "Failed to update user status" });
     }
-    res.status(200).json({ message: 'User status updated successfully' });
+    res.status(200).json({ message: "User status updated successfully" });
   });
 });
 module.exports = {
@@ -206,5 +203,5 @@ module.exports = {
   getUsersCount,
   getUserRoles,
   updateUserStatus,
-  getActiveUsers
+  getActiveUsers,
 };
