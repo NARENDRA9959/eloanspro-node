@@ -113,6 +113,10 @@ const createLead = asyncHandler((req, res) => {
   req.body["leadId"] = leadId;
   req.body["leadInternalStatus"] = 1;
   req.body["lastLeadInternalStatus"] = 1;
+  //console.log(req)
+ req.body["createdBy"] = req.user.name;
+  req.body["lastUpdatedBy"] = req.user.name;
+
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
 

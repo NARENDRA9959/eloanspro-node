@@ -54,7 +54,9 @@ const createCallBack = asyncHandler((req, res) => {
   req.body["callBackId"] = callBackId;
   req.body["callbackInternalStatus"] = 1;
   req.body["lastcallbackInternalStatus"] = 1;
-  req.body["createdBy"] = req.user.username;
+  req.body["createdBy"] = req.user.name;
+  req.body["lastUpdatedBy"] = req.user.name;
+
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO callbacks (${createClause[0]}) VALUES (${createClause[1]})`;
   dbConnect.query(sql, (err, result) => {

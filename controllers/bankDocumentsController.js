@@ -54,7 +54,7 @@ const createBankDocuments = asyncHandler((req, res) => {
   req.body["bankDocumentsId"] = bankDocumentsId;
   req.body["bankdocumentsInternalStatus"] = 1;
   req.body["lastBankdocumentsInternalStatus"] = 1;
-  req.body["createdBy"] = req.user.username;
+  req.body["createdBy"] = req.user.name;
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO bankdocuments (${createClause[0]}) VALUES (${createClause[1]})`;
   dbConnect.query(sql, (err, result) => {
