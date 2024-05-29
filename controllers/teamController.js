@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const bcrypt = require('bcrypt');
 const dbConnect = require("../config/dbConnection");
 const handleGlobalFilters = require("../middleware/filtersHandler");
 const parseNestedJSON = require("../middleware/parseHandler");
@@ -9,25 +10,49 @@ const {
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
 
-const createUsers = asyncHandler((req, res) => {
+// const createUsers = asyncHandler((req, res) => {
+//   let userId = "U-" + generateRandomNumber(6);
+//   req.body["userId"] = userId;
+//   req.body["userInternalStatus"] = 1;
+//   req.body["lastUserInternalStatus"] = 1;
+
+//   const createClause = createClauseHandler(req.body);
+//   const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
+
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.error("Error creating users :", err);
+//       res.status(500).send("Internal Server Error");
+//       return;
+//     }
+//     res.status(200).send(true);
+//   });
+// });
+
+
+const createUsers = asyncHandler(async (req, res) => {
   let userId = "U-" + generateRandomNumber(6);
+  let phoneNumber = req.body.phone; // Assuming phone number is in the request body
+  console.log(phoneNumber)
+  let encryptedPassword = await bcrypt.hash(phoneNumber, 12); // Hashing the phone number
+
   req.body["userId"] = userId;
   req.body["userInternalStatus"] = 1;
   req.body["lastUserInternalStatus"] = 1;
-
+  req.body["password"] = encryptedPassword; // Setting the hashed phone number as password
+console.log(encryptedPassword)
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
 
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      console.error("Error creating users :", err);
+      console.error("Error creating users:", err);
       res.status(500).send("Internal Server Error");
       return;
     }
     res.status(200).send(true);
   });
 });
-
 const updateUsers = asyncHandler((req, res) => {
   const id = req.params.id;
   const checkRequiredFields = handleRequiredFields("users", req.body);
