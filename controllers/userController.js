@@ -31,7 +31,7 @@ const userLogin = asyncHandler(async (req, res) => {
       );
       // console.log(user);
       //console.log(accessToken);
-      res.status(200).json({ accessToken, user });
+      res.status(200).json({ accessToken});
     } else {
       res.status(401).send("Username or Password Incorrect");
     }
