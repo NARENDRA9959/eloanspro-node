@@ -7,7 +7,7 @@ const userLogin = asyncHandler(async (req, res) => {
   if (!username || !password) {
     res.status(400).send("Please Enter Username and Password");
   }
-  const sql = `SELECT * FROM users WHERE email = "${username}" OR name = "${username}" OR phone = "${username}"`;
+  const sql = `SELECT * FROM users WHERE email = "${username}" OR name = "${username}"`;
   //console.log("correct")
   dbConnect.query(sql, async (err, result) => {
     if (err) {
