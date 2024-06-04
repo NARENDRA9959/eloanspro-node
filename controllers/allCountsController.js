@@ -17,11 +17,9 @@ const dbConnect = require("../config/dbConnection");
 //   });
 
 const getLeadCountStatus = asyncHandler(async (req, res) => {
-  let sql = `
-        SELECT COUNT(*) AS leadCountStatus
-        FROM leads
-        WHERE leadInternalStatus IN (1, 2)
-    `;
+  let sql ='SELECT COUNT(*) AS leadCountStatus FROM leads';
+  const queryParams=req.query || {};
+  queryParams['leadInternalStatus-or']="1";
   const filtersQuery = handleGlobalFilters(req.query);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
@@ -35,6 +33,23 @@ const getLeadCountStatus = asyncHandler(async (req, res) => {
   });
 });
 
+
+const getCallbackCountStatus = asyncHandler(async (req, res) => {
+  let sql ='SELECT COUNT(*) AS callbackCountStatus FROM callbacks';
+  const queryParams=req.query || {};
+  queryParams['callbackInternalStatus-or']="1";
+  const filtersQuery = handleGlobalFilters(req.query);
+  sql += filtersQuery;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    const callbackCountStatus = result[0].callbackCountStatus;
+    res.status(200).send(String(callbackCountStatus));
+  });
+});
 const getFilesCountStatus = asyncHandler(async (req, res) => {
   let sql = `
       SELECT COUNT(*) AS filesCountStatus
@@ -604,4 +619,5 @@ module.exports = {
   getLastYearLeadCountStatus,
   getDaywiseLeadsCount,
   getDaywiseCallBacksCount,
+  getCallbackCountStatus
 };

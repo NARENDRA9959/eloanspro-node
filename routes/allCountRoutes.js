@@ -15,7 +15,8 @@ const {
   getLastYearCallBacksCount,
   getLastYearLeadCountStatus,
   getDaywiseLeadsCount,
-  getDaywiseCallBacksCount
+  getDaywiseCallBacksCount,
+  getCallbackCountStatus
 } = require("../controllers/allCountsController");
 const { getCallBacksCount } = require("../controllers/callbacksController");
 const router = express.Router();
@@ -24,7 +25,7 @@ const validateToken = require("../middleware/validateTokenHandler");
 
 
 router.route("/leads").get(validateToken, getLeadCountStatus);
-router.route("/callback").get(validateToken, getCallBacksCount);
+router.route("/callback").get(validateToken,getCallbackCountStatus);
 router.route("/files").get(validateToken, getFilesCountStatus);
 router.route("/partial").get(validateToken, getPartialCountStatus);
 router.route("/credit").get(validateToken, getCreditEvaluationCountStatus);

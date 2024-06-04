@@ -52,8 +52,13 @@ const createUsers = asyncHandler(async (req, res) => {
     res.status(200).send(true);
   });
 });
-const updateUsers = asyncHandler((req, res) => {
+const updateUsers = asyncHandler(async (req, res) => {
   const id = req.params.id;
+  let phoneNumber = req.body.phone; // Assuming phone number is in the request body
+  //console.log(phoneNumber);
+  let encryptedPassword = await bcrypt.hash(phoneNumber, 12); // Hashing the phone number
+  req.body["password"] = encryptedPassword; // Setting the hashed phone number as password
+
   const checkRequiredFields = handleRequiredFields("users", req.body);
   if (!checkRequiredFields) {
     res.status(422).send("Please Fill all required fields");

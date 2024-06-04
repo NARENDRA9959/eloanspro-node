@@ -107,46 +107,65 @@ const addDocumentData = asyncHandler((req, res) => {
 });
 
 const createLead = asyncHandler((req, res) => {
-  let leadId = "L-" + generateRandomNumber(6);
-  let id = generateRandomNumber(9);
-  req.body["id"] = id;
-  req.body["leadId"] = leadId;
-  req.body["leadInternalStatus"] = 1;
-  req.body["lastLeadInternalStatus"] = 1;
-  //console.log(req)
- req.body["createdBy"] = req.user.name;
-  req.body["lastUpdatedBy"] = req.user.name;
-
-  const createClause = createClauseHandler(req.body);
-  const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-
-  // Execute the SQL query to insert data into the "leads" table
-  dbConnect.query(sql, (err, result) => {
+  console.log(req);
+  const phoneNumber = req.body.primaryPhone;
+  console.log(phoneNumber);
+  const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
+  dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
     if (err) {
-      console.error("Error inserting data into leads table:", err);
-      res.status(500).send("Internal server error");
-      return;
-    }
-
-    // Construct the SQL query for inserting the id into the "leaddocuments" table
-    const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
-
-    // Execute the SQL query to insert the id into the "leaddocuments" table
-    dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
-      if (leaddocumentsErr) {
-        console.error(
-          "Error inserting id into leaddocuments table:",
-          leaddocumentsErr
-        );
+      console.error("Error checking phone number:", err);
+      res.status(500).json({ error: "Internal server error" });
+    } else {
+      if (result.length > 0) {
+        const lead = result[0];
         res
           .status(500)
-          .send(`Failed to insert id ${id} into leaddocuments table`);
-        return;
-      }
+          .send(
+            `Lead already exists with phone number ${phoneNumber}, created by ${lead.createdBy}`
+          );
+      } else {
+        let leadId = "L-" + generateRandomNumber(6);
+        let id = generateRandomNumber(9);
+        req.body["id"] = id;
+        req.body["leadId"] = leadId;
+        req.body["leadInternalStatus"] = 1;
+        req.body["lastLeadInternalStatus"] = 1;
+        req.body["createdBy"] = req.user.name;
+        req.body["lastUpdatedBy"] = req.user.name;
 
-      console.log("ID inserted into leaddocuments successfully:", id);
-      res.status(200).send(true); // Send response after both insertions are complete
-    });
+        const createClause = createClauseHandler(req.body);
+        const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+
+        // Execute the SQL query to insert data into the "leads" table
+        dbConnect.query(sql, (err, result) => {
+          if (err) {
+            console.error("Error inserting data into leads table:", err);
+            res.status(500).send("Internal server error");
+            return;
+          }
+
+          // Construct the SQL query for inserting the id into the "leaddocuments" table
+          const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
+
+          // Execute the SQL query to insert the id into the "leaddocuments" table
+          dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
+            if (leaddocumentsErr) {
+              console.error(
+                "Error inserting id into leaddocuments table:",
+                leaddocumentsErr
+              );
+              res
+                .status(500)
+                .send(`Failed to insert id ${id} into leaddocuments table`);
+              return;
+            }
+
+            console.log("ID inserted into leaddocuments successfully:", id);
+            res.status(200).send(true); // Send response after both insertions are complete
+          });
+        });
+      }
+    }
   });
 });
 
@@ -405,5 +424,6 @@ module.exports = {
   updateLead,
   deleteLead,
   changeLeadStatus,
+
   addDocumentData,
 };

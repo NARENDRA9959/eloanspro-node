@@ -10,7 +10,7 @@ const {
   getLeadUsers,
   changeLeadStatus,
   getLeadDocumentsById,
-  addDocumentData
+  addDocumentData,
 } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -18,15 +18,20 @@ const router = express.Router();
 
 router.route("/").get(validateToken, getLeads).post(validateToken, createLead);
 
-router.route("/total").get(validateToken,  getLeadsCount); 
+router.route("/total").get(validateToken, getLeadsCount);
 
 router.route("/sources").get(validateToken, getLeadSources);
 
-router.route("/:leadId/changestatus/:statusId").put(validateToken, changeLeadStatus);
+router
+  .route("/:leadId/changestatus/:statusId")
+  .put(validateToken, changeLeadStatus);
 
 router.route("/users").get(validateToken, getLeadUsers);
 
-router.route("/documents/:leadId").get(validateToken, getLeadDocumentsById).put(validateToken, addDocumentData);
+router
+  .route("/documents/:leadId")
+  .get(validateToken, getLeadDocumentsById)
+  .put(validateToken, addDocumentData);
 
 router
   .route("/:id")
