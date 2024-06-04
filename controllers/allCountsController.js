@@ -19,7 +19,7 @@ const dbConnect = require("../config/dbConnection");
 const getLeadCountStatus = asyncHandler(async (req, res) => {
   let sql ='SELECT COUNT(*) AS leadCountStatus FROM leads';
   const queryParams=req.query || {};
-  queryParams['leadInternalStatus-or']="1";
+  queryParams['leadInternalStatus-or']="1,2";
   const filtersQuery = handleGlobalFilters(req.query);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
@@ -37,7 +37,7 @@ const getLeadCountStatus = asyncHandler(async (req, res) => {
 const getCallbackCountStatus = asyncHandler(async (req, res) => {
   let sql ='SELECT COUNT(*) AS callbackCountStatus FROM callbacks';
   const queryParams=req.query || {};
-  queryParams['callbackInternalStatus-or']="1";
+  queryParams['callbackInternalStatus-or']="1,2";
   const filtersQuery = handleGlobalFilters(req.query);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
