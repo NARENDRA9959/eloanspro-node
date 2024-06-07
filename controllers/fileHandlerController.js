@@ -19,10 +19,8 @@ const uploadFiles = asyncHandler(async (req, res) => {
         type,
         file.filename
       );
-
       fileLinks.push(filePath);
     }
-
     res.json({ links: fileLinks });
   } catch (error) {
     res.status(500).json("Error uploading files");

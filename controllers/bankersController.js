@@ -11,7 +11,7 @@ const { generateRandomNumber } = require("../middleware/valueGenerator");
 
 const getBankersCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as bankersCount FROM bankers";
-  const filtersQuery = handleGlobalFilters(req.query,true);
+  const filtersQuery = handleGlobalFilters(req.query, true);
   //console.log(filtersQuery)
   sql += filtersQuery;
   //console.log(sql);
@@ -54,7 +54,7 @@ const createBanker = asyncHandler((req, res) => {
   req.body["bankerId"] = bankerId;
   req.body["bankerInternalStatus"] = 1;
   req.body["lastBankerInternalStatus"] = 1;
-  
+
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO bankers (${createClause[0]}) VALUES (${createClause[1]})`;
   dbConnect.query(sql, (err, result) => {
@@ -120,7 +120,7 @@ const deleteBanker = asyncHandler((req, res) => {
 });
 
 module.exports = {
-    getBankers,
+  getBankers,
   getBankersCount,
   getBankersById,
   createBanker,

@@ -6,7 +6,7 @@ const dbConfig = {
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  multipleStatements: true
+  multipleStatements: true,
 };
 
 let connectDB;
@@ -16,22 +16,26 @@ function handleDisconnect() {
 
   connectDB.connect((err) => {
     if (err) {
-      console.error('Error connecting to the database:', err);
+      console.error("Error connecting to the database:", err);
       //setTimeout(handleDisconnect, 2000);
     } else {
-      console.log('Connected to the database');
+      console.log("Connected to the database");
     }
   });
 
-  connectDB.on('error', (err) => {
-    if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR' ||
-      err.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR' || err.code === 'ECONNRESET' || err.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR') {
-      console.error('Database connection was closed. Reconnecting...');
+  connectDB.on("error", (err) => {
+    if (
+      err.code === "PROTOCOL_CONNECTION_LOST" ||
+      err.code === "PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR" ||
+      err.code === "PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR" ||
+      err.code === "ECONNRESET" ||
+      err.code === "PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR"
+    ) {
+      console.error("Database connection was closed. Reconnecting...");
       handleDisconnect();
-    }
-    else {
+    } else {
       // throw err;
-      console.log("database connection error:")
+      console.log("database connection error:");
     }
   });
 }
@@ -39,9 +43,6 @@ function handleDisconnect() {
 handleDisconnect(); // Initial connection attempt
 
 module.exports = connectDB;
-
-
-
 
 // const mysql = require("mysql");
 // const dotenv = require("dotenv").config();

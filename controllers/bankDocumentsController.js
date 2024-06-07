@@ -11,7 +11,7 @@ const { generateRandomNumber } = require("../middleware/valueGenerator");
 
 const getBankDocumentsCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as bankDocumentsCount FROM bankdocuments";
-  const filtersQuery = handleGlobalFilters(req.query,true);
+  const filtersQuery = handleGlobalFilters(req.query, true);
   //console.log(filtersQuery)
   sql += filtersQuery;
   //console.log(sql);
@@ -120,11 +120,11 @@ const deleteBankDocuments = asyncHandler((req, res) => {
 });
 
 module.exports = {
-    getBankDocumentsCount,
-    getBankDocuments,
-    getBankDocumentsById,
-    createBankDocuments,
-    updateBankDocuments,
-    changeBankDocumentsStatus,
-    deleteBankDocuments
+  getBankDocumentsCount,
+  getBankDocuments,
+  getBankDocumentsById,
+  createBankDocuments,
+  updateBankDocuments,
+  changeBankDocumentsStatus,
+  deleteBankDocuments,
 };

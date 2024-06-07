@@ -12,7 +12,6 @@ const {
   updateUserStatus,
   getActiveUsers,
 } = require("../controllers/teamController");
-const { changeLeadStatus } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();

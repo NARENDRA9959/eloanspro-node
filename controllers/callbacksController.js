@@ -11,7 +11,7 @@ const { generateRandomNumber } = require("../middleware/valueGenerator");
 
 const getCallBacksCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as callBacksCount FROM callbacks";
-  const filtersQuery = handleGlobalFilters(req.query,true);
+  const filtersQuery = handleGlobalFilters(req.query, true);
   //console.log(filtersQuery)
   sql += filtersQuery;
   //console.log(sql);

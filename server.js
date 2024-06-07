@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const path = require('path');
-const validateToken = require("./middleware/validateTokenHandler");
 const app = express();
 app.use(express.json());
 app.use(cors({

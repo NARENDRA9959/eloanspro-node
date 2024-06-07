@@ -17,9 +17,9 @@ const dbConnect = require("../config/dbConnection");
 //   });
 
 const getLeadCountStatus = asyncHandler(async (req, res) => {
-  let sql ='SELECT COUNT(*) AS leadCountStatus FROM leads';
-  const queryParams=req.query || {};
-  queryParams['leadInternalStatus-or']="1";
+  let sql = "SELECT COUNT(*) AS leadCountStatus FROM leads";
+  const queryParams = req.query || {};
+  queryParams["leadInternalStatus-or"] = "1";
   const filtersQuery = handleGlobalFilters(req.query);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
@@ -33,11 +33,10 @@ const getLeadCountStatus = asyncHandler(async (req, res) => {
   });
 });
 
-
 const getCallbackCountStatus = asyncHandler(async (req, res) => {
-  let sql ='SELECT COUNT(*) AS callbackCountStatus FROM callbacks';
-  const queryParams=req.query || {};
-  queryParams['callbackInternalStatus-or']="1";
+  let sql = "SELECT COUNT(*) AS callbackCountStatus FROM callbacks";
+  const queryParams = req.query || {};
+  queryParams["callbackInternalStatus-or"] = "1";
   const filtersQuery = handleGlobalFilters(req.query);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
@@ -526,27 +525,27 @@ const getDaywiseLeadsCount = asyncHandler(async (req, res) => {
       DATE(dateList.date) DESC; -- Order by date in descending order to get the last 7 days
   `;
 
-//  let sql=` WITH RECURSIVE DateList AS (
-//   SELECT CURDATE() - INTERVAL 6 DAY AS date
-//   UNION ALL
-//   SELECT date + INTERVAL 1 DAY
-//   FROM DateList
-//   WHERE date < CURDATE() - INTERVAL 1 DAY
-// )
-// SELECT 
-//   DATE_FORMAT(DateList.date, '%a') AS dayName,
+  //  let sql=` WITH RECURSIVE DateList AS (
+  //   SELECT CURDATE() - INTERVAL 6 DAY AS date
+  //   UNION ALL
+  //   SELECT date + INTERVAL 1 DAY
+  //   FROM DateList
+  //   WHERE date < CURDATE() - INTERVAL 1 DAY
+  // )
+  // SELECT
+  //   DATE_FORMAT(DateList.date, '%a') AS dayName,
 
-//   COALESCE(COUNT(leads.id), 0) AS leadCount
-// FROM 
-//   DateList
-// LEFT JOIN leads ON DATE(leads.createdOn) = DateList.date
-// WHERE 
-//   DateList.date BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE() - INTERVAL 1 DAY
-//   ${handleGlobalFilters(req.query)}
-// GROUP BY 
-//   DATE(DateList.date)
-// ORDER BY
-// DATE(DateList.date) DESC;`
+  //   COALESCE(COUNT(leads.id), 0) AS leadCount
+  // FROM
+  //   DateList
+  // LEFT JOIN leads ON DATE(leads.createdOn) = DateList.date
+  // WHERE
+  //   DateList.date BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE() - INTERVAL 1 DAY
+  //   ${handleGlobalFilters(req.query)}
+  // GROUP BY
+  //   DATE(DateList.date)
+  // ORDER BY
+  // DATE(DateList.date) DESC;`
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -619,5 +618,5 @@ module.exports = {
   getLastYearLeadCountStatus,
   getDaywiseLeadsCount,
   getDaywiseCallBacksCount,
-  getCallbackCountStatus
+  getCallbackCountStatus,
 };

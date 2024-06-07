@@ -6,20 +6,23 @@ const {
   createCallBack,
   updateCallBack,
   deleteCallBack,
-  changeCallbackStatus
- 
+  changeCallbackStatus,
 } = require("../controllers/callbacksController");
 
 const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();
 
-router.route("/").get(validateToken, getCallBacks).post(validateToken, createCallBack);
+router
+  .route("/")
+  .get(validateToken, getCallBacks)
+  .post(validateToken, createCallBack);
 
 router.route("/total").get(validateToken, getCallBacksCount);
 
-router.route("/:callBackId/changestatus/:statusId").put(validateToken, changeCallbackStatus);
-
+router
+  .route("/:callBackId/changestatus/:statusId")
+  .put(validateToken, changeCallbackStatus);
 
 router
   .route("/:id")
