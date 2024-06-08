@@ -25,7 +25,9 @@ const getLeadsCount = asyncHandler(async (req, res) => {
 
 const getLeads = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM leads";
-  const filtersQuery = handleGlobalFilters(req.query);
+  const queryParams = req.query;
+  queryParams["sort"] = "createdOn";
+  const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {

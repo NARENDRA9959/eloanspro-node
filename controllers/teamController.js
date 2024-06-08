@@ -100,7 +100,9 @@ const getUsersById = asyncHandler((req, res) => {
 
 const getUsers = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM users";
-  const filtersQuery = handleGlobalFilters(req.query);
+  const queryParams = req.query;
+  queryParams["sort"] = "addedOn";
+  const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {

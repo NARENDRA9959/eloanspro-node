@@ -27,7 +27,9 @@ const getCallBacksCount = asyncHandler(async (req, res) => {
 
 const getCallBacks = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM callbacks";
-  const filtersQuery = handleGlobalFilters(req.query);
+  const queryParams = req.query;
+  queryParams["sort"] = "createdOn";
+  const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {

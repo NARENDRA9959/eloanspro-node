@@ -1,5 +1,4 @@
 const mysql = require("mysql");
-
 const handleFilters = (queryParams, isCountUrl = false) => {
   let querySuffix = " ";
   if (
@@ -10,7 +9,7 @@ const handleFilters = (queryParams, isCountUrl = false) => {
     let conditionalQuery = handleConditionalFilters(queryParams);
     querySuffix += conditionalQuery;
     if (queryParams["sort"]) {
-      const [column, order = "asc"] = queryParams["sort"].split(",");
+      const [column, order = "desc"] = queryParams["sort"].split(",");
       querySuffix += ` ORDER BY ${column} ${order.toUpperCase()}`;
     }
     if (queryParams["count"] && !isCountUrl) {
@@ -57,5 +56,4 @@ const handleConditionalFilters = (queryParams) => {
   }
   return conditionalQuery == " WHERE " ? "" : conditionalQuery;
 };
-
 module.exports = handleFilters;
