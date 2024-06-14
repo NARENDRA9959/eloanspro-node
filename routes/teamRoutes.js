@@ -11,6 +11,7 @@ const {
   getUserRoles,
   updateUserStatus,
   getActiveUsers,
+  exportLeads
 } = require("../controllers/teamController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -25,6 +26,7 @@ router
 router.route("/userroles").get(validateToken, getUserRoles);
 router.route("/active").get(validateToken, getActiveUsers);
 router.route("/:userId/status").put(validateToken, updateUserStatus);
+router.route("/export").get(validateToken, exportLeads);
 
 router
   .route("/:id")

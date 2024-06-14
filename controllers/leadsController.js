@@ -1,10 +1,12 @@
 const asyncHandler = require("express-async-handler");
+
 const dbConnect = require("../config/dbConnection");
 const handleGlobalFilters = require("../middleware/filtersHandler");
 const parseNestedJSON = require("../middleware/parseHandler");
 const {
   createClauseHandler,
   updateClauseHandler,
+  
 } = require("../middleware/clauseHandler");
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
@@ -67,12 +69,10 @@ const getLeadUsers = asyncHandler(async (req, res) => {
     res.status(200).send(result);
   });
 });
-
 const getLeadById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM leads WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("getLeadById error in controller");
     }
     result = parseNestedJSON(result);
@@ -85,7 +85,6 @@ const getLeadDocumentsById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM leaddocuments WHERE leadId = ${req.params.leadId}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("getLeadDocumentsById Error in controller");
     }
     result = parseNestedJSON(result);
@@ -101,12 +100,271 @@ const addDocumentData = asyncHandler((req, res) => {
   const sql = `UPDATE leaddocuments SET ${updateClause} WHERE leadId = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("addDocumentData error in controller");
     }
     res.status(200).send({ success: "Documents Saved Successfully" });
   });
 });
+
+const addDscrValuesData = asyncHandler((req, res) => {
+  const id = req.params.leadId;
+  const updateClause = updateClauseHandler(req.body);
+  console.log(updateClause);
+  console.log(id);
+  const sql = `UPDATE dscr_values SET ${updateClause} WHERE leadId = ${id}`;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("addDscrValuesData error in controller");
+    }
+    res.status(200).send({ success: "Dscr Values  Saved Successfully" });
+  });
+});
+
+const getDscrValuesById = asyncHandler((req, res) => {
+  const sql = `SELECT * FROM dscr_values WHERE leadId = ${req.params.leadId}`;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("getDscrValuesById Error in controller");
+    }
+    result = parseNestedJSON(result);
+    res.status(200).send(result[0] || {});
+  });
+});
+
+const calculateGstProgram = asyncHandler((req, res) => {
+  const { totalEmi, odCcInterestAy1, gstTurnover, margin, months } = req.body;
+  const margin1 = margin / 100;
+  const monthlyInterest = (gstTurnover * margin1) / months;
+  const monthlyPayment = monthlyInterest * 0.8; // 80% of monthly interest
+  const finalMonthlyPayment = monthlyPayment - totalEmi - odCcInterestAy1;
+  const gstValue = Math.round(finalMonthlyPayment);
+  const updateClause = updateClauseHandler(req.body);
+  if (!updateClause) {
+    return res.status(400).json({ error: "No update values provided" });
+  }
+  const extendedUpdateClause = `${updateClause}, gstValue = ${gstValue}`;
+  const sql = `
+    UPDATE dscr_values
+    SET ${extendedUpdateClause}
+    WHERE leadId = ${req.params.leadId}
+  `;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error updating data:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "No rows updated" });
+    }
+    res.json({ gstValue });
+  });
+});
+const calculateBalanceSheet = asyncHandler((req, res) => {
+  const {
+    capitalAy1,
+    sundryDebtorsAy1,
+    sundryCreditorsAy1,
+    turnoverAy1,
+    purchasesAy1,
+  } = req.body;
+  const debtNumerator = sundryDebtorsAy1 * 365;
+  const creditNumerator = sundryCreditorsAy1 * 365;
+  const debtDenominator = turnoverAy1;
+  const creditDenominator = purchasesAy1;
+  const debtor_daysFirstYear =
+    debtDenominator !== 0 ? debtNumerator / debtDenominator : 0;
+  const creditor_daysFirstYear =
+    creditDenominator !== 0 ? creditNumerator / creditDenominator : 0;
+  const updateClause = updateClauseHandler(req.body);
+  if (!updateClause) {
+    return res.status(400).json({ error: "No update values provided" });
+  }
+  const extendedUpdateClause = `${updateClause}, debtor_daysFirstYear = ${debtor_daysFirstYear}, creditor_daysFirstYear=${creditor_daysFirstYear}`;
+  const sql = `
+    UPDATE dscr_values
+    SET ${extendedUpdateClause}
+    WHERE leadId = ${req.params.leadId}
+  `;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error updating data:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "No rows updated" });
+    }
+    res.json({ creditor_daysFirstYear, debtor_daysFirstYear });
+  });
+});
+
+const calculateDscrRatio = asyncHandler((req, res) => {
+  const {
+    profitaftertaxAy1,
+    depreciationAy1,
+    totalloansinterest,
+    directorsRemuAy1,
+    partnerRemuAy1,
+    partnerInterestAy1,
+    totalEmi,
+    proposedEmi,
+    odCcInterestAy1,
+    monthsAy1,
+  } = req.body;
+
+  let numerator = 0;
+
+  if (directorsRemuAy1) {
+    numerator =
+      profitaftertaxAy1 +
+      depreciationAy1 +
+      totalloansinterest +
+      directorsRemuAy1;
+  } else if (partnerRemuAy1 && partnerInterestAy1) {
+    numerator =
+      profitaftertaxAy1 +
+      depreciationAy1 +
+      totalloansinterest +
+      partnerRemuAy1 +
+      partnerInterestAy1;
+  } else {
+    numerator = profitaftertaxAy1 + depreciationAy1 + totalloansinterest;
+  }
+
+  const denominator = (totalEmi + proposedEmi + odCcInterestAy1) * monthsAy1;
+  const resultFirstYear = denominator !== 0 ? numerator / denominator : 0;
+  const updateClause = updateClauseHandler(req.body);
+  const extendedUpdateClause = `${updateClause},  resultFirstYear=${resultFirstYear}`;
+  const sql = `
+    UPDATE dscr_values
+    SET ${extendedUpdateClause}
+    WHERE leadId = ${req.params.leadId}
+  `;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error updating data:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "No rows updated" });
+    }
+    res.json({ resultFirstYear });
+  });
+});
+
+const calculateBTOProgram = asyncHandler((req, res) => {
+  const { totalEmi, odCcInterestAy1, bankingTurnover, btoMargin, btoMonths } =
+    req.body;
+  const margin1 = btoMargin / 100;
+  const monthlyInterest = (bankingTurnover * margin1) / btoMonths;
+  const monthlyPayment = monthlyInterest * 0.8; // 80% of monthly interest
+  const finalMonthlyPayment = monthlyPayment - totalEmi - odCcInterestAy1;
+  const btoValue = Math.round(finalMonthlyPayment);
+  const updateClause = updateClauseHandler(req.body);
+  if (!updateClause) {
+    return res.status(400).json({ error: "No update values provided" });
+  }
+  const extendedUpdateClause = `${updateClause}, btoValue = ${btoValue}`;
+  const sql = `
+    UPDATE dscr_values
+    SET ${extendedUpdateClause}
+    WHERE leadId = ${req.params.leadId}
+  `;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error updating data:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "No rows updated" });
+    }
+    res.json({ btoValue });
+  });
+});
+
+// const createLead = asyncHandler((req, res) => {
+//   console.log(req);
+//   const phoneNumber = req.body.primaryPhone;
+//   console.log(phoneNumber);
+//   const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
+//   dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
+//     if (err) {
+//       console.error("Error checking phone number:", err);
+//       res.status(500).json({ error: "Internal server error" });
+//     } else {
+//       if (result.length > 0) {
+//         const lead = result[0];
+//         res
+//           .status(500)
+//           .send(
+//             `Lead already exists with phone number ${phoneNumber}, created by ${lead.createdBy}`
+//           );
+//       } else {
+//         let leadId = "L-" + generateRandomNumber(6);
+//         let id = generateRandomNumber(9);
+//         req.body["id"] = id;
+//         req.body["leadId"] = leadId;
+//         req.body["leadInternalStatus"] = 1;
+//         req.body["lastLeadInternalStatus"] = 1;
+//         req.body["createdBy"] = req.user.name;
+//         req.body["lastUpdatedBy"] = req.user.name;
+
+//         const createClause = createClauseHandler(req.body);
+//         const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+
+//         // Execute the SQL query to insert data into the "leads" table
+//         dbConnect.query(sql, (err, result) => {
+//           if (err) {
+//             console.error("Error inserting data into leads table:", err);
+//             res.status(500).send("Internal server error");
+//             return;
+//           }
+
+//           // Construct the SQL query for inserting the id into the "leaddocuments" table
+//           const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
+
+//           // Execute the SQL query to insert the id into the "leaddocuments" table
+//           dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
+//             if (leaddocumentsErr) {
+//               console.error(
+//                 "Error inserting id into leaddocuments table:",
+//                 leaddocumentsErr
+//               );
+//               res
+//                 .status(500)
+//                 .send(`Failed to insert id ${id} into leaddocuments table`);
+//               return;
+//             }
+
+//             console.log("ID inserted into leaddocuments successfully:", id);
+
+//             // Construct the SQL query for inserting the id into the "dscr_value" table
+//             const dscrValueSql = `INSERT INTO dscr_values (leadid) VALUES ('${id}')`;
+
+//             // Execute the SQL query to insert the id into the "dscr_value" table
+//             dbConnect.query(dscrValueSql, (dscrValueErr) => {
+//               if (dscrValueErr) {
+//                 console.error(
+//                   "Error inserting id into dscr_value table:",
+//                   dscrValueErr
+//                 );
+//                 res
+//                   .status(500)
+//                   .send(`Failed to insert id ${id} into dscr_value table`);
+//                 return;
+//               }
+
+//               console.log("ID inserted into dscr_value successfully:", id);
+//               res.status(200).send(true);
+
+//               // Send response after both insertions are complete
+//             });
+//           });
+//         });
+//       }
+//     }
+//   });
+// });
+
 
 const createLead = asyncHandler((req, res) => {
   console.log(req);
@@ -426,6 +684,12 @@ module.exports = {
   updateLead,
   deleteLead,
   changeLeadStatus,
-
+  calculateGstProgram,
   addDocumentData,
+  addDscrValuesData,
+  getDscrValuesById,
+  calculateBalanceSheet,
+  calculateDscrRatio,
+  calculateBTOProgram,
+
 };

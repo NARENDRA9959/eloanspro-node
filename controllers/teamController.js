@@ -9,6 +9,9 @@ const {
 } = require("../middleware/clauseHandler");
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
+const { createObjectCsvWriter } = require("csv-writer");
+
+let leadUsersData = []; // Define a variable to store lead users
 
 // const createUsers = asyncHandler((req, res) => {
 //   let userId = "U-" + generateRandomNumber(6);
@@ -109,10 +112,69 @@ const getUsers = asyncHandler(async (req, res) => {
       // throw err;
       console.log("getUsers Error in controller");
     }
-    result = parseNestedJSON(result);
-    res.status(200).send(result);
+    leadUsersData = parseNestedJSON(result);
+    res.status(200).send(leadUsersData);
   });
 });
+
+const exportLeads = asyncHandler(async (req, res) => {
+  let sql = "SELECT * FROM leads";
+  const queryParams = req.query;
+  queryParams["sort"] = "createdOn";
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+  dbConnect.query(sql, async (err, result) => {
+    if (err) {
+      console.log("Error exporting leads: ", err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+    try {
+      for (let i = 0; i < result.length; i++) {
+        result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
+      }
+      result = parseNestedJSON(result);
+      const csvWriter = createObjectCsvWriter({
+        path: "leads1.csv",
+        header: [
+          { id: "id", title: "ID" },
+          { id: "leadId", title: "Lead Id" },
+          { id: "businessName", title: "Business Name" },
+          { id: "businessEmail", title: "Business Email" },
+          { id: "contactPerson", title: "Contact Person" },
+          { id: "sourcedBy", title: "Sourced By" },
+        ],
+      });
+      csvWriter
+        .writeRecords(result)
+        .then(() => {
+          console.log("CSV file created successfully");
+          res.download("leads1.csv", "downloads/leads1.csv");
+          res.status(200).json(true);
+        })
+        .catch((error) => {
+          console.error("Error writing CSV file:", error);
+          res.status(500).json({ error: "Internal server error" });
+        });
+    } catch (error) {
+      console.error("Error getting sourcedBy names:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+});
+
+const getSourceName = async (userId) => {
+  try {
+    //console.log(leadUsersData)
+    //console.log(userId)
+    const leadUser = leadUsersData.find((user) => user.id == userId);
+    //console.log(leadUser)
+    return leadUser ? leadUser.name : "";
+  } catch (error) {
+    console.error("Error getting sourcedBy names:", error);
+    throw error;
+  }
+};
 
 const getActiveUsers = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM users WHERE status = 'Active'";
@@ -211,4 +273,5 @@ module.exports = {
   getUserRoles,
   updateUserStatus,
   getActiveUsers,
+  exportLeads,
 };

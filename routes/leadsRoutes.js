@@ -11,6 +11,13 @@ const {
   changeLeadStatus,
   getLeadDocumentsById,
   addDocumentData,
+  addDscrValuesData,
+  getDscrValuesById,
+  calculateBalanceSheet,
+  calculateGstProgram,
+  calculateBTOProgram,
+
+  calculateDscrRatio,
 } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -32,6 +39,19 @@ router
   .route("/documents/:leadId")
   .get(validateToken, getLeadDocumentsById)
   .put(validateToken, addDocumentData);
+
+router
+  .route("/dscr_ratio/:leadId")
+  .get(validateToken, getDscrValuesById)
+  .put(validateToken, addDscrValuesData);
+
+router
+  .route("/calulategstprogram/:leadId")
+  .put(validateToken, calculateGstProgram);
+router.route("/balancesheet/:leadId").put(validateToken, calculateBalanceSheet);
+router.route("/btoprogram/:leadId").put(validateToken, calculateBTOProgram);
+router.route("/dscrratio/:leadId").put(validateToken, calculateDscrRatio);
+
 
 router
   .route("/:id")
