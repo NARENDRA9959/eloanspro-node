@@ -57,16 +57,16 @@ const createUsers = asyncHandler(async (req, res) => {
 });
 const updateUsers = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  let phoneNumber = req.body.phone; // Assuming phone number is in the request body
+  let phoneNumber = req.body.phone.toString(); // Assuming phone number is in the request body
   //console.log(phoneNumber);
   let encryptedPassword = await bcrypt.hash(phoneNumber, 12); // Hashing the phone number
   req.body["password"] = encryptedPassword; // Setting the hashed phone number as password
 
-  const checkRequiredFields = handleRequiredFields("users", req.body);
-  if (!checkRequiredFields) {
-    res.status(422).send("Please Fill all required fields");
-    return;
-  }
+  // const checkRequiredFields = handleRequiredFields("users", req.body);
+  // if (!checkRequiredFields) {
+  //   res.status(422).send("Please Fill all required fields");
+  //   return;
+  // }
   const updateClause = updateClauseHandler(req.body);
   const sql = `UPDATE users SET ${updateClause} WHERE id = ${id}`;
   dbConnect.query(sql, (err, result) => {
@@ -78,6 +78,7 @@ const updateUsers = asyncHandler(async (req, res) => {
   });
 });
 
+
 const deleteUsers = asyncHandler((req, res) => {
   const sql = `DELETE FROM users WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
@@ -88,7 +89,6 @@ const deleteUsers = asyncHandler((req, res) => {
     res.status(200).send("users Deleted Successfully");
   });
 });
-
 const getUsersById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM users WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
@@ -100,7 +100,6 @@ const getUsersById = asyncHandler((req, res) => {
     res.status(200).send(result);
   });
 });
-
 const getUsers = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM users";
   const queryParams = req.query;
@@ -116,7 +115,6 @@ const getUsers = asyncHandler(async (req, res) => {
     res.status(200).send(leadUsersData);
   });
 });
-
 const exportLeads = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM leads";
   const queryParams = req.query;
