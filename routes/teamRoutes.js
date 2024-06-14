@@ -26,7 +26,7 @@ router
 router.route("/userroles").get(validateToken, getUserRoles);
 router.route("/active").get(validateToken, getActiveUsers);
 router.route("/:userId/status").put(validateToken, updateUserStatus);
-router.route("/export").get(validateToken, exportLeads);
+// router.route("/export").get(validateToken, exportLeads);
 
 router
   .route("/:id")
