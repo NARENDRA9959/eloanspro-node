@@ -6,7 +6,6 @@ const parseNestedJSON = require("../middleware/parseHandler");
 const {
   createClauseHandler,
   updateClauseHandler,
-  
 } = require("../middleware/clauseHandler");
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
@@ -36,8 +35,8 @@ const getLeads = asyncHandler(async (req, res) => {
       // throw err;
       console.log("getLeads Error in controller");
     }
-
     result = parseNestedJSON(result);
+    // console.log(result)
     res.status(200).send(result);
   });
 });
@@ -201,7 +200,7 @@ const calculateDscrRatio = asyncHandler((req, res) => {
   const {
     profitaftertaxAy1,
     depreciationAy1,
-    totalloansinterest,
+    
     directorsRemuAy1,
     partnerRemuAy1,
     partnerInterestAy1,
@@ -217,21 +216,23 @@ const calculateDscrRatio = asyncHandler((req, res) => {
     numerator =
       profitaftertaxAy1 +
       depreciationAy1 +
-      totalloansinterest +
+     
       directorsRemuAy1;
   } else if (partnerRemuAy1 && partnerInterestAy1) {
     numerator =
       profitaftertaxAy1 +
       depreciationAy1 +
-      totalloansinterest +
+     
       partnerRemuAy1 +
       partnerInterestAy1;
   } else {
-    numerator = profitaftertaxAy1 + depreciationAy1 + totalloansinterest;
+    numerator = profitaftertaxAy1 + depreciationAy1 ;
+   
   }
 
   const denominator = (totalEmi + proposedEmi + odCcInterestAy1) * monthsAy1;
-  const resultFirstYear = denominator !== 0 ? numerator / denominator : 0;
+  const resultFirstYear = denominator !== 0 ? (numerator / denominator).toFixed(2) : 0;
+  
   const updateClause = updateClauseHandler(req.body);
   const extendedUpdateClause = `${updateClause},  resultFirstYear=${resultFirstYear}`;
   const sql = `
@@ -364,7 +365,6 @@ const calculateBTOProgram = asyncHandler((req, res) => {
 //     }
 //   });
 // });
-
 
 const createLead = asyncHandler((req, res) => {
   console.log(req);
@@ -639,6 +639,8 @@ const deleteLead = asyncHandler((req, res) => {
 const changeLeadStatus = asyncHandler((req, res) => {
   const id = req.params.leadId;
   const statusId = req.params.statusId;
+  // console.log(id);
+  // console.log(statusId);
   const createSql = `SELECT * FROM leads WHERE id = ${id}`;
   dbConnect.query(createSql, (err, result) => {
     if (err) {

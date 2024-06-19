@@ -65,6 +65,52 @@ const createBanker = asyncHandler((req, res) => {
   });
 });
 
+// const createBanker = asyncHandler((req, res) => {
+//   const name = req.body.name;
+//   const bankerId = "B-" + generateRandomNumber(6);
+//   req.body["bankerId"] = bankerId;
+//   req.body["bankerInternalStatus"] = 1;
+//   req.body["lastBankerInternalStatus"] = 1;
+
+//   // Check if banker with the same bank name exists
+//   const checkIfExistsSql = `SELECT * FROM bankers WHERE name = ?`;
+//   dbConnect.query(checkIfExistsSql, [name], (err, rows) => {
+//     if (err) {
+//       console.log("Error checking if banker exists:", err);
+//       return res.status(500).send(false);
+//     }
+
+//     if (rows && rows.length > 0) {
+//       // Banker with the same bank name exists, update the existing record
+//       const existingBanker = rows[0];
+//       const updatedBanker = { ...existingBanker, ...req.body }; // Merge existing and new data
+//       delete updatedBanker.id; // Remove id field from update data
+
+//       const updateClause = updateClauseHandler(updatedBanker);
+
+//       const updateSql = `UPDATE bankers SET ${updateClause} WHERE name = ?`;
+//       dbConnect.query(updateSql, [name], (updateErr, updateResult) => {
+//         if (updateErr) {
+//           console.log("Error updating banker:", updateErr);
+//           return res.status(500).send(false);
+//         }
+//         res.status(200).send(true); // Successfully updated
+//       });
+//     } else {
+//       // Banker with the same bank name does not exist, insert new record
+//       const createClause = createClauseHandler(req.body);
+//       const insertSql = `INSERT INTO bankers (${createClause[0]}) VALUES (${createClause[1]})`;
+//       dbConnect.query(insertSql, (insertErr, result) => {
+//         if (insertErr) {
+//           console.log("Error creating banker:", insertErr);
+//           return res.status(500).send(false);
+//         }
+//         res.status(200).send(true); // Successfully inserted
+//       });
+//     }
+//   });
+// });
+
 const updateBanker = asyncHandler((req, res) => {
   const id = req.params.id;
   const checkRequiredFields = handleRequiredFields("bankers", req.body);

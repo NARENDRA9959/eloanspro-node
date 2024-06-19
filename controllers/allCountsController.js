@@ -68,6 +68,52 @@ const getFilesCountStatus = asyncHandler(async (req, res) => {
   });
 });
 
+const getRejectedCountStatus = asyncHandler(async (req, res) => {
+  // let sql = `
+  //     SELECT COUNT(*) AS rejectsCountStatus
+  //     FROM leads
+  //     WHERE leadInternalStatus = 10,14,15
+  // `;
+  let sql = `
+    SELECT COUNT(*) AS rejectsCountStatus
+    FROM leads
+    WHERE leadInternalStatus IN (10, 14, 15)
+`;
+
+  const filtersQuery = handleGlobalFilters(req.query);
+  sql += filtersQuery;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    const rejectsCountStatus = result[0].rejectsCountStatus;
+    res.status(200).send(String(rejectsCountStatus));
+  });
+});
+const getLoginsCountStatus = asyncHandler(async (req, res) => {
+ 
+  let sql = `
+    SELECT COUNT(*) AS loginsCountStatus
+    FROM leads
+    WHERE leadInternalStatus IN (11, 12)
+`;
+
+  const filtersQuery = handleGlobalFilters(req.query);
+  sql += filtersQuery;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    const loginsCountStatus = result[0].loginsCountStatus;
+    res.status(200).send(String(loginsCountStatus));
+  });
+});
+
+
 const getPartialCountStatus = asyncHandler(async (req, res) => {
   let sql = `
       SELECT COUNT(*) AS partialCountStatus
@@ -554,4 +600,6 @@ module.exports = {
   getDaywiseLeadsCount,
   getDaywiseCallBacksCount,
   getCallbackCountStatus,
+  getRejectedCountStatus,
+  getLoginsCountStatus
 };
