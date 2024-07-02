@@ -93,7 +93,6 @@ const getRejectedCountStatus = asyncHandler(async (req, res) => {
   });
 });
 const getLoginsCountStatus = asyncHandler(async (req, res) => {
- 
   let sql = `
     SELECT COUNT(*) AS loginsCountStatus
     FROM leads
@@ -113,7 +112,6 @@ const getLoginsCountStatus = asyncHandler(async (req, res) => {
   });
 });
 
-
 const getPartialCountStatus = asyncHandler(async (req, res) => {
   let sql = `
       SELECT COUNT(*) AS partialCountStatus
@@ -130,6 +128,44 @@ const getPartialCountStatus = asyncHandler(async (req, res) => {
     }
     const partialCountStatus = result[0].partialCountStatus;
     res.status(200).send(String(partialCountStatus));
+  });
+});
+
+const getApprovalsCountStatus = asyncHandler(async (req, res) => {
+  let sql = `
+      SELECT COUNT(*) AS approvalCountStatus
+      FROM leads
+      WHERE leadInternalStatus = 7
+  `;
+  const filtersQuery = handleGlobalFilters(req.query);
+  sql += filtersQuery;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    const approvalCountStatus = result[0].approvalCountStatus;
+    res.status(200).send(String(approvalCountStatus));
+  });
+});
+
+const getDisbursalsCountStatus = asyncHandler(async (req, res) => {
+  let sql = `
+      SELECT COUNT(*) AS disbursalsCountStatus
+      FROM leads
+      WHERE leadInternalStatus = 8
+  `;
+  const filtersQuery = handleGlobalFilters(req.query);
+  sql += filtersQuery;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    const disbursalsCountStatus = result[0].disbursalsCountStatus;
+    res.status(200).send(String(disbursalsCountStatus));
   });
 });
 
@@ -354,12 +390,12 @@ const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getFullYear(),
     currentDate.getMonth() - 5,
     1
-  ); // Subtract 5 months to get the start date of the last 6 months
+  ); 
   const lastMonthEndDate = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
     0
-  ); // End date is the last day of the current month
+  );
   let sql = `
       SELECT 
           YEAR(createdOn) AS year,
@@ -385,14 +421,12 @@ const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
         res.status(500).send("Internal Server Error");
         return;
       }
-      // Process the query result to structure the data into a list
       const last6MonthsLeadCountList = [];
       result.forEach((row) => {
         const year = row.year;
         const month = row.month;
         const leadCount = row.leadCount;
-        // Add entry to the list
-        const monthName = monthNames[month - 1]; // Adjust the index since month numbers start from 1
+        const monthName = monthNames[month - 1];
         const newEntry = {
           year: year,
           month: monthName,
@@ -410,12 +444,12 @@ const getLast6MonthsCallBacksCount = asyncHandler(async (req, res) => {
     currentDate.getFullYear(),
     currentDate.getMonth() - 6,
     1
-  ); // Start date is 6 months ago
+  ); 
   const lastMonthEndDate = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
     0
-  ); // End date is the last day of the current month
+  ); 
   let sql = `
       SELECT 
           COUNT(*) AS count
@@ -444,8 +478,8 @@ const getLastYearLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getFullYear() - 1,
     currentDate.getMonth(),
     1
-  ); // Start date is 1 year ago from the current month
-  const lastYearEndDate = new Date(currentDate.getFullYear() - 1, 11, 31); // End date is the last day of the last year
+  ); 
+  const lastYearEndDate = new Date(currentDate.getFullYear() - 1, 11, 31); 
   let sql = `
       SELECT 
           COUNT(*) AS leadCount
@@ -601,5 +635,7 @@ module.exports = {
   getDaywiseCallBacksCount,
   getCallbackCountStatus,
   getRejectedCountStatus,
-  getLoginsCountStatus
+  getLoginsCountStatus,
+  getApprovalsCountStatus,
+  getDisbursalsCountStatus,
 };

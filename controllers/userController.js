@@ -8,20 +8,16 @@ const userLogin = asyncHandler(async (req, res) => {
     res.status(400).send("Please Enter Username and Password");
   }
   const sql = `SELECT * FROM users WHERE email = "${username}" OR name = "${username}"`;
-  //console.log("correct")
   dbConnect.query(sql, async (err, result) => {
     if (err) {
-      //throw err;
       console.log("adminlogin error in controller");
     }
-    // console.log(result)
     if (
       result &&
       result.length == 1 &&
       (await bcrypt.compare(password, result[0].password))
     ) {
       const user = result[0];
-      //console.log(result);
       const accessToken = jwt.sign(
         {
           user: user,
@@ -29,8 +25,6 @@ const userLogin = asyncHandler(async (req, res) => {
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "10h" }
       );
-      // console.log(user);
-      //console.log(accessToken);
       res.status(200).json({ accessToken });
     } else {
       res.status(401).send("Username or Password Incorrect");

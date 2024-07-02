@@ -16,7 +16,6 @@ const getLeadsCount = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("getLeadsCount error in controller");
     }
     const leadsCount = result[0]["leadsCount"];
@@ -32,11 +31,9 @@ const getLeads = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("getLeads Error in controller");
     }
     result = parseNestedJSON(result);
-    // console.log(result)
     res.status(200).send(result);
   });
 });
@@ -47,7 +44,6 @@ const getLeadSources = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("getLeadUSoucres error in controller");
     }
     result = parseNestedJSON(result);
@@ -61,7 +57,6 @@ const getLeadUsers = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("getLeadUsers error in controller");
     }
     result = parseNestedJSON(result);
@@ -75,7 +70,6 @@ const getLeadById = asyncHandler((req, res) => {
       console.log("getLeadById error in controller");
     }
     result = parseNestedJSON(result);
-    //console.log(result)
     res.status(200).send(result);
   });
 });
@@ -200,7 +194,7 @@ const calculateDscrRatio = asyncHandler((req, res) => {
   const {
     profitaftertaxAy1,
     depreciationAy1,
-    
+
     directorsRemuAy1,
     partnerRemuAy1,
     partnerInterestAy1,
@@ -213,26 +207,18 @@ const calculateDscrRatio = asyncHandler((req, res) => {
   let numerator = 0;
 
   if (directorsRemuAy1) {
-    numerator =
-      profitaftertaxAy1 +
-      depreciationAy1 +
-     
-      directorsRemuAy1;
+    numerator = profitaftertaxAy1 + depreciationAy1 + directorsRemuAy1;
   } else if (partnerRemuAy1 && partnerInterestAy1) {
     numerator =
-      profitaftertaxAy1 +
-      depreciationAy1 +
-     
-      partnerRemuAy1 +
-      partnerInterestAy1;
+      profitaftertaxAy1 + depreciationAy1 + partnerRemuAy1 + partnerInterestAy1;
   } else {
-    numerator = profitaftertaxAy1 + depreciationAy1 ;
-   
+    numerator = profitaftertaxAy1 + depreciationAy1;
   }
 
   const denominator = (totalEmi + proposedEmi + odCcInterestAy1) * monthsAy1;
-  const resultFirstYear = denominator !== 0 ? (numerator / denominator).toFixed(2) : 0;
-  
+  const resultFirstYear =
+    denominator !== 0 ? (numerator / denominator).toFixed(2) : 0;
+
   const updateClause = updateClauseHandler(req.body);
   const extendedUpdateClause = `${updateClause},  resultFirstYear=${resultFirstYear}`;
   const sql = `
@@ -395,19 +381,13 @@ const createLead = asyncHandler((req, res) => {
 
         const createClause = createClauseHandler(req.body);
         const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-
-        // Execute the SQL query to insert data into the "leads" table
         dbConnect.query(sql, (err, result) => {
           if (err) {
             console.error("Error inserting data into leads table:", err);
             res.status(500).send("Internal server error");
             return;
           }
-
-          // Construct the SQL query for inserting the id into the "leaddocuments" table
           const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
-
-          // Execute the SQL query to insert the id into the "leaddocuments" table
           dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
             if (leaddocumentsErr) {
               console.error(
@@ -419,9 +399,8 @@ const createLead = asyncHandler((req, res) => {
                 .send(`Failed to insert id ${id} into leaddocuments table`);
               return;
             }
-
             console.log("ID inserted into leaddocuments successfully:", id);
-            res.status(200).send(true); // Send response after both insertions are complete
+            res.status(200).send(true); 
           });
         });
       }
@@ -618,7 +597,6 @@ const updateLead = asyncHandler((req, res) => {
   const sql = `UPDATE leads SET ${updateClause} WHERE id = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("updateLead error in controller");
     }
     res.status(200).send(result);
@@ -629,7 +607,6 @@ const deleteLead = asyncHandler((req, res) => {
   const sql = `DELETE FROM leads WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("deleteLead error in controller");
     }
     res.status(200).send("Lead Deleted Successfully");
@@ -639,12 +616,9 @@ const deleteLead = asyncHandler((req, res) => {
 const changeLeadStatus = asyncHandler((req, res) => {
   const id = req.params.leadId;
   const statusId = req.params.statusId;
-  // console.log(id);
-  // console.log(statusId);
   const createSql = `SELECT * FROM leads WHERE id = ${id}`;
   dbConnect.query(createSql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("changeLeadStatus error in controller");
     }
     if (result && result[0] && statusId) {
@@ -656,7 +630,6 @@ const changeLeadStatus = asyncHandler((req, res) => {
       const sql = `UPDATE leads SET ${updateClause} WHERE id = ${id}`;
       dbConnect.query(sql, (err, result) => {
         if (err) {
-          // throw err;
           console.log("changeLeadStatus error in controller");
         }
         res.status(200).send(true);
@@ -693,5 +666,4 @@ module.exports = {
   calculateBalanceSheet,
   calculateDscrRatio,
   calculateBTOProgram,
-
 };

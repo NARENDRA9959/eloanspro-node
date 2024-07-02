@@ -16,7 +16,7 @@ const {
   calculateBalanceSheet,
   calculateGstProgram,
   calculateBTOProgram,
- 
+
   calculateDscrRatio,
 } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
@@ -35,8 +35,6 @@ router
 
 router.route("/users").get(validateToken, getLeadUsers);
 
-
-
 router
   .route("/documents/:leadId")
   .get(validateToken, getLeadDocumentsById)
@@ -53,7 +51,6 @@ router
 router.route("/balancesheet/:leadId").put(validateToken, calculateBalanceSheet);
 router.route("/btoprogram/:leadId").put(validateToken, calculateBTOProgram);
 router.route("/dscrratio/:leadId").put(validateToken, calculateDscrRatio);
-
 
 router
   .route("/:id")

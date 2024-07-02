@@ -12,15 +12,12 @@ const { generateRandomNumber } = require("../middleware/valueGenerator");
 const getBankDocumentsCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as bankDocumentsCount FROM bankdocuments";
   const filtersQuery = handleGlobalFilters(req.query, true);
-  //console.log(filtersQuery)
   sql += filtersQuery;
-  //console.log(sql);
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getBankDocumentsCount error");
     }
     const bankDocumentsCount = result[0]["bankDocumentsCount"];
-    //console.log(bankDocumentsCount)
     res.status(200).send(String(bankDocumentsCount));
   });
 });

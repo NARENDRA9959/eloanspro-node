@@ -34,15 +34,13 @@ let leadUsersData = []; // Define a variable to store lead users
 
 const createUsers = asyncHandler(async (req, res) => {
   let userId = "U-" + generateRandomNumber(6);
-  let phoneNumber = req.body.phone; // Assuming phone number is in the request body
-  //console.log(phoneNumber);
-  let encryptedPassword = await bcrypt.hash(phoneNumber, 12); // Hashing the phone number
+  let phoneNumber = req.body.phone;
+  let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
 
   req.body["userId"] = userId;
   req.body["userInternalStatus"] = 1;
   req.body["lastUserInternalStatus"] = 1;
-  req.body["password"] = encryptedPassword; // Setting the hashed phone number as password
-  //console.log(encryptedPassword);
+  req.body["password"] = encryptedPassword;
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
 
@@ -57,16 +55,9 @@ const createUsers = asyncHandler(async (req, res) => {
 });
 const updateUsers = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  let phoneNumber = req.body.phone.toString(); // Assuming phone number is in the request body
-  //console.log(phoneNumber);
-  let encryptedPassword = await bcrypt.hash(phoneNumber, 12); // Hashing the phone number
-  req.body["password"] = encryptedPassword; // Setting the hashed phone number as password
-
-  // const checkRequiredFields = handleRequiredFields("users", req.body);
-  // if (!checkRequiredFields) {
-  //   res.status(422).send("Please Fill all required fields");
-  //   return;
-  // }
+  let phoneNumber = req.body.phone.toString();
+  let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
+  req.body["password"] = encryptedPassword;
   const updateClause = updateClauseHandler(req.body);
   const sql = `UPDATE users SET ${updateClause} WHERE id = ${id}`;
   dbConnect.query(sql, (err, result) => {
@@ -78,12 +69,10 @@ const updateUsers = asyncHandler(async (req, res) => {
   });
 });
 
-
 const deleteUsers = asyncHandler((req, res) => {
   const sql = `DELETE FROM users WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("deleteusers error in controller");
     }
     res.status(200).send("users Deleted Successfully");
@@ -93,7 +82,6 @@ const getUsersById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM users WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("getUsersById error in controller");
     }
     result = parseNestedJSON(result[0]);
@@ -108,7 +96,6 @@ const getUsers = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("getUsers Error in controller");
     }
     leadUsersData = parseNestedJSON(result);
@@ -163,10 +150,7 @@ const exportLeads = asyncHandler(async (req, res) => {
 
 const getSourceName = async (userId) => {
   try {
-    //console.log(leadUsersData)
-    //console.log(userId)
     const leadUser = leadUsersData.find((user) => user.id == userId);
-    //console.log(leadUser)
     return leadUser ? leadUser.name : "";
   } catch (error) {
     console.error("Error getting sourcedBy names:", error);
@@ -219,14 +203,12 @@ const getUsersCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as usersCount FROM users";
   const filtersQuery = handleGlobalFilters(req.query, true);
   sql += filtersQuery;
-  //console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("Error in getUsersCount:", err);
       res.status(500).send("Internal Server Error");
     } else {
       const usersCount = result[0]["usersCount"];
-      //console.log(usersCount);
       res.status(200).send(String(usersCount));
     }
   });
@@ -238,7 +220,6 @@ const getUserRoles = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("getUserRoles Error in Controller");
     }
     result = parseNestedJSON(result);
@@ -249,8 +230,6 @@ const getUserRoles = asyncHandler(async (req, res) => {
 const updateUserStatus = asyncHandler(async (req, res) => {
   const userId = req.params.userId;
   const { status } = req.body;
-
-  // Update user status in the database
   const sql = "UPDATE users SET status = ? WHERE id = ?";
   dbConnect.query(sql, [status, userId], (err, result) => {
     if (err) {

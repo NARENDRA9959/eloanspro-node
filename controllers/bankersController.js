@@ -12,22 +12,21 @@ const { generateRandomNumber } = require("../middleware/valueGenerator");
 const getBankersCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as bankersCount FROM bankers";
   const filtersQuery = handleGlobalFilters(req.query, true);
-  //console.log(filtersQuery)
   sql += filtersQuery;
-  //console.log(sql);
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getBankersCount error");
     }
     const bankersCount = result[0]["bankersCount"];
-    //console.log(bankersCount)
     res.status(200).send(String(bankersCount));
   });
 });
 
 const getBankers = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM bankers";
-  const filtersQuery = handleGlobalFilters(req.query);
+  const queryParams = req.query;
+  queryParams["sort"] = "createdOn";
+  const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
@@ -35,6 +34,25 @@ const getBankers = asyncHandler(async (req, res) => {
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
+  });
+});
+
+const getBanks = asyncHandler(async (req, res) => {
+  let sql = "SELECT id, name, imageFiles AS imageUrl FROM bankers";
+  const filtersQuery = handleGlobalFilters(req.body); // Assuming handleGlobalFilters is defined elsewhere
+  sql += filtersQuery;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("getBankers error:", err);
+      return res.status(500).send("Error retrieving bankers");
+    }
+    const transformedResult = result.map((bank) => ({
+      ...bank,
+      imageUrl: JSON.parse(bank.imageUrl),
+      selected: false,
+      
+    }));
+    res.status(200).send(transformedResult);
   });
 });
 
@@ -49,67 +67,57 @@ const getBankersById = asyncHandler((req, res) => {
   });
 });
 
-const createBanker = asyncHandler((req, res) => {
-  let bankerId = "B-" + generateRandomNumber(6);
-  req.body["bankerId"] = bankerId;
-  req.body["bankerInternalStatus"] = 1;
-  req.body["lastBankerInternalStatus"] = 1;
-
-  const createClause = createClauseHandler(req.body);
-  const sql = `INSERT INTO bankers (${createClause[0]}) VALUES (${createClause[1]})`;
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.log("createBanker error:");
-    }
-    res.status(200).send(true);
-  });
-});
-
 // const createBanker = asyncHandler((req, res) => {
-//   const name = req.body.name;
-//   const bankerId = "B-" + generateRandomNumber(6);
+//   let bankerId = "B-" + generateRandomNumber(6);
 //   req.body["bankerId"] = bankerId;
 //   req.body["bankerInternalStatus"] = 1;
 //   req.body["lastBankerInternalStatus"] = 1;
-
-//   // Check if banker with the same bank name exists
-//   const checkIfExistsSql = `SELECT * FROM bankers WHERE name = ?`;
-//   dbConnect.query(checkIfExistsSql, [name], (err, rows) => {
+//   console.log(req)
+// console.log(req.body)
+//   const createClause = createClauseHandler(req.body);
+//   console.log(createClause)
+//   const sql = `INSERT INTO bankers (${createClause[0]}) VALUES (${createClause[1]})`;
+//   dbConnect.query(sql, (err, result) => {
 //     if (err) {
-//       console.log("Error checking if banker exists:", err);
-//       return res.status(500).send(false);
+//       console.log("createBanker error:");
 //     }
-
-//     if (rows && rows.length > 0) {
-//       // Banker with the same bank name exists, update the existing record
-//       const existingBanker = rows[0];
-//       const updatedBanker = { ...existingBanker, ...req.body }; // Merge existing and new data
-//       delete updatedBanker.id; // Remove id field from update data
-
-//       const updateClause = updateClauseHandler(updatedBanker);
-
-//       const updateSql = `UPDATE bankers SET ${updateClause} WHERE name = ?`;
-//       dbConnect.query(updateSql, [name], (updateErr, updateResult) => {
-//         if (updateErr) {
-//           console.log("Error updating banker:", updateErr);
-//           return res.status(500).send(false);
-//         }
-//         res.status(200).send(true); // Successfully updated
-//       });
-//     } else {
-//       // Banker with the same bank name does not exist, insert new record
-//       const createClause = createClauseHandler(req.body);
-//       const insertSql = `INSERT INTO bankers (${createClause[0]}) VALUES (${createClause[1]})`;
-//       dbConnect.query(insertSql, (insertErr, result) => {
-//         if (insertErr) {
-//           console.log("Error creating banker:", insertErr);
-//           return res.status(500).send(false);
-//         }
-//         res.status(200).send(true); // Successfully inserted
-//       });
-//     }
+//     res.status(200).send(true);
 //   });
 // });
+
+const createBanker = asyncHandler((req, res) => {
+  try {
+    let bankerId = "B-" + generateRandomNumber(6);
+    req.body["bankerId"] = bankerId;
+    req.body["bankerInternalStatus"] = 1;
+    req.body["lastBankerInternalStatus"] = 1;
+    console.log("Request Body:", req.body);
+    const checkSql = `SELECT * FROM bankers WHERE name = ?`;
+    dbConnect.query(checkSql, [req.body.name], (checkErr, checkResult) => {
+      if (checkErr) {
+        console.error("createBanker check error:", checkErr);
+        return res.status(500).send({ error: "Database check error" });
+      }
+
+      if (checkResult.length > 0) {
+        return res.status(400).send("Bank name already exists!!!");
+      }
+      const createClause = createClauseHandler(req.body);
+      console.log("Generated SQL Clause:", createClause);
+      const insertSql = `INSERT INTO bankers (${createClause[0]}) VALUES (${createClause[1]})`;
+      dbConnect.query(insertSql, (err, result) => {
+        if (err) {
+          console.error("createBanker insertion error:", err);
+          return res.status(500).send({ error: "Database insertion error" });
+        }
+        res.status(200).send(true);
+      });
+    });
+  } catch (error) {
+    console.error("createBanker unexpected error:", error);
+    res.status(500).send({ error: "Unexpected server error" });
+  }
+});
 
 const updateBanker = asyncHandler((req, res) => {
   const id = req.params.id;
@@ -170,6 +178,7 @@ module.exports = {
   getBankersCount,
   getBankersById,
   createBanker,
+  getBanks,
   updateBanker,
   deleteBanker,
   changeBankersStatus,

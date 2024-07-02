@@ -11,7 +11,7 @@ const {
   getUserRoles,
   updateUserStatus,
   getActiveUsers,
-  exportLeads
+  exportLeads,
 } = require("../controllers/teamController");
 const validateToken = require("../middleware/validateTokenHandler");
 

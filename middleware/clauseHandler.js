@@ -15,6 +15,30 @@ const createClauseHandler = (body) => {
   return [columns, values];
 };
 
+// const createClauseHandler = (body) => {
+//   const columns = Object.keys(body).join(", ");
+//   const values = Object.keys(body)
+//     .map((key) => {
+//       if (Array.isArray(body[key])) {
+//         const arrayValues = JSON.stringify(
+//           body[key].map((value) => {
+//             if (typeof value === 'string') {
+//               return value.replace(/\\/g, "/");
+//             } else {
+//               return value; // return non-string values as is
+//             }
+//           })
+//         );
+//         return `'${arrayValues}'`;
+//       } else {
+//         // Handle non-array values
+//         return `"${body[key]}"`;
+//       }
+//     })
+//     .join(", ");
+//   return [columns, values];
+// };
+
 const updateClauseHandler = (body) => {
   // return Object.keys(body).map(key => `${key} = "${body[key]}"`).join(', ');
   return Object.keys(body)
@@ -46,5 +70,35 @@ const updateClauseHandler = (body) => {
     })
     .join(", ");
 };
+
+// const updateClauseHandler = (body) => {
+//   return Object.keys(body)
+//     .map((key) => {
+//       if (Array.isArray(body[key])) {
+//         const arrayValues = JSON.stringify(
+//           body[key].map((value) => {
+//             if (typeof value == "object") {
+//               for (let keyElement in value) {
+//                 if (Array.isArray(value[keyElement])) {
+//                   value[keyElement] = value[keyElement].map((valueElement) =>
+//                     valueElement ? valueElement.replace(/\\/g, "/") : valueElement
+//                   );
+//                 } else {
+//                   value[keyElement] = value[keyElement] ? value[keyElement].replace(/\\/g, "/") : value[keyElement];
+//                 }
+//               }
+//             } else {
+//               value = value ? value.replace(/\\/g, "/") : value;
+//             }
+//             return value;
+//           })
+//         );
+//         return `${key} = '${arrayValues}'`;
+//       } else {
+//         return `${key} = "${body[key]}"`;
+//       }
+//     })
+//     .join(", ");
+// };
 
 module.exports = { createClauseHandler, updateClauseHandler };

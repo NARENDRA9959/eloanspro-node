@@ -17,7 +17,6 @@ const getLenders = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("getLenders Error in controller");
     }
     result = parseNestedJSON(result);
@@ -29,14 +28,12 @@ const getLendersCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as lendersCount FROM lenders";
   const filtersQuery = handleGlobalFilters(req.query, true);
   sql += filtersQuery;
-  //console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("Error in getLendersCount:", err);
       res.status(500).send("Internal Server Error");
     } else {
       const lendersCount = result[0]["lendersCount"];
-      //console.log(lendersCount);
       res.status(200).send(String(lendersCount));
     }
   });
@@ -49,7 +46,6 @@ const getLenderById = asyncHandler((req, res) => {
       console.log("getLenderById error in controller");
     }
     result = parseNestedJSON(result);
-    //console.log(result)
     res.status(200).send(result);
   });
 });
@@ -60,7 +56,6 @@ const createLender = asyncHandler((req, res) => {
   req.body["lenderInternalStatus"] = 1;
   req.body["lastlenderInternalStatus"] = 1;
   req.body["createdBy"] = req.user.name;
-
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO lenders (${createClause[0]}) VALUES (${createClause[1]})`;
   dbConnect.query(sql, (err, result) => {
@@ -73,7 +68,6 @@ const createLender = asyncHandler((req, res) => {
 
 const updatelenders = asyncHandler((req, res) => {
   const id = req.params.id;
-  
   const updateClause = updateClauseHandler(req.body);
   const sql = `UPDATE lenders SET ${updateClause} WHERE id = ${id}`;
   dbConnect.query(sql, (err, result) => {
@@ -83,7 +77,6 @@ const updatelenders = asyncHandler((req, res) => {
     res.status(200).send(result);
   });
 });
-
 const changeLenderStatus = asyncHandler((req, res) => {
   const id = req.params.lenderId;
   const statusId = req.params.statusId;
