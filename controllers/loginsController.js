@@ -58,26 +58,33 @@ const createLogin = asyncHandler((req, res) => {
 const getDistinctLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctLeadIds();
+
+    if (distinctLeadIds.length === 0) {
+      return res.status(200).json([]); // Return an empty array if there are no distinct lead IDs
+    }
+
     let sql = "SELECT * FROM leads WHERE id IN (?)";
     const queryParams = [distinctLeadIds];
-    queryParams.push(req.query.sort || "createdOn");
     const filtersQuery = handleGlobalFilters(req.query);
     sql += filtersQuery;
+
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching leads:", err);
         res.status(500).json({ error: "Error fetching leads" });
         return;
       }
+
       result = parseNestedJSON(result);
       console.log(result);
       res.status(200).json(result);
     });
   } catch (error) {
-    console.error("Error in getLeads function:", error);
-    res.status(500).json({ error: "Error in getLeads function" });
+    console.error("Error in getDistinctLeads function:", error);
+    res.status(500).json({ error: "Error in getDistinctLeads function" });
   }
 });
+
 async function fetchDistinctLeadIds() {
   const sql = "SELECT DISTINCT leadId FROM logins";
   return new Promise((resolve, reject) => {
@@ -86,11 +93,13 @@ async function fetchDistinctLeadIds() {
         reject(err);
         return;
       }
+
       const leadIds = result.map((row) => row.leadId);
       resolve(leadIds);
     });
   });
 }
+
 
 const getDistinctLeadCount = asyncHandler(async (req, res) => {
   try {
