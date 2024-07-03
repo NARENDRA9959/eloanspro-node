@@ -1,43 +1,43 @@
-const createClauseHandler = (body) => {
-  const columns = Object.keys(body).join(", ");
-  const values = Object.keys(body)
-    .map((key) => {
-      if (Array.isArray(body[key])) {
-        const arrayValues = JSON.stringify(
-          body[key].map((value) => value.replace(/\\/g, "/"))
-        );
-        return `'${arrayValues}'`;
-      } else {
-        return `"${body[key]}"`;
-      }
-    })
-    .join(", ");
-  return [columns, values];
-};
-
 // const createClauseHandler = (body) => {
 //   const columns = Object.keys(body).join(", ");
 //   const values = Object.keys(body)
 //     .map((key) => {
 //       if (Array.isArray(body[key])) {
 //         const arrayValues = JSON.stringify(
-//           body[key].map((value) => {
-//             if (typeof value === 'string') {
-//               return value.replace(/\\/g, "/");
-//             } else {
-//               return value; // return non-string values as is
-//             }
-//           })
+//           body[key].map((value) => value.replace(/\\/g, "/"))
 //         );
 //         return `'${arrayValues}'`;
 //       } else {
-//         // Handle non-array values
 //         return `"${body[key]}"`;
 //       }
 //     })
 //     .join(", ");
 //   return [columns, values];
 // };
+
+const createClauseHandler = (body) => {
+  const columns = Object.keys(body).join(", ");
+  const values = Object.keys(body)
+    .map((key) => {
+      if (Array.isArray(body[key])) {
+        const arrayValues = JSON.stringify(
+          body[key].map((value) => {
+            if (typeof value === 'string') {
+              return value.replace(/\\/g, "/");
+            } else {
+              return value; // return non-string values as is
+            }
+          })
+        );
+        return `'${arrayValues}'`;
+      } else {
+        // Handle non-array values
+        return `"${body[key]}"`;
+      }
+    })
+    .join(", ");
+  return [columns, values];
+};
 
 const updateClauseHandler = (body) => {
   // return Object.keys(body).map(key => `${key} = "${body[key]}"`).join(', ');
