@@ -35,25 +35,21 @@ const createDscrTable = asyncHandler(async (req, res) => {
 
 const createleadDocumentsTable = asyncHandler(async (req, res) => {
   const { id } = req.body;
-  const createdBy = req.user.name;
+  console.log(req)
+  console.log(req.body)
+  console.log(id);
   const checkQuery = `SELECT * FROM leaddocuments WHERE leadId = ?`;
   dbConnect.query(checkQuery, [id], (checkErr, checkResult) => {
     if (checkErr) {
-      console.error(
-        "Error checking existing id in leaddocuments table:",
-        checkErr
-      );
+      console.error("Error checking existing id in leaddocuments table:", checkErr);
       return res.status(500).send("Internal server error");
     }
     if (checkResult.length > 0) {
-      return res
-        .status(200)
-        .send(
-          `ID ${id} already exists in leaddocuments table just upload the files `
-        );
+      return res.status(200).send(`ID ${id} already exists in leaddocuments table. Just upload the files.`);
     }
+
     const sql = `INSERT INTO leaddocuments (leadId) VALUES (?)`;
-    dbConnect.query(sql, [id, createdBy], (err, result) => {
+    dbConnect.query(sql, [id], (err, result) => {
       if (err) {
         console.error("Error inserting data into leaddocuments table:", err);
         return res.status(500).send("Internal server error");
@@ -63,6 +59,7 @@ const createleadDocumentsTable = asyncHandler(async (req, res) => {
     });
   });
 });
+
 // const createLoginInfoTable = asyncHandler(async (req, res) => {
 //   const { id } = req.body;
 //   const createdBy = req.user.name;
