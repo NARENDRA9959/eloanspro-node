@@ -319,7 +319,7 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
 
     if (distinctLeadIds.length === 0) {
       // If no lead IDs are found, return a 404 Not Found response
-      res.status(404).json({ message: "No approved leads found" });
+      res.status(404).send("No approved leads found" );
       return;
     }
 
