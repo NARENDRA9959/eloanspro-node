@@ -96,7 +96,7 @@ const getLoginsCountStatus = asyncHandler(async (req, res) => {
   let sql = `
     SELECT COUNT(*) AS loginsCountStatus
     FROM leads
-    WHERE leadInternalStatus IN (11, 12)
+    WHERE leadInternalStatus IN (11)
 `;
 
   const filtersQuery = handleGlobalFilters(req.query);

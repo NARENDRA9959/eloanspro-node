@@ -13,6 +13,12 @@ const {
   getDisbursalLeadCount,
   getDisbursalsDetailsById,
   updateDisbursalDetails,
+  getBankRejectsLeads,
+  getBankRejectedLeadCount,
+  getCNIRejectsLeads,
+  getCNIRejectedLeadCount,
+  getBankRejectsDetailsById,
+  getCNIRejectsDetailsById
 } = require("../controllers/loginsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -24,14 +30,29 @@ router
 
 router.route("/approvals").get(validateToken, getApprovalsLeads);
 router.route("/disbursals").get(validateToken, getDisbursalLeads);
+router.route("/bankRejects").get(validateToken, getBankRejectsLeads);
+router.route("/cniRejects").get(validateToken, getCNIRejectsLeads);
+
 router.route("/total").get(validateToken, getDistinctLeadCount);
 router.route("/approvalCount").get(validateToken, getApprovedLeadCount);
+router.route("/rejectedCount").get(validateToken, getBankRejectedLeadCount);
+router.route("/cniCount").get(validateToken, getCNIRejectedLeadCount);
+
+
 router.route("/disbursalCount").get(validateToken, getDisbursalLeadCount);
 
 router
   .route("/fipDetails/:leadId")
   .get(validateToken, getFIPDetailsById)
   .put(validateToken, updateFIPDetails);
+
+  router
+  .route("/bankRejected/:leadId")
+  .get(validateToken, getBankRejectsDetailsById);
+
+  router
+  .route("/cniRejected/:leadId")
+  .get(validateToken, getCNIRejectsDetailsById);
 router
   .route("/approved/:leadId")
   .get(validateToken, getApprovalsDetailsById)
