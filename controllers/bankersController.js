@@ -91,6 +91,7 @@ const createBanker = asyncHandler((req, res) => {
     req.body["bankerId"] = bankerId;
     req.body["bankerInternalStatus"] = 1;
     req.body["lastBankerInternalStatus"] = 1;
+    req.body["lastUpdatedBy"] = req.user.name;
     console.log("Request Body:", req.body);
     const checkSql = `SELECT * FROM bankers WHERE name = ?`;
     dbConnect.query(checkSql, [req.body.name], (checkErr, checkResult) => {
