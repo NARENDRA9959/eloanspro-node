@@ -319,8 +319,7 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
 
     if (distinctLeadIds.length === 0) {
       // If no lead IDs are found, return a 404 Not Found response
-      res.status(404).send("No approved leads found" );
-      return;
+      return res.status(200).json([]);
     }
 
     let sql = `
@@ -340,10 +339,6 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
         return;
       }
 
-      if (result.length === 0) {
-        res.status(404).json({ message: "No leads found" });
-        return;
-      }
 
       result = parseNestedJSON(result); // Assuming this function parses nested JSON in the result
       console.log(result);
