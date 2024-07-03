@@ -316,6 +316,13 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
 const getApprovalsLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctApprovedLeadIds();
+
+    if (distinctLeadIds.length === 0) {
+      // If no lead IDs are found, return a 404 Not Found response
+      res.status(404).json({ message: "No approved leads found" });
+      return;
+    }
+
     let sql = `
       SELECT *
       FROM leads
@@ -332,6 +339,12 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
         res.status(500).json({ error: "Error fetching approval details" });
         return;
       }
+
+      if (result.length === 0) {
+        res.status(404).json({ message: "No leads found" });
+        return;
+      }
+
       result = parseNestedJSON(result); // Assuming this function parses nested JSON in the result
       console.log(result);
       res.status(200).json(result);
