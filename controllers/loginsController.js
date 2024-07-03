@@ -100,7 +100,6 @@ async function fetchDistinctLeadIds() {
   });
 }
 
-
 const getDistinctLeadCount = asyncHandler(async (req, res) => {
   try {
     const distinctLeadCount = await fetchDistinctLeadCount();
@@ -125,7 +124,6 @@ async function fetchDistinctLeadCount() {
   });
 }
 
-
 const getApprovedLeadCount = asyncHandler(async (req, res) => {
   try {
     const approvedLeadCount = await fetchApprovedLeadCount();
@@ -137,7 +135,8 @@ const getApprovedLeadCount = asyncHandler(async (req, res) => {
 });
 
 async function fetchApprovedLeadCount() {
-  const sql = "SELECT COUNT(DISTINCT leadId) AS leadCount FROM logins WHERE fipStatus = 'approved'";
+  const sql =
+    "SELECT COUNT(DISTINCT leadId) AS leadCount FROM logins WHERE fipStatus = 'approved'";
   return new Promise((resolve, reject) => {
     dbConnect.query(sql, (err, result) => {
       if (err) {
@@ -161,7 +160,8 @@ const getDisbursalLeadCount = asyncHandler(async (req, res) => {
 });
 
 async function fetchDisbursalLeadCount() {
-  const sql = "SELECT COUNT(DISTINCT leadId) AS leadCount FROM logins WHERE approvedStatus = 'disbursed'";
+  const sql =
+    "SELECT COUNT(DISTINCT leadId) AS leadCount FROM logins WHERE approvedStatus = 'disbursed'";
   return new Promise((resolve, reject) => {
     dbConnect.query(sql, (err, result) => {
       if (err) {
@@ -173,7 +173,6 @@ async function fetchDisbursalLeadCount() {
     });
   });
 }
-
 
 const getFIPDetailsById = asyncHandler((req, res) => {
   console.log(req);
@@ -199,7 +198,7 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
     WHERE leadId = ? AND fipStatus = 'approved'
   `;
   const queryParams = [leadId];
-  
+
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getApprovalsDetailsById error in controller:", err);
@@ -211,7 +210,6 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
   });
 });
 
-
 const getDisbursalsDetailsById = asyncHandler((req, res) => {
   console.log(req);
   const leadId = req.params.leadId;
@@ -221,7 +219,7 @@ const getDisbursalsDetailsById = asyncHandler((req, res) => {
     WHERE leadId = ? AND approvedStatus = 'disbursed'
   `;
   const queryParams = [leadId];
-  
+
   console.log(queryParams);
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
@@ -229,7 +227,7 @@ const getDisbursalsDetailsById = asyncHandler((req, res) => {
       return res.status(500).json({ error: "Error fetching login details" });
     }
     result = result.map(parseNestedJSON);
-    
+
     console.log(result);
     res.status(200).json(result);
   });
@@ -279,9 +277,20 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
   const updates = req.body; // Assuming req.body is an array of objects containing id, program, bankName, lan, sanctionedAmount, disbursedAmount, roi, tenure, approvalDate, approvedStatus, and approvedRemarks
 
   // Define the fields that can be updated
-  const fields = ['program', 'bankName', 'lan', 'sanctionedAmount', 'disbursedAmount', 'roi', 'tenure', 'approvalDate', 'approvedStatus', 'approvedRemarks'];
+  const fields = [
+    "program",
+    "bankName",
+    "lan",
+    "sanctionedAmount",
+    "disbursedAmount",
+    "roi",
+    "tenure",
+    "approvalDate",
+    "approvedStatus",
+    "approvedRemarks",
+  ];
 
-  let sql = 'UPDATE logins SET ';
+  let sql = "UPDATE logins SET ";
   const params = [];
 
   fields.forEach((field, fieldIndex) => {
@@ -292,15 +301,14 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
     });
     sql += `ELSE ${field} END`;
     if (fieldIndex < fields.length - 1) {
-      sql += ', ';
+      sql += ", ";
     }
   });
 
   // Add WHERE clause to specify which rows to update based on id
-  sql += ` WHERE id IN (${updates.map(() => '?').join(', ')})`;
+  sql += ` WHERE id IN (${updates.map(() => "?").join(", ")})`;
   params.push(...updates.map((update) => update.id));
 
- 
   // Execute the SQL query
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
@@ -318,7 +326,6 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
     const distinctLeadIds = await fetchDistinctApprovedLeadIds();
 
     if (distinctLeadIds.length === 0) {
-      // If no lead IDs are found, return a 404 Not Found response
       return res.status(200).json([]);
     }
 
@@ -331,15 +338,12 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
     queryParams.push(req.query.sort || "createdOn");
     const filtersQuery = handleGlobalFilters(req.query);
     sql += filtersQuery;
-
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching approval details:", err);
         res.status(500).json({ error: "Error fetching approval details" });
         return;
       }
-
-
       result = parseNestedJSON(result); // Assuming this function parses nested JSON in the result
       console.log(result);
       res.status(200).json(result);
@@ -368,11 +372,12 @@ async function fetchDistinctApprovedLeadIds() {
   });
 }
 
-
-
 const getDisbursalLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctDisbursedLeadIds();
+    if (distinctLeadIds.length === 0) {
+      return res.status(200).json([]);
+    }
     let sql = `
       SELECT *
       FROM leads
@@ -382,14 +387,13 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
     queryParams.push(req.query.sort || "createdOn");
     const filtersQuery = handleGlobalFilters(req.query);
     sql += filtersQuery;
-
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching disbursal details:", err);
         res.status(500).json({ error: "Error fetching disbursal details" });
         return;
       }
-      result = parseNestedJSON(result); // Assuming this function parses nested JSON in the result
+      result = parseNestedJSON(result);
       console.log(result);
       res.status(200).json(result);
     });
@@ -417,7 +421,6 @@ async function fetchDistinctDisbursedLeadIds() {
   });
 }
 
-
 const updateDisbursalDetails = asyncHandler((req, res) => {
   const updates = req.body; // Assuming req.body is an array of objects containing id, sanctionedLetter, repaymentSchedule
 
@@ -430,19 +433,26 @@ const updateDisbursalDetails = asyncHandler((req, res) => {
     sql += `
       sanctionedLetter = CASE WHEN id = ? THEN ? ELSE sanctionedLetter END,
       repaymentSchedule = CASE WHEN id = ? THEN ? ELSE repaymentSchedule END`;
-    params.push(id, JSON.stringify(sanctionedLetter), id, JSON.stringify(repaymentSchedule));
+    params.push(
+      id,
+      JSON.stringify(sanctionedLetter),
+      id,
+      JSON.stringify(repaymentSchedule)
+    );
     if (index !== updates.length - 1) {
       sql += ", ";
     }
   });
   sql += ` WHERE id IN (${updates.map((update) => "?").join(", ")})`;
   params.push(...updates.map((update) => update.id));
-  console.log(sql); 
-  console.log(params); 
+  console.log(sql);
+  console.log(params);
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateDisbursalDetails error in query:", err);
-      return res.status(500).json({ error: "Error updating disbursal details" });
+      return res
+        .status(500)
+        .json({ error: "Error updating disbursal details" });
     }
 
     console.log(result); // Output the query result for debugging
@@ -450,17 +460,14 @@ const updateDisbursalDetails = asyncHandler((req, res) => {
   });
 });
 
-
-
-
-
-
 //rejects
-
 
 const getBankRejectsLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctBankRejectedLeadIds();
+    if (distinctLeadIds.length === 0) {
+      return res.status(200).json([]);
+    }
     let sql = `
       SELECT *
       FROM leads
@@ -505,20 +512,21 @@ async function fetchDistinctBankRejectedLeadIds() {
   });
 }
 
-
-
 const getBankRejectedLeadCount = asyncHandler(async (req, res) => {
   try {
     const rejectedLeadCount = await fetchBankRejectedLeadCount();
     res.status(200).send(String(rejectedLeadCount));
   } catch (error) {
     console.error("Error in getBankRejectedLeadCount function:", error);
-    res.status(500).json({ error: "Error in getBankRejectedLeadCount function" });
+    res
+      .status(500)
+      .json({ error: "Error in getBankRejectedLeadCount function" });
   }
 });
 
 async function fetchBankRejectedLeadCount() {
-  const sql = "SELECT COUNT(DISTINCT leadId) AS leadCount FROM logins WHERE fipStatus = 'rejected'";
+  const sql =
+    "SELECT COUNT(DISTINCT leadId) AS leadCount FROM logins WHERE fipStatus = 'rejected'";
   return new Promise((resolve, reject) => {
     dbConnect.query(sql, (err, result) => {
       if (err) {
@@ -531,14 +539,12 @@ async function fetchBankRejectedLeadCount() {
   });
 }
 
-
-
-
-
-
 const getCNIRejectsLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctCNIRejectedLeadIds();
+    if (distinctLeadIds.length === 0) {
+      return res.status(200).json([]);
+    }
     let sql = `
       SELECT *
       FROM leads
@@ -583,19 +589,21 @@ async function fetchDistinctCNIRejectedLeadIds() {
   });
 }
 
-
 const getCNIRejectedLeadCount = asyncHandler(async (req, res) => {
   try {
     const cniLeadCount = await fetchCNIRejectedLeadCount();
     res.status(200).send(String(cniLeadCount));
   } catch (error) {
     console.error("Error in getCNIRejectedLeadCount function:", error);
-    res.status(500).json({ error: "Error in getCNIRejectedLeadCount function" });
+    res
+      .status(500)
+      .json({ error: "Error in getCNIRejectedLeadCount function" });
   }
 });
 
 async function fetchCNIRejectedLeadCount() {
-  const sql = "SELECT COUNT(DISTINCT leadId) AS leadCount FROM logins  WHERE approvedStatus = 'cnis'";
+  const sql =
+    "SELECT COUNT(DISTINCT leadId) AS leadCount FROM logins  WHERE approvedStatus = 'cnis'";
   return new Promise((resolve, reject) => {
     dbConnect.query(sql, (err, result) => {
       if (err) {
@@ -608,9 +616,6 @@ async function fetchCNIRejectedLeadCount() {
   });
 }
 
-
-
-
 const getBankRejectsDetailsById = asyncHandler((req, res) => {
   console.log(req);
   const leadId = req.params.leadId;
@@ -620,22 +625,21 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
     WHERE leadId = ? AND fipStatus = 'rejected'
   `;
   const queryParams = [leadId];
-  
+
   console.log(queryParams);
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getBankRejectsDetailsById error in controller:", err);
-      return res.status(500).json({ error: "Error fetching getBankRejectsDetailsById details" });
+      return res
+        .status(500)
+        .json({ error: "Error fetching getBankRejectsDetailsById details" });
     }
     result = result.map(parseNestedJSON);
-    
+
     console.log(result);
     res.status(200).json(result);
   });
 });
-
-
-
 
 const getCNIRejectsDetailsById = asyncHandler((req, res) => {
   console.log(req);
@@ -646,15 +650,17 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
     WHERE leadId = ? AND approvedStatus = 'cnis'
   `;
   const queryParams = [leadId];
-  
+
   console.log(queryParams);
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getCNIRejectsDetailsById error in controller:", err);
-      return res.status(500).json({ error: "Error fetching getCNIRejectsDetailsById details" });
+      return res
+        .status(500)
+        .json({ error: "Error fetching getCNIRejectsDetailsById details" });
     }
     result = result.map(parseNestedJSON);
-    
+
     console.log(result);
     res.status(200).json(result);
   });
@@ -679,5 +685,4 @@ module.exports = {
   getCNIRejectedLeadCount,
   getBankRejectsDetailsById,
   getCNIRejectsDetailsById,
-  
 };

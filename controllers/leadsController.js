@@ -378,7 +378,6 @@ const createLead = asyncHandler((req, res) => {
         req.body["lastLeadInternalStatus"] = 1;
         req.body["createdBy"] = req.user.name;
         req.body["lastUpdatedBy"] = req.user.name;
-
         const createClause = createClauseHandler(req.body);
         const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
         dbConnect.query(sql, (err, result) => {
@@ -387,21 +386,7 @@ const createLead = asyncHandler((req, res) => {
             res.status(500).send("Internal server error");
             return;
           }
-          const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
-          dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
-            if (leaddocumentsErr) {
-              console.error(
-                "Error inserting id into leaddocuments table:",
-                leaddocumentsErr
-              );
-              res
-                .status(500)
-                .send(`Failed to insert id ${id} into leaddocuments table`);
-              return;
-            }
-            console.log("ID inserted into leaddocuments successfully:", id);
-            res.status(200).send(true); 
-          });
+          res.status(200).send(true);
         });
       }
     }

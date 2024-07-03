@@ -25,13 +25,12 @@ const createClauseHandler = (body) => {
             if (typeof value === 'string') {
               return value.replace(/\\/g, "/");
             } else {
-              return value; // return non-string values as is
+              return value; 
             }
           })
         );
         return `'${arrayValues}'`;
       } else {
-        // Handle non-array values
         return `"${body[key]}"`;
       }
     })

@@ -32,7 +32,6 @@ const getLeadCountStatus = asyncHandler(async (req, res) => {
     res.status(200).send(String(leadCountStatus));
   });
 });
-
 const getCallbackCountStatus = asyncHandler(async (req, res) => {
   let sql = "SELECT COUNT(*) AS callbackCountStatus FROM callbacks";
   const queryParams = req.query || {};
@@ -98,7 +97,6 @@ const getLoginsCountStatus = asyncHandler(async (req, res) => {
     FROM leads
     WHERE leadInternalStatus IN (11)
 `;
-
   const filtersQuery = handleGlobalFilters(req.query);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
@@ -390,7 +388,7 @@ const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getFullYear(),
     currentDate.getMonth() - 5,
     1
-  ); 
+  );
   const lastMonthEndDate = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
@@ -444,12 +442,12 @@ const getLast6MonthsCallBacksCount = asyncHandler(async (req, res) => {
     currentDate.getFullYear(),
     currentDate.getMonth() - 6,
     1
-  ); 
+  );
   const lastMonthEndDate = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
     0
-  ); 
+  );
   let sql = `
       SELECT 
           COUNT(*) AS count
@@ -478,8 +476,8 @@ const getLastYearLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getFullYear() - 1,
     currentDate.getMonth(),
     1
-  ); 
-  const lastYearEndDate = new Date(currentDate.getFullYear() - 1, 11, 31); 
+  );
+  const lastYearEndDate = new Date(currentDate.getFullYear() - 1, 11, 31);
   let sql = `
       SELECT 
           COUNT(*) AS leadCount
