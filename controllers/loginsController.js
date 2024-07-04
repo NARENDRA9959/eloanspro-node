@@ -59,7 +59,7 @@ const {
 
 const createLogin = asyncHandler((req, res) => {
   console.log("Request body:", req.body);
-  req.body["createdBy"] = req.user.name;
+ 
   const bankIds = req.body.bankId;
   const bankNames = req.body.Banks;
   delete req.body.bankId;
