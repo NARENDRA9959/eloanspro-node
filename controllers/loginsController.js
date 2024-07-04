@@ -7,6 +7,56 @@ const {
   createClauseHandler,
   updateClauseHandler,
 } = require("../middleware/clauseHandler");
+// const createLogin = asyncHandler((req, res) => {
+//   console.log("Request body:", req.body);
+//   req.body["createdBy"] = req.user.name;
+//   const bankIds = req.body.bankId;
+//   const bankNames = req.body.Banks;
+//   delete req.body.bankId;
+//   delete req.body.Banks;
+//   if (
+//     !Array.isArray(bankIds) ||
+//     bankIds.length === 0 ||
+//     !Array.isArray(bankNames) ||
+//     bankNames.length === 0
+//   ) {
+//     return res
+//       .status(400)
+//       .send("Bank IDs and names are required and should not be empty");
+//   }
+//   if (bankIds.length !== bankNames.length) {
+//     return res.status(400).send("Bank IDs and names array lengths must match");
+//   }
+//   const insertQueries = bankIds.map((bankId, index) => {
+//     const bankName = bankNames[index];
+//     const rowData = { ...req.body, bankId, bankName };
+//     const createClause = createClauseHandler(rowData);
+//     console.log("Row data:", rowData);
+//     console.log("Create clause:", createClause);
+//     return `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
+//   });
+//   console.log("Insert queries:", insertQueries);
+//   let queryPromises = insertQueries.map((query) => {
+//     return new Promise((resolve, reject) => {
+//       dbConnect.query(query, (err, result) => {
+//         if (err) {
+//           return reject(err);
+//         }
+//         resolve(result);
+//       });
+//     });
+//   });
+//   Promise.all(queryPromises)
+//     .then((results) => {
+//       res.status(200).send(true);
+//     })
+//     .catch((err) => {
+//       console.log("createLogin error:", err);
+//       res.status(500).send("Error inserting data");
+//     });
+// });
+
+
 const createLogin = asyncHandler((req, res) => {
   console.log("Request body:", req.body);
   req.body["createdBy"] = req.user.name;
@@ -14,47 +64,53 @@ const createLogin = asyncHandler((req, res) => {
   const bankNames = req.body.Banks;
   delete req.body.bankId;
   delete req.body.Banks;
+
   if (
     !Array.isArray(bankIds) ||
     bankIds.length === 0 ||
     !Array.isArray(bankNames) ||
-    bankNames.length === 0
+    bankNames.length === 0 ||
+    bankIds.length !== bankNames.length
   ) {
     return res
       .status(400)
-      .send("Bank IDs and names are required and should not be empty");
+      .send("Bank IDs and names are required and should be non-empty arrays of the same length");
   }
-  if (bankIds.length !== bankNames.length) {
-    return res.status(400).send("Bank IDs and names array lengths must match");
-  }
+
   const insertQueries = bankIds.map((bankId, index) => {
     const bankName = bankNames[index];
     const rowData = { ...req.body, bankId, bankName };
-    const createClause = createClauseHandler(rowData);
+    const createClause = createClauseHandler(rowData); // Assuming createClauseHandler function exists
+
     console.log("Row data:", rowData);
     console.log("Create clause:", createClause);
-    return `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
+
+    const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
+
+    return query;
   });
+
   console.log("Insert queries:", insertQueries);
-  let queryPromises = insertQueries.map((query) => {
-    return new Promise((resolve, reject) => {
-      dbConnect.query(query, (err, result) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve(result);
-      });
+
+  let completedQueries = 0;
+
+  insertQueries.forEach((query) => {
+    dbConnect.query(query, (err, result) => {
+      if (err) {
+        console.log("createLogin error:", err);
+        res.status(500).send("Error inserting data");
+        return;
+      }
+      console.log("Insert result:", result);
+      completedQueries++;
+      if (completedQueries === insertQueries.length) {
+     
+        res.status(200).send(true);
+      }
     });
   });
-  Promise.all(queryPromises)
-    .then((results) => {
-      res.status(200).send(true);
-    })
-    .catch((err) => {
-      console.log("createLogin error:", err);
-      res.status(500).send("Error inserting data");
-    });
 });
+
 const getDistinctLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctLeadIds();
