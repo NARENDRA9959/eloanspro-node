@@ -510,14 +510,11 @@ const updateDisbursalDetails = asyncHandler((req, res) => {
         .status(500)
         .json({ error: "Error updating disbursal details" });
     }
-
-    console.log(result); // Output the query result for debugging
+    console.log(result); 
     res.status(200).json({ message: "Disbursal details updated successfully" });
   });
 });
-
 //rejects
-
 const getBankRejectsLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctBankRejectedLeadIds();
@@ -721,6 +718,29 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
     res.status(200).json(result);
   });
 });
+
+
+
+const getSanctionedAmountSum = asyncHandler(async (req, res) => {
+  console.log(req)
+  const { leadId } = req.params; 
+  let sql = `
+    SELECT SUM(sanctionedAmount) AS total_sanctioned_amount
+    FROM logins
+    WHERE leadId = ?;
+  `;
+  dbConnect.query(sql, [leadId], (err, result) => {
+    if (err) {
+      console.log("getSanctionedAmountSum error:", err);
+      return res.status(500).send("Error retrieving sanctioned amount sum");
+    }
+    console.log(result)
+    const totalSanctionedAmount = result[0].total_sanctioned_amount;
+   
+    res.status(200).json({ totalSanctionedAmount });
+  });
+});
+
 module.exports = {
   createLogin,
   getDistinctLeads,
@@ -741,4 +761,5 @@ module.exports = {
   getCNIRejectedLeadCount,
   getBankRejectsDetailsById,
   getCNIRejectsDetailsById,
+  getSanctionedAmountSum
 };

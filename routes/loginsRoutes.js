@@ -18,7 +18,8 @@ const {
   getCNIRejectsLeads,
   getCNIRejectedLeadCount,
   getBankRejectsDetailsById,
-  getCNIRejectsDetailsById
+  getCNIRejectsDetailsById,
+  getSanctionedAmountSum
 } = require("../controllers/loginsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -58,6 +59,10 @@ router
   .get(validateToken, getApprovalsDetailsById)
   .put(validateToken, updateApprovalsDetails);
 
+  router
+  .route("/sancAmountSum/:leadId")
+  .get(validateToken, getSanctionedAmountSum);
+  
 router
   .route("/disbursed/:leadId")
   .get(validateToken, getDisbursalsDetailsById)

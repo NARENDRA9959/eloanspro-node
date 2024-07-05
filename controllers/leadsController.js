@@ -598,6 +598,9 @@ const deleteLead = asyncHandler((req, res) => {
   });
 });
 
+
+
+
 const changeLeadStatus = asyncHandler((req, res) => {
   const id = req.params.leadId;
   const statusId = req.params.statusId;
@@ -633,10 +636,33 @@ const changeLeadStatus = asyncHandler((req, res) => {
   });
 });
 
+
+const getCreditSummary = asyncHandler(async (req, res) => {
+  console.log(req)
+
+  const { id } = req.params;
+
+  let sql = `SELECT creditSummary FROM dscr_values WHERE leadId = ?`;
+
+  dbConnect.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('getCreditSummary error:', err);
+      return res.status(500).send('Error retrieving credit summary');
+    }
+    if (result.length === 0) {
+      return res.status(404).send('No Remarks Found ');
+    }
+    const creditSummary = result[0].creditSummary;
+    res.status(200).json({ creditSummary });
+  });
+});
+
+
 module.exports = {
   getLeads,
   getLeadSources,
   getLeadUsers,
+  getCreditSummary,
   getLeadsCount,
   getLeadById,
   getLeadDocumentsById,

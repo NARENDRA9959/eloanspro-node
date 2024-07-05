@@ -37,25 +37,43 @@ const getBankers = asyncHandler(async (req, res) => {
   });
 });
 
+// const getBanks = asyncHandler(async (req, res) => {
+//   let sql = "SELECT id, name, imageFiles AS imageUrl FROM bankers";
+//   const filtersQuery = handleGlobalFilters(req.body); // Assuming handleGlobalFilters is defined elsewhere
+//   sql += filtersQuery;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("getBankers error:", err);
+//       return res.status(500).send("Error retrieving bankers");
+//     }
+//     const transformedResult = result.map((bank) => ({
+//       ...bank,
+//       imageUrl: JSON.parse(bank.imageUrl),
+//       selected: false,
+      
+//     }));
+//     res.status(200).send(transformedResult);
+//   });
+// });
+
 const getBanks = asyncHandler(async (req, res) => {
   let sql = "SELECT id, name, imageFiles AS imageUrl FROM bankers";
-  const filtersQuery = handleGlobalFilters(req.body); // Assuming handleGlobalFilters is defined elsewhere
+  const filtersQuery = handleGlobalFilters(req.body); 
   sql += filtersQuery;
+  sql += " ORDER BY name ASC"; 
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      console.log("getBankers error:", err);
-      return res.status(500).send("Error retrieving bankers");
+      console.log("getBanks error:", err);
+      return res.status(500).send("Error retrieving banks");
     }
     const transformedResult = result.map((bank) => ({
       ...bank,
       imageUrl: JSON.parse(bank.imageUrl),
       selected: false,
-      
     }));
     res.status(200).send(transformedResult);
   });
 });
-
 const getBankersById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM bankers WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
@@ -66,7 +84,6 @@ const getBankersById = asyncHandler((req, res) => {
     res.status(200).send(result[0]);
   });
 });
-
 // const createBanker = asyncHandler((req, res) => {
 //   let bankerId = "B-" + generateRandomNumber(6);
 //   req.body["bankerId"] = bankerId;

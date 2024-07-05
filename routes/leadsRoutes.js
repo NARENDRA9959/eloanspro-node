@@ -16,7 +16,7 @@ const {
   calculateBalanceSheet,
   calculateGstProgram,
   calculateBTOProgram,
-
+  getCreditSummary,
   calculateDscrRatio,
 } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
@@ -57,5 +57,7 @@ router
   .get(validateToken, getLeadById)
   .put(validateToken, updateLead)
   .delete(validateToken, deleteLead);
+
+router.route("/creditSummary/:id").get(validateToken, getCreditSummary);
 
 module.exports = router;
