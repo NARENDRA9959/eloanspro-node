@@ -598,9 +598,6 @@ const deleteLead = asyncHandler((req, res) => {
   });
 });
 
-
-
-
 const changeLeadStatus = asyncHandler((req, res) => {
   const id = req.params.leadId;
   const statusId = req.params.statusId;
@@ -636,9 +633,8 @@ const changeLeadStatus = asyncHandler((req, res) => {
   });
 });
 
-
 const getCreditSummary = asyncHandler(async (req, res) => {
-  console.log(req)
+  console.log(req);
 
   const { id } = req.params;
 
@@ -646,17 +642,16 @@ const getCreditSummary = asyncHandler(async (req, res) => {
 
   dbConnect.query(sql, [id], (err, result) => {
     if (err) {
-      console.error('getCreditSummary error:', err);
-      return res.status(500).send('Error retrieving credit summary');
+      console.error("getCreditSummary error:", err);
+      return res.status(500).send("Error retrieving credit summary");
     }
     if (result.length === 0) {
-      return res.status(404).send('No Remarks Found ');
+      return res.status(404).send("No Remarks Found ");
     }
     const creditSummary = result[0].creditSummary;
     res.status(200).json({ creditSummary });
   });
 });
-
 
 module.exports = {
   getLeads,

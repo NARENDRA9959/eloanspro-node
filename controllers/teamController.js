@@ -33,11 +33,8 @@ let leadUsersData = []; // Define a variable to store lead users
 // });
 
 const createUsers = asyncHandler(async (req, res) => {
-  let userId = "U-" + generateRandomNumber(6);
   let phoneNumber = req.body.phone;
   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
-
-  req.body["userId"] = userId;
   req.body["userInternalStatus"] = 1;
   req.body["lastUserInternalStatus"] = 1;
   req.body["password"] = encryptedPassword;

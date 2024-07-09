@@ -56,15 +56,12 @@ const {
 //     });
 // });
 
-
 const createLogin = asyncHandler((req, res) => {
   console.log("Request body:", req.body);
- 
   const bankIds = req.body.bankId;
   const bankNames = req.body.Banks;
   delete req.body.bankId;
   delete req.body.Banks;
-
   if (
     !Array.isArray(bankIds) ||
     bankIds.length === 0 ||
@@ -74,26 +71,21 @@ const createLogin = asyncHandler((req, res) => {
   ) {
     return res
       .status(400)
-      .send("Bank IDs and names are required and should be non-empty arrays of the same length");
+      .send(
+        "Bank IDs and names are required and should be non-empty arrays of the same length"
+      );
   }
-
   const insertQueries = bankIds.map((bankId, index) => {
     const bankName = bankNames[index];
     const rowData = { ...req.body, bankId, bankName };
-    const createClause = createClauseHandler(rowData); // Assuming createClauseHandler function exists
-
+    const createClause = createClauseHandler(rowData);
     console.log("Row data:", rowData);
     console.log("Create clause:", createClause);
-
     const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
-
     return query;
   });
-
   console.log("Insert queries:", insertQueries);
-
   let completedQueries = 0;
-
   insertQueries.forEach((query) => {
     dbConnect.query(query, (err, result) => {
       if (err) {
@@ -104,7 +96,6 @@ const createLogin = asyncHandler((req, res) => {
       console.log("Insert result:", result);
       completedQueries++;
       if (completedQueries === insertQueries.length) {
-     
         res.status(200).send(true);
       }
     });
@@ -114,23 +105,19 @@ const createLogin = asyncHandler((req, res) => {
 const getDistinctLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctLeadIds();
-
     if (distinctLeadIds.length === 0) {
-      return res.status(200).json([]); // Return an empty array if there are no distinct lead IDs
+      return res.status(200).json([]);
     }
-
     let sql = "SELECT * FROM leads WHERE id IN (?)";
     const queryParams = [distinctLeadIds];
     const filtersQuery = handleGlobalFilters(req.query);
     sql += filtersQuery;
-
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching leads:", err);
         res.status(500).json({ error: "Error fetching leads" });
         return;
       }
-
       result = parseNestedJSON(result);
       console.log(result);
       res.status(200).json(result);
@@ -140,7 +127,6 @@ const getDistinctLeads = asyncHandler(async (req, res) => {
     res.status(500).json({ error: "Error in getDistinctLeads function" });
   }
 });
-
 async function fetchDistinctLeadIds() {
   const sql = "SELECT DISTINCT leadId FROM logins";
   return new Promise((resolve, reject) => {
@@ -149,7 +135,6 @@ async function fetchDistinctLeadIds() {
         reject(err);
         return;
       }
-
       const leadIds = result.map((row) => row.leadId);
       resolve(leadIds);
     });
@@ -260,7 +245,7 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
       console.error("getApprovalsDetailsById error in controller:", err);
       return res.status(500).json({ error: "Error fetching login details" });
     }
-    result = result.map(parseNestedJSON); // Assuming parseNestedJSON function parses nested JSON
+    result = result.map(parseNestedJSON);
     console.log(result);
     res.status(200).json(result);
   });
@@ -290,9 +275,7 @@ const getDisbursalsDetailsById = asyncHandler((req, res) => {
 });
 
 const updateFIPDetails = asyncHandler((req, res) => {
-  const updates = req.body; // Assuming req.body is an array of objects containing id, program, bankName, fipStatus, and fipRemarks
-
-  // Prepare the SQL update statement with single CASE WHEN clauses based on id
+  const updates = req.body;
   let sql = `UPDATE logins SET `;
   let params = [];
 
@@ -303,36 +286,28 @@ const updateFIPDetails = asyncHandler((req, res) => {
       fipRemarks = CASE WHEN id = ? THEN ? ELSE fipRemarks END`;
 
     params.push(id, fipStatus, id, fipRemarks);
-
-    // Add a comma if not the last update
     if (index !== updates.length - 1) {
       sql += ", ";
     }
   });
-
-  // Add WHERE clause to specify which rows to update based on id
   sql += ` WHERE id IN (${updates.map((update) => "?").join(", ")})`;
   params.push(...updates.map((update) => update.id));
 
-  console.log(sql); // Output the constructed SQL query for debugging
-  console.log(params); // Output the parameters for debugging
-
-  // Execute the SQL query
+  console.log(sql);
+  console.log(params);
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateFIPDetails error in query:", err);
       return res.status(500).json({ error: "Error updating FIP details" });
     }
 
-    console.log(result); // Output the query result for debugging
+    console.log(result);
     res.status(200).json({ message: "FIP details updated successfully" });
   });
 });
 
 const updateApprovalsDetails = asyncHandler((req, res) => {
-  const updates = req.body; // Assuming req.body is an array of objects containing id, program, bankName, lan, sanctionedAmount, disbursedAmount, roi, tenure, approvalDate, approvedStatus, and approvedRemarks
-
-  // Define the fields that can be updated
+  const updates = req.body;
   const fields = [
     "program",
     "bankName",
@@ -348,7 +323,6 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
 
   let sql = "UPDATE logins SET ";
   const params = [];
-
   fields.forEach((field, fieldIndex) => {
     sql += `${field} = CASE `;
     updates.forEach((update, updateIndex) => {
@@ -360,19 +334,15 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
       sql += ", ";
     }
   });
-
-  // Add WHERE clause to specify which rows to update based on id
   sql += ` WHERE id IN (${updates.map(() => "?").join(", ")})`;
   params.push(...updates.map((update) => update.id));
-
-  // Execute the SQL query
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateApprovalsDetails error in query:", err);
       return res.status(500).json({ error: "Error updating approval details" });
     }
 
-    console.log(result); // Output the query result for debugging
+    console.log(result);
     res.status(200).json({ message: "Approval details updated successfully" });
   });
 });
@@ -400,7 +370,7 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
         res.status(500).json({ error: "Error fetching approval details" });
         return;
       }
-      result = parseNestedJSON(result); // Assuming this function parses nested JSON in the result
+      result = parseNestedJSON(result);
       console.log(result);
       res.status(200).json(result);
     });
@@ -476,14 +446,10 @@ async function fetchDistinctDisbursedLeadIds() {
     });
   });
 }
-
 const updateDisbursalDetails = asyncHandler((req, res) => {
-  const updates = req.body; // Assuming req.body is an array of objects containing id, sanctionedLetter, repaymentSchedule
-
-  // Prepare the SQL update statement with single CASE WHEN clauses based on id
+  const updates = req.body;
   let sql = `UPDATE logins SET `;
   let params = [];
-
   updates.forEach((update, index) => {
     const { id, sanctionedLetter, repaymentSchedule } = update;
     sql += `
@@ -510,7 +476,7 @@ const updateDisbursalDetails = asyncHandler((req, res) => {
         .status(500)
         .json({ error: "Error updating disbursal details" });
     }
-    console.log(result); 
+    console.log(result);
     res.status(200).json({ message: "Disbursal details updated successfully" });
   });
 });
@@ -530,14 +496,13 @@ const getBankRejectsLeads = asyncHandler(async (req, res) => {
     queryParams.push(req.query.sort || "createdOn");
     const filtersQuery = handleGlobalFilters(req.query);
     sql += filtersQuery;
-
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching approval details:", err);
         res.status(500).json({ error: "Error fetching approval details" });
         return;
       }
-      result = parseNestedJSON(result); // Assuming this function parses nested JSON in the result
+      result = parseNestedJSON(result);
       console.log(result);
       res.status(200).json(result);
     });
@@ -607,14 +572,13 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
     queryParams.push(req.query.sort || "createdOn");
     const filtersQuery = handleGlobalFilters(req.query);
     sql += filtersQuery;
-
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching cni rejected details:", err);
         res.status(500).json({ error: "Error  getCNIRejectsLeads details" });
         return;
       }
-      result = parseNestedJSON(result); // Assuming this function parses nested JSON in the result
+      result = parseNestedJSON(result);
       console.log(result);
       res.status(200).json(result);
     });
@@ -641,7 +605,6 @@ async function fetchDistinctCNIRejectedLeadIds() {
     });
   });
 }
-
 const getCNIRejectedLeadCount = asyncHandler(async (req, res) => {
   try {
     const cniLeadCount = await fetchCNIRejectedLeadCount();
@@ -678,7 +641,6 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
     WHERE leadId = ? AND fipStatus = 'rejected'
   `;
   const queryParams = [leadId];
-
   console.log(queryParams);
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
@@ -688,7 +650,6 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
         .json({ error: "Error fetching getBankRejectsDetailsById details" });
     }
     result = result.map(parseNestedJSON);
-
     console.log(result);
     res.status(200).json(result);
   });
@@ -703,7 +664,6 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
     WHERE leadId = ? AND approvedStatus = 'cnis'
   `;
   const queryParams = [leadId];
-
   console.log(queryParams);
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
@@ -713,17 +673,14 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
         .json({ error: "Error fetching getCNIRejectsDetailsById details" });
     }
     result = result.map(parseNestedJSON);
-
     console.log(result);
     res.status(200).json(result);
   });
 });
 
-
-
 const getSanctionedAmountSum = asyncHandler(async (req, res) => {
-  console.log(req)
-  const { leadId } = req.params; 
+  console.log(req);
+  const { leadId } = req.params;
   let sql = `
     SELECT SUM(sanctionedAmount) AS total_sanctioned_amount
     FROM logins
@@ -734,10 +691,20 @@ const getSanctionedAmountSum = asyncHandler(async (req, res) => {
       console.log("getSanctionedAmountSum error:", err);
       return res.status(500).send("Error retrieving sanctioned amount sum");
     }
-    console.log(result)
+    console.log(result);
     const totalSanctionedAmount = result[0].total_sanctioned_amount;
-   
     res.status(200).json({ totalSanctionedAmount });
+  });
+});
+
+const getLoginsDoneById = asyncHandler((req, res) => {
+  const sql = `SELECT businessName, program, bankName, fipStatus, fipRemarks FROM logins WHERE bankId = ${req.params.leadId}`;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("getLoginsDoneById Error in controller");
+    }
+    result = parseNestedJSON(result);
+    res.status(200).send(result || {});
   });
 });
 
@@ -761,5 +728,6 @@ module.exports = {
   getCNIRejectedLeadCount,
   getBankRejectsDetailsById,
   getCNIRejectsDetailsById,
-  getSanctionedAmountSum
+  getSanctionedAmountSum,
+  getLoginsDoneById,
 };
