@@ -20,7 +20,9 @@ const {
   getBankRejectsDetailsById,
   getCNIRejectsDetailsById,
   getSanctionedAmountSum,
-  getLoginsDoneById
+  getLoginsDoneById,
+  getTotalDisbursedAmountSum,
+  getTotalSanctionedAmountSum,
 } = require("../controllers/loginsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -29,7 +31,6 @@ router
   .route("/")
   .post(validateToken, createLogin)
   .get(validateToken, getDistinctLeads);
-
 router.route("/approvals").get(validateToken, getApprovalsLeads);
 router.route("/disbursals").get(validateToken, getDisbursalLeads);
 router.route("/bankRejects").get(validateToken, getBankRejectsLeads);
@@ -40,37 +41,33 @@ router.route("/approvalCount").get(validateToken, getApprovedLeadCount);
 router.route("/rejectedCount").get(validateToken, getBankRejectedLeadCount);
 router.route("/cniCount").get(validateToken, getCNIRejectedLeadCount);
 
-
 router.route("/disbursalCount").get(validateToken, getDisbursalLeadCount);
+
+router.route("/totalsancsum").get(validateToken, getTotalSanctionedAmountSum);
+router.route("/totaldisbsum").get(validateToken, getTotalDisbursedAmountSum);
 
 router
   .route("/fipDetails/:leadId")
   .get(validateToken, getFIPDetailsById)
   .put(validateToken, updateFIPDetails);
-
-  router
+router
   .route("/bankRejected/:leadId")
   .get(validateToken, getBankRejectsDetailsById);
-
-  router
+router
   .route("/cniRejected/:leadId")
   .get(validateToken, getCNIRejectsDetailsById);
 router
   .route("/approved/:leadId")
   .get(validateToken, getApprovalsDetailsById)
   .put(validateToken, updateApprovalsDetails);
-
-  router
+router
   .route("/sancAmountSum/:leadId")
   .get(validateToken, getSanctionedAmountSum);
-  
+
 router
   .route("/disbursed/:leadId")
   .get(validateToken, getDisbursalsDetailsById)
   .put(validateToken, updateDisbursalDetails);
 
-
-  router
-  .route("/loginsDone/:leadId")
-  .get(validateToken, getLoginsDoneById);
+router.route("/loginsDone/:leadId").get(validateToken, getLoginsDoneById);
 module.exports = router;

@@ -102,17 +102,53 @@ const createLogin = asyncHandler((req, res) => {
   });
 });
 
+// const getDistinctLeads = asyncHandler(async (req, res) => {
+//   try {
+//     const distinctLeadIds = await fetchDistinctLeadIds();
+//     if (distinctLeadIds.length === 0) {
+//       return res.status(200).json([]);
+//     }
+//     let sql = "SELECT * FROM leads WHERE id IN (?)";
+//     const queryParams = [distinctLeadIds];
+//     const filtersQuery = handleGlobalFilters(req.query);
+//     sql += filtersQuery;
+//     dbConnect.query(sql, queryParams, (err, result) => {
+//       if (err) {
+//         console.error("Error fetching leads:", err);
+//         res.status(500).json({ error: "Error fetching leads" });
+//         return;
+//       }
+//       result = parseNestedJSON(result);
+//       console.log(result);
+//       res.status(200).json(result);
+//     });
+//   } catch (error) {
+//     console.error("Error in getDistinctLeads function:", error);
+//     res.status(500).json({ error: "Error in getDistinctLeads function" });
+//   }
+// });
+
 const getDistinctLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctLeadIds();
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    let sql = "SELECT * FROM leads WHERE id IN (?)";
-    const queryParams = [distinctLeadIds];
-    const filtersQuery = handleGlobalFilters(req.query);
+    //console.log(req);
+    // Construct the IN clause manually to avoid using the question mark placeholder
+    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    let sql = `SELECT * FROM leads`;
+    const queryParams = req.query|| {} ;
+   
+    console.log(inClause)
+    queryParams["id-or"] = inClause;
+    queryParams["sort"] = "createdOn";
+    // Append the filters query
+    const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
-    dbConnect.query(sql, queryParams, (err, result) => {
+    console.log(sql);
+
+    dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error fetching leads:", err);
         res.status(500).json({ error: "Error fetching leads" });
@@ -216,7 +252,7 @@ async function fetchDisbursalLeadCount() {
 }
 
 const getFIPDetailsById = asyncHandler((req, res) => {
-  console.log(req);
+  //console.log(req);
   const sql = `SELECT id, program, bankName, fipStatus, fipRemarks FROM logins WHERE leadId = ${req.params.leadId}`;
   const queryParams = [req.params.leadId];
   console.log(queryParams);
@@ -252,7 +288,7 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
 });
 
 const getDisbursalsDetailsById = asyncHandler((req, res) => {
-  console.log(req);
+  //console.log(req);
   const leadId = req.params.leadId;
   const sql = `
   SELECT id, approvalDate, lan, program, bankName,  sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule 
@@ -355,16 +391,17 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
       return res.status(200).json([]);
     }
 
-    let sql = `
-      SELECT *
-      FROM leads
-      WHERE id IN (?)
-    `;
-    const queryParams = [distinctLeadIds];
-    queryParams.push(req.query.sort || "createdOn");
-    const filtersQuery = handleGlobalFilters(req.query);
+   // console.log(req);
+    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    let sql = `SELECT * FROM leads`;
+    const queryParams = req.query|| {} ;
+    console.log(inClause)
+    queryParams["id-or"] = inClause;
+    queryParams["sort"] = "createdOn";
+    const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
-    dbConnect.query(sql, queryParams, (err, result) => {
+    console.log(sql);
+    dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error fetching approval details:", err);
         res.status(500).json({ error: "Error fetching approval details" });
@@ -404,15 +441,17 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    let sql = `
-      SELECT *
-      FROM leads
-      WHERE id IN (?)
-    `;
-    const queryParams = [distinctLeadIds];
-    queryParams.push(req.query.sort || "createdOn");
-    const filtersQuery = handleGlobalFilters(req.query);
+    console.log(req);
+    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    let sql = `SELECT * FROM leads`;
+    const queryParams = req.query|| {} ;
+    console.log(inClause)
+    queryParams["id-or"] = inClause;
+    queryParams["sort"] = "createdOn";
+    const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
+    console.log("---------------------------------------------------------------------------------------------------------------")
+    console.log(sql);
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching disbursal details:", err);
@@ -487,15 +526,25 @@ const getBankRejectsLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    let sql = `
-      SELECT *
-      FROM leads
-      WHERE id IN (?)
-    `;
-    const queryParams = [distinctLeadIds];
-    queryParams.push(req.query.sort || "createdOn");
-    const filtersQuery = handleGlobalFilters(req.query);
-    sql += filtersQuery;
+    // let sql = `
+    //   SELECT *
+    //   FROM leads
+    //   WHERE id IN (?)
+    // `;
+    // const queryParams = [distinctLeadIds];
+    // queryParams.push(req.query.sort || "createdOn");
+    // const filtersQuery = handleGlobalFilters(req.query);
+    // sql += filtersQuery;
+     console.log(req);
+     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+     let sql = `SELECT * FROM leads`;
+     const queryParams = req.query|| {} ;
+     console.log(inClause)
+     queryParams["id-or"] = inClause;
+     queryParams["sort"] = "createdOn";
+     const filtersQuery = handleGlobalFilters(queryParams);
+     sql += filtersQuery;
+     console.log(sql);
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching approval details:", err);
@@ -563,15 +612,26 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    let sql = `
-      SELECT *
-      FROM leads
-      WHERE id IN (?)
-    `;
-    const queryParams = [distinctLeadIds];
-    queryParams.push(req.query.sort || "createdOn");
-    const filtersQuery = handleGlobalFilters(req.query);
-    sql += filtersQuery;
+    // let sql = `
+    //   SELECT *
+    //   FROM leads
+    //   WHERE id IN (?)
+    // `;
+    // const queryParams = [distinctLeadIds];
+    // queryParams.push(req.query.sort || "createdOn");
+    // const filtersQuery = handleGlobalFilters(req.query);
+    // sql += filtersQuery;
+
+     // console.log(req);
+     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+     let sql = `SELECT * FROM leads`;
+     const queryParams = req.query|| {} ;
+     console.log(inClause)
+     queryParams["id-or"] = inClause;
+     queryParams["sort"] = "createdOn";
+     const filtersQuery = handleGlobalFilters(queryParams);
+     sql += filtersQuery;
+     console.log(sql);
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching cni rejected details:", err);
@@ -633,7 +693,7 @@ async function fetchCNIRejectedLeadCount() {
 }
 
 const getBankRejectsDetailsById = asyncHandler((req, res) => {
-  console.log(req);
+ // console.log(req);
   const leadId = req.params.leadId;
   const sql = `
   SELECT id, program, bankName, fipStatus, fipRemarks 
@@ -656,7 +716,7 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
 });
 
 const getCNIRejectsDetailsById = asyncHandler((req, res) => {
-  console.log(req);
+ // console.log(req);
   const leadId = req.params.leadId;
   const sql = `
   SELECT id,approvalDate, lan, program, bankName,sanctionedAmount, roi, approvedStatus, approvedRemarks
@@ -679,7 +739,7 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
 });
 
 const getSanctionedAmountSum = asyncHandler(async (req, res) => {
-  console.log(req);
+ // console.log(req);
   const { leadId } = req.params;
   let sql = `
     SELECT SUM(sanctionedAmount) AS total_sanctioned_amount
@@ -708,6 +768,42 @@ const getLoginsDoneById = asyncHandler((req, res) => {
   });
 });
 
+const getTotalSanctionedAmountSum = asyncHandler(async (req, res) => {
+  //console.log(req);
+
+  let sql = `
+    SELECT SUM(sanctionedAmount) AS total_sanctioned_amount
+    FROM logins
+   ;
+  `;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("getTotalSanctionedAmountSum error:", err);
+      return res.status(500).send("Error retrieving sanctioned amount sum");
+    }
+    console.log(result);
+    const totalSanctionedAmount = result[0].total_sanctioned_amount;
+    res.status(200).json({ totalSanctionedAmount });
+  });
+});
+
+const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
+ // console.log(req);
+  let sql = `
+    SELECT SUM(disbursedAmount) AS total_disbursed_amount
+    FROM logins
+   ;
+  `;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("getTotalSanctionedAmountSum error:", err);
+      return res.status(500).send("Error retrieving sanctioned amount sum");
+    }
+    console.log(result);
+    const totalDisbursedAmount = result[0].total_disbursed_amount;
+    res.status(200).json({ totalDisbursedAmount });
+  });
+});
 module.exports = {
   createLogin,
   getDistinctLeads,
@@ -730,4 +826,6 @@ module.exports = {
   getCNIRejectsDetailsById,
   getSanctionedAmountSum,
   getLoginsDoneById,
+  getTotalSanctionedAmountSum,
+  getTotalDisbursedAmountSum,
 };
