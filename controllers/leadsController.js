@@ -1,5 +1,4 @@
 const asyncHandler = require("express-async-handler");
-
 const dbConnect = require("../config/dbConnection");
 const handleGlobalFilters = require("../middleware/filtersHandler");
 const parseNestedJSON = require("../middleware/parseHandler");
@@ -9,7 +8,6 @@ const {
 } = require("../middleware/clauseHandler");
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
-
 const getLeadsCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as leadsCount FROM leads";
   const filtersQuery = handleGlobalFilters(req.query, true);
@@ -194,7 +192,6 @@ const calculateDscrRatio = asyncHandler((req, res) => {
   const {
     profitaftertaxAy1,
     depreciationAy1,
-
     directorsRemuAy1,
     partnerRemuAy1,
     partnerInterestAy1,
@@ -203,9 +200,7 @@ const calculateDscrRatio = asyncHandler((req, res) => {
     odCcInterestAy1,
     monthsAy1,
   } = req.body;
-
   let numerator = 0;
-
   if (directorsRemuAy1) {
     numerator = profitaftertaxAy1 + depreciationAy1 + directorsRemuAy1;
   } else if (partnerRemuAy1 && partnerInterestAy1) {
@@ -214,11 +209,9 @@ const calculateDscrRatio = asyncHandler((req, res) => {
   } else {
     numerator = profitaftertaxAy1 + depreciationAy1;
   }
-
   const denominator = (totalEmi + proposedEmi + odCcInterestAy1) * monthsAy1;
   const resultFirstYear =
     denominator !== 0 ? (numerator / denominator).toFixed(2) : 0;
-
   const updateClause = updateClauseHandler(req.body);
   const extendedUpdateClause = `${updateClause},  resultFirstYear=${resultFirstYear}`;
   const sql = `
@@ -635,11 +628,8 @@ const changeLeadStatus = asyncHandler((req, res) => {
 
 const getCreditSummary = asyncHandler(async (req, res) => {
   console.log(req);
-
   const { id } = req.params;
-
   let sql = `SELECT creditSummary FROM dscr_values WHERE leadId = ?`;
-
   dbConnect.query(sql, [id], (err, result) => {
     if (err) {
       console.error("getCreditSummary error:", err);

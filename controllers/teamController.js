@@ -32,24 +32,56 @@ let leadUsersData = []; // Define a variable to store lead users
 //   });
 // });
 
+// const createUsers = asyncHandler(async (req, res) => {
+//   let phoneNumber = req.body.phone;
+//   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
+//   req.body["userInternalStatus"] = 1;
+//   req.body["lastUserInternalStatus"] = 1;
+//   req.body["password"] = encryptedPassword;
+//   const createClause = createClauseHandler(req.body);
+//   const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
+
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.error("Error creating users:", err);
+//       res.status(500).send("Internal Server Error");
+//       return;
+//     }
+//     res.status(200).send(true);
+//   });
+// });
+
 const createUsers = asyncHandler(async (req, res) => {
   let phoneNumber = req.body.phone;
   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
   req.body["userInternalStatus"] = 1;
   req.body["lastUserInternalStatus"] = 1;
   req.body["password"] = encryptedPassword;
-  const createClause = createClauseHandler(req.body);
-  const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
-
-  dbConnect.query(sql, (err, result) => {
+  console.log(req)
+  const checkIfExistsQuery = `SELECT * FROM users WHERE name = ?`;
+  dbConnect.query(checkIfExistsQuery, [req.body.name], (err, results) => {
     if (err) {
-      console.error("Error creating users:", err);
+      console.error("Error checking if user exists:", err);
       res.status(500).send("Internal Server Error");
       return;
     }
-    res.status(200).send(true);
+    if (results.length > 0) {
+      res.status(400).send("User with this username already exists");
+      return;
+    }
+    const createClause = createClauseHandler(req.body);
+    const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
+    dbConnect.query(sql, (err, result) => {
+      if (err) {
+        console.error("Error creating user:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      res.status(200).send(true);
+    });
   });
 });
+
 const updateUsers = asyncHandler(async (req, res) => {
   const id = req.params.id;
   let phoneNumber = req.body.phone.toString();
@@ -59,7 +91,6 @@ const updateUsers = asyncHandler(async (req, res) => {
   const sql = `UPDATE users SET ${updateClause} WHERE id = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      // throw err;
       console.log("updateUsers error in controller");
     }
     res.status(200).send(result);
@@ -144,7 +175,6 @@ const exportLeads = asyncHandler(async (req, res) => {
     }
   });
 });
-
 const getSourceName = async (userId) => {
   try {
     const leadUser = leadUsersData.find((user) => user.id == userId);
@@ -154,12 +184,10 @@ const getSourceName = async (userId) => {
     throw error;
   }
 };
-
 const getActiveUsers = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM users WHERE status = 'Active'";
   const filtersQuery = handleGlobalFilters(req.query);
   sql += filtersQuery;
-
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getUsers Error in controller");
@@ -195,7 +223,6 @@ const changeUsersStatus = asyncHandler((req, res) => {
     }
   });
 });
-
 const getUsersCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as usersCount FROM users";
   const filtersQuery = handleGlobalFilters(req.query, true);
