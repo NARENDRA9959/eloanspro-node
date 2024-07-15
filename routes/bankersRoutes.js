@@ -8,6 +8,7 @@ const {
   deleteBanker,
   changeBankersStatus,
   getBanks,
+  getBankRevenueValue
 } = require("../controllers/bankersController");
 
 const validateToken = require("../middleware/validateTokenHandler");
@@ -33,4 +34,7 @@ router
   .put(validateToken, updateBanker)
   .delete(validateToken, deleteBanker);
 
+  router
+  .route("/bankRevenueValue/:id")
+  .get(validateToken, getBankRevenueValue);
 module.exports = router;

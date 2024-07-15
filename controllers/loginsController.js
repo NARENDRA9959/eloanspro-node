@@ -102,6 +102,68 @@ const createLogin = asyncHandler((req, res) => {
   });
 });
 
+// const createLogin = asyncHandler((req, res) => {
+//   console.log("Request body:", req.body);
+
+//   const bankIds = req.body.bankId;
+//   const bankNames = req.body.Banks;
+//   const bankRevenueValues = req.body.bankRevenueValue;
+
+//   console.log("bankIds:", bankIds);
+//   console.log("bankNames:", bankNames);
+//   console.log("bankRevenueValues:", bankRevenueValues);
+
+//   delete req.body.bankId;
+//   delete req.body.Banks;
+//   delete req.body.bankRevenueValues;
+
+//   if (
+//     !Array.isArray(bankIds) ||
+//     bankIds.length === 0 ||
+//     !Array.isArray(bankNames) ||
+//     bankNames.length === 0
+//   ) {
+//     return res
+//       .status(400)
+//       .send(
+//         "Bank IDs and names are required and should be non-empty arrays of the same length"
+//       );
+//   }
+
+//   const insertQueries = bankIds.map((bankId, index) => {
+//     const bankName = bankNames[index];
+//     const bankRevenueValue = bankRevenueValues[index];
+//     const rowData = { ...req.body, bankId, bankName, bankRevenueValue };
+//     const createClause = createClauseHandler(rowData);
+//     console.log("Row data:", rowData);
+//     console.log("Create clause:", createClause);
+//     const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
+//     return query;
+//   });
+//   console.log("Insert queries:", insertQueries);
+
+//   let completedQueries = 0;
+//   let hasError = false;
+
+//   insertQueries.forEach((query) => {
+//     dbConnect.query(query, (err, result) => {
+//       if (err) {
+//         console.log("createLogin error:", err);
+//         if (!hasError) {
+//           hasError = true;
+//           res.status(500).send("Error inserting data");
+//         }
+//         return;
+//       }
+//       console.log("Insert result:", result);
+//       completedQueries++;
+//       if (completedQueries === insertQueries.length && !hasError) {
+//         res.status(200).send(true);
+//       }
+//     });
+//   });
+// });
+
 // const getDistinctLeads = asyncHandler(async (req, res) => {
 //   try {
 //     const distinctLeadIds = await fetchDistinctLeadIds();
@@ -773,6 +835,119 @@ const getLoginsDoneById = asyncHandler((req, res) => {
   });
 });
 
+// const getTotalSanctionedAmountSum = asyncHandler(async (req, res) => {
+//   let sql = `
+//  SELECT SUM(lg.sanctionedAmount) AS totalSanctionedAmount
+// FROM logins lg
+// WHERE lg.fipstatus = 'approved'
+//   AND lg.leadId IN (
+//     SELECT id
+//     FROM leads
+//     WHERE YEAR(createdOn) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)
+//       AND MONTH(createdOn) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
+//   );
+
+//   `;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("getTotalSanctionedAmountSum error:", err);
+//       return res.status(500).send("Error retrieving sanctioned amount sum");
+//     }
+
+//     const totalSanctionedAmount = result[0].totalSanctionedAmount;
+//     console.log(totalSanctionedAmount);
+//     res.status(200).json({ totalSanctionedAmount });
+//   });
+// });
+
+// async function fetchLeadIdsForLastMonth() {
+//   const sql = `
+//     SELECT id
+//     FROM leads
+//     WHERE YEAR(createdOn) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)
+//       AND MONTH(createdOn) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
+//   `;
+//   return new Promise((resolve, reject) => {
+//     dbConnect.query(sql, (err, result) => {
+//       if (err) {
+//         reject(err);
+//         return;
+//       }
+//       const leadIds = result.map((row) => row.id);
+//       resolve(leadIds);
+//     });
+//   });
+// }
+
+// const getTotalSanctionedAmountSum = asyncHandler(async (req, res) => {
+//   try {
+//     const leadIds = await fetchLeadIdsForLastMonth();
+//     if (leadIds.length === 0) {
+//       return res.status(200).json({ totalSanctionedAmount: 0 });
+//     }
+//     const inClause = leadIds.map((id) => `${id}`).join(",");
+//     let sql = `
+//       SELECT SUM(lg.sanctionedAmount) AS totalSanctionedAmount
+//       FROM logins lg
+//       WHERE lg.fipstatus = 'approved'
+//         AND lg.leadId IN (${inClause});
+//     `;
+//     dbConnect.query(sql, (err, result) => {
+//       if (err) {
+//         console.error("Error fetching sanctioned amount sum:", err);
+//         return res
+//           .status(500)
+//           .json({ error: "Error retrieving sanctioned amount sum" });
+//       }
+//       const totalSanctionedAmount = result[0].totalSanctionedAmount || 0;
+//       console.log("Total sanctioned amount:", totalSanctionedAmount);
+//       res.status(200).json({ totalSanctionedAmount });
+//     });
+//   } catch (error) {
+//     console.error("Error in getTotalSanctionedAmountSum function:", error);
+//     res
+//       .status(500)
+//       .json({ error: "Error in getTotalSanctionedAmountSum function" });
+//   }
+// });
+
+// const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
+//   try {
+//     const leadIds = await fetchLeadIdsForLastMonth();
+
+//     if (leadIds.length === 0) {
+//       return res.status(200).json({ totalDisbursedAmount: 0 });
+//     }
+
+//     const inClause = leadIds.map((id) => `${id}`).join(",");
+//     let sql = `
+//       SELECT SUM(lg.disbursedAmount) AS totalDisbursedAmount
+//       FROM logins lg
+//       WHERE lg.fipstatus = 'approved' 
+//       AND lg.approvedStatus='disbursed'
+//         AND lg.leadId IN (${inClause});
+//     `;
+
+//     dbConnect.query(sql, (err, result) => {
+//       if (err) {
+//         console.error("Error fetching disbursed amount sum:", err);
+//         return res
+//           .status(500)
+//           .json({ error: "Error retrieving disbursed amount sum" });
+//       }
+
+//       const totalDisbursedAmount = result[0].totalDisbursedAmount || 0;
+//       console.log("Total disbursed amount:", totalDisbursedAmount);
+//       res.status(200).json({ totalDisbursedAmount });
+//     });
+//   } catch (error) {
+//     console.error("Error in getTotalDisbursedAmountSum function:", error);
+//     res
+//       .status(500)
+//       .json({ error: "Error in getTotalDisbursedAmountSum function" });
+//   }
+// });
+
 const getTotalSanctionedAmountSum = asyncHandler(async (req, res) => {
   let sql = `
     SELECT SUM(sanctionedAmount) AS total_sanctioned_amount
@@ -789,12 +964,10 @@ const getTotalSanctionedAmountSum = asyncHandler(async (req, res) => {
     res.status(200).json({ totalSanctionedAmount });
   });
 });
-
 const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
   let sql = `
     SELECT SUM(disbursedAmount) AS total_disbursed_amount
-    FROM logins
-   ;
+    FROM logins;
   `;
   dbConnect.query(sql, (err, result) => {
     if (err) {
@@ -806,6 +979,62 @@ const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
     res.status(200).json({ totalDisbursedAmount });
   });
 });
+
+
+
+async function fetchFIPProcessDistinctLeadIds() {
+  const sql = `
+    SELECT DISTINCT leadId
+    FROM logins
+    WHERE fipstatus != 'approved' AND fipstatus != 'rejected'
+  `;
+  
+  return new Promise((resolve, reject) => {
+    dbConnect.query(sql, (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      const leadIds = result.map((row) => row.leadId);
+      resolve(leadIds);
+    });
+  });
+}
+
+
+const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
+  try {
+    const distinctLeadIds = await fetchFIPProcessDistinctLeadIds();
+    if (distinctLeadIds.length === 0) {
+      return res.status(200).json([]);
+    }
+    
+    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    let sql = `SELECT * FROM leads WHERE id IN (${inClause})`;
+    const queryParams = req.query || {};
+    console.log(inClause);
+    queryParams["id-or"] = inClause;
+    queryParams["sort"] = "createdOn";
+    const filtersQuery = handleGlobalFilters(queryParams);
+    sql += filtersQuery;
+    console.log(sql);
+
+    dbConnect.query(sql, (err, result) => {
+      if (err) {
+        console.error("Error fetching leads:", err);
+        res.status(500).json({ error: "Error fetching leads" });
+        return;
+      }
+      result = parseNestedJSON(result);
+      console.log(result);
+      res.status(200).json(result);
+    });
+  } catch (error) {
+    console.error("Error in getFIPProcessDistinctLeads function:", error);
+    res.status(500).json({ error: "Error in getFIPProcessDistinctLeads function" });
+  }
+});
+
 module.exports = {
   createLogin,
   getDistinctLeads,
@@ -830,4 +1059,5 @@ module.exports = {
   getLoginsDoneById,
   getTotalSanctionedAmountSum,
   getTotalDisbursedAmountSum,
+  getFIPProcessDistinctLeads
 };
