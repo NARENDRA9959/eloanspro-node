@@ -878,7 +878,6 @@ const getLoginsDoneById = asyncHandler((req, res) => {
 //     });
 //   });
 // }
-
 // const getTotalSanctionedAmountSum = asyncHandler(async (req, res) => {
 //   try {
 //     const leadIds = await fetchLeadIdsForLastMonth();
@@ -910,15 +909,12 @@ const getLoginsDoneById = asyncHandler((req, res) => {
 //       .json({ error: "Error in getTotalSanctionedAmountSum function" });
 //   }
 // });
-
 // const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
 //   try {
 //     const leadIds = await fetchLeadIdsForLastMonth();
-
 //     if (leadIds.length === 0) {
 //       return res.status(200).json({ totalDisbursedAmount: 0 });
 //     }
-
 //     const inClause = leadIds.map((id) => `${id}`).join(",");
 //     let sql = `
 //       SELECT SUM(lg.disbursedAmount) AS totalDisbursedAmount
@@ -927,7 +923,6 @@ const getLoginsDoneById = asyncHandler((req, res) => {
 //       AND lg.approvedStatus='disbursed'
 //         AND lg.leadId IN (${inClause});
 //     `;
-
 //     dbConnect.query(sql, (err, result) => {
 //       if (err) {
 //         console.error("Error fetching disbursed amount sum:", err);
@@ -935,7 +930,6 @@ const getLoginsDoneById = asyncHandler((req, res) => {
 //           .status(500)
 //           .json({ error: "Error retrieving disbursed amount sum" });
 //       }
-
 //       const totalDisbursedAmount = result[0].totalDisbursedAmount || 0;
 //       console.log("Total disbursed amount:", totalDisbursedAmount);
 //       res.status(200).json({ totalDisbursedAmount });
@@ -980,15 +974,12 @@ const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
   });
 });
 
-
-
 async function fetchFIPProcessDistinctLeadIds() {
   const sql = `
     SELECT DISTINCT leadId
     FROM logins
     WHERE fipstatus != 'approved' AND fipstatus != 'rejected'
   `;
-  
   return new Promise((resolve, reject) => {
     dbConnect.query(sql, (err, result) => {
       if (err) {
@@ -1001,16 +992,14 @@ async function fetchFIPProcessDistinctLeadIds() {
   });
 }
 
-
 const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchFIPProcessDistinctLeadIds();
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
-    let sql = `SELECT * FROM leads WHERE id IN (${inClause})`;
+    let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     console.log(inClause);
     queryParams["id-or"] = inClause;
@@ -1018,7 +1007,6 @@ const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
     console.log(sql);
-
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error fetching leads:", err);
@@ -1035,6 +1023,34 @@ const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
   }
 });
 
+const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
+  try {
+    const distinctLeadIds = await fetchFIPProcessDistinctLeadIds();
+    if (distinctLeadIds.length === 0) {
+      return res.status(200).json({ count: 0 });
+    }
+    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    let sql = `SELECT COUNT(*) as count FROM leads`;
+    const queryParams = req.query || {};
+    console.log(inClause);
+    queryParams["id-or"] = inClause;
+    const filtersQuery = handleGlobalFilters(queryParams);
+    sql += filtersQuery;
+    console.log(sql);
+    dbConnect.query(sql, (err, result) => {
+      if (err) {
+        console.error("Error counting leads:", err);
+        res.status(500).json({ error: "Error counting leads" });
+        return;
+      }
+      console.log(result);
+      res.status(200).send(String(result[0].count));
+    });
+  } catch (error) {
+    console.error("Error in countFIPProcessDistinctLeads function:", error);
+    res.status(500).json({ error: "Error in countFIPProcessDistinctLeads function" });
+  }
+});
 module.exports = {
   createLogin,
   getDistinctLeads,
@@ -1059,5 +1075,6 @@ module.exports = {
   getLoginsDoneById,
   getTotalSanctionedAmountSum,
   getTotalDisbursedAmountSum,
-  getFIPProcessDistinctLeads
+  getFIPProcessDistinctLeads,
+  getFIPProcessDistinctLeadsCount
 };

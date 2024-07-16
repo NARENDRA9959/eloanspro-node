@@ -24,9 +24,10 @@ const getLeadsCount = asyncHandler(async (req, res) => {
 const getLeads = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM leads";
   const queryParams = req.query;
-  queryParams["sort"] = "createdOn";
+  queryParams["sort"] = "lastUpdatedOn";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
+  console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLeads Error in controller");

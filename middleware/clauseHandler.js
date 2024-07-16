@@ -25,7 +25,7 @@ const createClauseHandler = (body) => {
             if (typeof value === 'string') {
               return value.replace(/\\/g, "/");
             } else {
-              return value; 
+              return value;
             }
           })
         );

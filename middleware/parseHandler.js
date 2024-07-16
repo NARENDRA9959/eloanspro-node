@@ -3,7 +3,7 @@ const parseNestedJSON = (result) => {
     if (typeof result[key] === "string") {
       try {
         result[key] = JSON.parse(result[key]);
-      } catch (error) {}
+      } catch (error) { }
     } else if (typeof result[key] === "object") {
       parseNestedJSON(result[key]);
     }

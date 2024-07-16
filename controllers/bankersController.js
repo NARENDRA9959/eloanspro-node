@@ -50,7 +50,7 @@ const getBankers = asyncHandler(async (req, res) => {
 //       ...bank,
 //       imageUrl: JSON.parse(bank.imageUrl),
 //       selected: false,
-      
+
 //     }));
 //     res.status(200).send(transformedResult);
 //   });
@@ -58,9 +58,9 @@ const getBankers = asyncHandler(async (req, res) => {
 
 const getBanks = asyncHandler(async (req, res) => {
   let sql = "SELECT id, name, bankRevenueValue, imageFiles AS imageUrl FROM bankers";
-  const filtersQuery = handleGlobalFilters(req.body); 
+  const filtersQuery = handleGlobalFilters(req.body);
   sql += filtersQuery;
-  sql += " ORDER BY name ASC"; 
+  sql += " ORDER BY name ASC";
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getBanks error:", err);
@@ -211,9 +211,9 @@ const getBankRevenueValue = asyncHandler(async (req, res) => {
     if (result.length === 0) {
       return res.status(404).send("Bank not found");
     }
-console.log(result)
+    console.log(result)
     const bankRevenueValue = result[0].bankRevenueValue;
-console.log(bankRevenueValue)
+    console.log(bankRevenueValue)
     res.status(200).send(bankRevenueValue);
   });
 });

@@ -263,8 +263,8 @@ const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
     WHERE 
       leadInternalStatus = 1
       AND createdOn >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) ${handleGlobalFilters(
-        req.query
-      )};`;
+    req.query
+  )};`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -284,8 +284,8 @@ const getPast7DaysCallBacksCount = asyncHandler(async (req, res) => {
             callbacks
         WHERE 
             createdOn >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) ${handleGlobalFilters(
-              req.query
-            )}
+    req.query
+  )}
     `;
   dbConnect.query(sql, (err, result) => {
     if (err) {
@@ -317,8 +317,8 @@ const getLastMonthLeadCountStatus = asyncHandler(async (req, res) => {
       WHERE 
           leadInternalStatus=1
           AND createdOn >= ? AND createdOn <= ? ${handleGlobalFilters(
-            req.query
-          )}
+    req.query
+  )}
   `;
   dbConnect.query(
     sql,
@@ -404,8 +404,8 @@ const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
       WHERE 
           leadInternalStatus=1
           AND createdOn >= ? AND createdOn <= ? ${handleGlobalFilters(
-            req.query
-          )}
+    req.query
+  )}
       GROUP BY 
           YEAR(createdOn),
           MONTH(createdOn)
@@ -486,8 +486,8 @@ const getLastYearLeadCountStatus = asyncHandler(async (req, res) => {
       WHERE 
           leadInternalStatus = 1
           AND createdOn >= ? AND createdOn <= ? ${handleGlobalFilters(
-            req.query
-          )}
+    req.query
+  )}
   `;
   dbConnect.query(sql, [lastYearStartDate, lastYearEndDate], (err, result) => {
     if (err) {

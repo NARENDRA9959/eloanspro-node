@@ -130,53 +130,59 @@ const getUsers = asyncHandler(async (req, res) => {
     res.status(200).send(leadUsersData);
   });
 });
-const exportLeads = asyncHandler(async (req, res) => {
-  let sql = "SELECT * FROM leads";
-  const queryParams = req.query;
-  queryParams["sort"] = "createdOn";
-  const filtersQuery = handleGlobalFilters(queryParams);
-  sql += filtersQuery;
-  dbConnect.query(sql, async (err, result) => {
-    if (err) {
-      console.log("Error exporting leads: ", err);
-      res.status(500).json({ error: "Internal server error" });
-      return;
-    }
-    try {
-      for (let i = 0; i < result.length; i++) {
-        result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
-      }
-      result = parseNestedJSON(result);
-      const csvWriter = createObjectCsvWriter({
-        path: "leads1.csv",
-        header: [
-          { id: "id", title: "ID" },
-          { id: "leadId", title: "Lead Id" },
-          { id: "businessName", title: "Business Name" },
-          { id: "businessEmail", title: "Business Email" },
-          { id: "contactPerson", title: "Contact Person" },
-          { id: "sourcedBy", title: "Sourced By" },
-        ],
-      });
-      csvWriter
-        .writeRecords(result)
-        .then(() => {
-          console.log("CSV file created successfully");
-          res.download("leads1.csv", "downloads/leads1.csv");
-          res.status(200).json(true);
-        })
-        .catch((error) => {
-          console.error("Error writing CSV file:", error);
-          res.status(500).json({ error: "Internal server error" });
-        });
-    } catch (error) {
-      console.error("Error getting sourcedBy names:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
-});
+// const exportLeads = asyncHandler(async (req, res) => {
+//   let sql = "SELECT * FROM leads";
+//   console.log(req)
+//   const queryParams = req.query;
+//   queryParams["sort"] = "createdOn";
+//   const filtersQuery = handleGlobalFilters(queryParams);
+//   sql += filtersQuery;
+//   console.log(sql)
+//   dbConnect.query(sql, async (err, result) => {
+//     if (err) {
+//       console.log("Error exporting leads: ", err);
+//       res.status(500).json({ error: "Internal server error" });
+//       return;
+//     }
+//     try {
+//       for (let i = 0; i < result.length; i++) {
+//         result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
+//       }
+//       result = parseNestedJSON(result);
+//       const csvWriter = createObjectCsvWriter({
+//         path: "leads1.csv",
+//         header: [
+//           { id: "id", title: "ID" },
+//           { id: "leadId", title: "Lead Id" },
+//           { id: "businessName", title: "Business Name" },
+//           { id: "businessEmail", title: "Business Email" },
+//           { id: "contactPerson", title: "Contact Person" },
+//           { id: "sourcedBy", title: "Sourced By" },
+//         ],
+//       });
+//       csvWriter
+//         .writeRecords(result)
+//         .then(() => {
+//           console.log("CSV file created successfully");
+//           res.download("leads1.csv", "downloads/leads1.csv");
+//           res.status(200).json(true);
+//         })
+//         .catch((error) => {
+//           console.error("Error writing CSV file:", error);
+//           res.status(500).json({ error: "Internal server error" });
+//         });
+//     } catch (error) {
+//       console.error("Error getting sourcedBy names:", error);
+//       res.status(500).json({ error: "Internal server error" });
+//     }
+//   });
+// });
+
+
+
 const getSourceName = async (userId) => {
   try {
+    //console.log("leadUsersData:", leadUsersData)
     const leadUser = leadUsersData.find((user) => user.id == userId);
     return leadUser ? leadUser.name : "";
   } catch (error) {
@@ -261,6 +267,56 @@ const updateUserStatus = asyncHandler(async (req, res) => {
       return res.status(500).json({ error: "Failed to update user status" });
     }
     res.status(200).json({ message: "User status updated successfully" });
+  });
+});
+
+
+const exportLeads = asyncHandler(async (req, res) => {
+  let sql = "SELECT * FROM leads";
+  const queryParams = req.query;
+  queryParams["sort"] = "createdOn";
+  console.log(queryParams)
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+  console.log(sql)
+  dbConnect.query(sql, async (err, result) => {
+    if (err) {
+      console.log("Error exporting leads: ", err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+    try {
+      for (let i = 0; i < result.length; i++) {
+        result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
+      }
+      result = parseNestedJSON(result);
+      const csvWriter = createObjectCsvWriter({
+        path: "leads1.csv",
+        header: [
+          { id: "id", title: "ID" },
+          { id: "leadId", title: "Lead Id" },
+          { id: "businessName", title: "Business Name" },
+          { id: "businessEmail", title: "Business Email" },
+          { id: "contactPerson", title: "Contact Person" },
+          { id: "sourcedBy", title: "Sourced By" },
+          { id: "createdOn", title: "Created On" },
+        ],
+      });
+      csvWriter
+        .writeRecords(result)
+        .then(() => {
+          console.log("CSV file created successfully");
+          res.download("leads1.csv", "downloads/leads1.csv");
+          res.status(200).json(true);
+        })
+        .catch((error) => {
+          console.error("Error writing CSV file:", error);
+          res.status(500).json({ error: "Internal server error" });
+        });
+    } catch (error) {
+      console.error("Error getting sourcedBy names:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 });
 module.exports = {

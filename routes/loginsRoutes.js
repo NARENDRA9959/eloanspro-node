@@ -23,7 +23,8 @@ const {
   getLoginsDoneById,
   getTotalDisbursedAmountSum,
   getTotalSanctionedAmountSum,
-  getFIPProcessDistinctLeads
+  getFIPProcessDistinctLeads,
+  getFIPProcessDistinctLeadsCount
 } = require("../controllers/loginsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -33,6 +34,8 @@ router
   .post(validateToken, createLogin)
   .get(validateToken, getDistinctLeads);
 router.route("/fipDistinctLeads").get(validateToken, getFIPProcessDistinctLeads);
+router.route("/fipcount").get(validateToken, getFIPProcessDistinctLeadsCount);
+
 
 router.route("/approvals").get(validateToken, getApprovalsLeads);
 router.route("/disbursals").get(validateToken, getDisbursalLeads);
@@ -43,9 +46,7 @@ router.route("/total").get(validateToken, getDistinctLeadCount);
 router.route("/approvalCount").get(validateToken, getApprovedLeadCount);
 router.route("/rejectedCount").get(validateToken, getBankRejectedLeadCount);
 router.route("/cniCount").get(validateToken, getCNIRejectedLeadCount);
-
 router.route("/disbursalCount").get(validateToken, getDisbursalLeadCount);
-
 router.route("/totalsancsum").get(validateToken, getTotalSanctionedAmountSum);
 router.route("/totaldisbsum").get(validateToken, getTotalDisbursedAmountSum);
 
