@@ -199,12 +199,12 @@ const getDistinctLeads = asyncHandler(async (req, res) => {
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
-    console.log(inClause);
+    //console.log(inClause);
     queryParams["id-or"] = inClause;
     queryParams["sort"] = "createdOn";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
-    console.log(sql);
+    //console.log(sql);
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error fetching leads:", err);
@@ -243,15 +243,19 @@ const getDistinctLeadCount = asyncHandler(async (req, res) => {
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
+    console.log("query params ", queryParams)
     queryParams["id-or"] = inClause;
-    const filtersQuery = handleGlobalFilters(queryParams);
+    const filtersQuery = handleGlobalFilters(queryParams, true);
+    console.log("filtersQuery", filtersQuery)
     countSql += filtersQuery;
+    console.log("countSql", countSql)
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
         console.error("Error counting leads:", err);
         res.status(500).json({ error: "Error counting leads" });
         return;
       }
+      console.log("countResult", countResult)
       const count = countResult[0].count;
       res.status(200).send(String(count));
     });
@@ -271,7 +275,7 @@ const getApprovedLeadCount = asyncHandler(async (req, res) => {
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
-    const filtersQuery = handleGlobalFilters(queryParams);
+    const filtersQuery = handleGlobalFilters(queryParams, true);
     countSql += filtersQuery;
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
@@ -297,7 +301,7 @@ const getDisbursalLeadCount = asyncHandler(async (req, res) => {
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
-    const filtersQuery = handleGlobalFilters(queryParams);
+    const filtersQuery = handleGlobalFilters(queryParams, true);
     countSql += filtersQuery;
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
@@ -633,7 +637,7 @@ const getBankRejectedLeadCount = asyncHandler(async (req, res) => {
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
-    const filtersQuery = handleGlobalFilters(queryParams);
+    const filtersQuery = handleGlobalFilters(queryParams, true);
     countSql += filtersQuery;
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
@@ -718,7 +722,7 @@ const getCNIRejectedLeadCount = asyncHandler(async (req, res) => {
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
-    const filtersQuery = handleGlobalFilters(queryParams);
+    const filtersQuery = handleGlobalFilters(queryParams, true);
     countSql += filtersQuery;
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
@@ -1034,7 +1038,7 @@ const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
     const queryParams = req.query || {};
     console.log(inClause);
     queryParams["id-or"] = inClause;
-    const filtersQuery = handleGlobalFilters(queryParams);
+    const filtersQuery = handleGlobalFilters(queryParams, true);
     sql += filtersQuery;
     console.log(sql);
     dbConnect.query(sql, (err, result) => {
