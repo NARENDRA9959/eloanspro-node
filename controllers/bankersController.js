@@ -109,7 +109,7 @@ const createBanker = asyncHandler((req, res) => {
     req.body["bankerInternalStatus"] = 1;
     req.body["lastBankerInternalStatus"] = 1;
     req.body["lastUpdatedBy"] = req.user.name;
-    console.log("Request Body:", req.body);
+   // console.log("Request Body:", req.body);
     const checkSql = `SELECT * FROM bankers WHERE name = ?`;
     dbConnect.query(checkSql, [req.body.name], (checkErr, checkResult) => {
       if (checkErr) {
@@ -121,7 +121,7 @@ const createBanker = asyncHandler((req, res) => {
         return res.status(400).send("Bank name already exists!!!");
       }
       const createClause = createClauseHandler(req.body);
-      console.log("Generated SQL Clause:", createClause);
+     // console.log("Generated SQL Clause:", createClause);
       const insertSql = `INSERT INTO bankers (${createClause[0]}) VALUES (${createClause[1]})`;
       dbConnect.query(insertSql, (err, result) => {
         if (err) {
@@ -193,7 +193,7 @@ const deleteBanker = asyncHandler((req, res) => {
 
 
 const getBankRevenueValue = asyncHandler(async (req, res) => {
-  console.log(req)
+  //console.log(req)
   // Check if bankid is present in the query parameters
   if (!req.params.id) {
     return res.status(400).send("bankid is required");
@@ -211,9 +211,9 @@ const getBankRevenueValue = asyncHandler(async (req, res) => {
     if (result.length === 0) {
       return res.status(404).send("Bank not found");
     }
-    console.log(result)
+    //console.log(result)
     const bankRevenueValue = result[0].bankRevenueValue;
-    console.log(bankRevenueValue)
+    //console.log(bankRevenueValue)
     res.status(200).send(bankRevenueValue);
   });
 });

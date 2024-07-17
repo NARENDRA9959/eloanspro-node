@@ -87,8 +87,8 @@ const getLeadDocumentsById = asyncHandler((req, res) => {
 const addDocumentData = asyncHandler((req, res) => {
   const id = req.params.leadId;
   const updateClause = updateClauseHandler(req.body);
-  console.log(updateClause);
-  console.log(id);
+  // console.log(updateClause);
+  // console.log(id);
   const sql = `UPDATE leaddocuments SET ${updateClause} WHERE leadId = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
@@ -101,8 +101,8 @@ const addDocumentData = asyncHandler((req, res) => {
 const addDscrValuesData = asyncHandler((req, res) => {
   const id = req.params.leadId;
   const updateClause = updateClauseHandler(req.body);
-  console.log(updateClause);
-  console.log(id);
+  // console.log(updateClause);
+  // console.log(id);
   const sql = `UPDATE dscr_values SET ${updateClause} WHERE leadId = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
@@ -347,9 +347,9 @@ const calculateBTOProgram = asyncHandler((req, res) => {
 // });
 
 const createLead = asyncHandler((req, res) => {
-  console.log(req);
+  //console.log(req);
   const phoneNumber = req.body.primaryPhone;
-  console.log(phoneNumber);
+  //console.log(phoneNumber);
   const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
   dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
     if (err) {
@@ -628,7 +628,7 @@ const changeLeadStatus = asyncHandler((req, res) => {
 });
 
 const getCreditSummary = asyncHandler(async (req, res) => {
-  console.log(req);
+ // console.log(req);
   const { id } = req.params;
   let sql = `SELECT creditSummary FROM dscr_values WHERE leadId = ?`;
   dbConnect.query(sql, [id], (err, result) => {

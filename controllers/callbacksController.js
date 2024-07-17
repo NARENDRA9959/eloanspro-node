@@ -28,6 +28,7 @@ const getCallBacks = asyncHandler(async (req, res) => {
   queryParams["sort"] = "createdOn";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
+ // console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getCallBacks error:");
@@ -50,9 +51,9 @@ const getCallBackById = asyncHandler((req, res) => {
 
 
 const createCallBack = asyncHandler((req, res) => {
-  console.log(req);
+  //console.log(req);
   const phoneNumber = req.body.phone;
-  console.log(phoneNumber);
+  //console.log(phoneNumber);
   const checkPhoneQuery = `SELECT * FROM callbacks WHERE phone = ?`;
   dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
     if (err) {
