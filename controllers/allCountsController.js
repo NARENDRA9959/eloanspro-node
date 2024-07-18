@@ -287,7 +287,7 @@ seq DESC; `
       return;
     }
     const monthWiseCallbacksCountList = result;
-   // console.log(monthWiseCallbacksCountList)
+    // console.log(monthWiseCallbacksCountList)
     res.status(200).json(monthWiseCallbacksCountList);
   });
 });
@@ -301,7 +301,7 @@ const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
       AND createdOn >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) ${handleGlobalFilters(
     req.query
   )};`;
-  
+
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);

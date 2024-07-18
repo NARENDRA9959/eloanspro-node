@@ -10,6 +10,11 @@ const {
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
 const { createObjectCsvWriter } = require("csv-writer");
+//const request = require('request');
+const fs = require('fs');
+const path = require('path');
+
+
 
 let leadUsersData = []; // Define a variable to store lead users
 
@@ -82,6 +87,59 @@ const createUsers = asyncHandler(async (req, res) => {
   });
 });
 
+
+
+// const createUsers = asyncHandler(async (req, res) => {
+//   let phoneNumber = req.body.phone;
+//   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
+//   req.body["userInternalStatus"] = 1;
+//   req.body["lastUserInternalStatus"] = 1;
+//   req.body["password"] = encryptedPassword;
+//   const checkIfExistsQuery = `SELECT * FROM users WHERE name = ?`;
+//   dbConnect.query(checkIfExistsQuery, [req.body.name], (err, results) => {
+//     if (err) {
+//       console.error("Error checking if user exists:", err);
+//       res.status(500).send("Internal Server Error");
+//       return;
+//     }
+//     if (results.length > 0) {
+//       res.status(400).send("User with this username already exists");
+//       return;
+//     }
+//     const createClause = createClauseHandler(req.body);
+//     const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
+//     dbConnect.query(sql, (err, result) => {
+//       if (err) {
+//         console.error("Error creating user:", err);
+//         res.status(500).send("Internal Server Error");
+//         return;
+//       }
+//       const rbacValues = {
+//         1: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
+//         2: 'leads,callbacks,team',
+//         3: 'leads,callbacks',
+//         4: 'leads,callbacks,files,partial,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess',
+//         5: 'leads,callbacks,files,partial,credit'
+//       };
+//       const rbacValue = rbacValues[req.body.userType];
+//       if (rbacValue) {
+//         const updateRbacQuery = `UPDATE users SET rbac = ? WHERE id = ?`;
+//         dbConnect.query(updateRbacQuery, [rbacValue, result.insertId], (err, updateResult) => {
+//           if (err) {
+//             console.error("Error updating RBAC:", err);
+//             res.status(500).send("Internal Server Error");
+//             return;
+//           }
+//           res.status(200).send(true);
+//         });
+//       } else {
+//         res.status(200).send(true);
+//       }
+//     });
+//   });
+// });
+
+
 const updateUsers = asyncHandler(async (req, res) => {
   const id = req.params.id;
   let phoneNumber = req.body.phone.toString();
@@ -97,6 +155,44 @@ const updateUsers = asyncHandler(async (req, res) => {
   });
 });
 
+
+// const updateUsers = asyncHandler(async (req, res) => {
+//   const id = req.params.id;
+//   let phoneNumber = req.body.phone.toString();
+//   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
+//   req.body["password"] = encryptedPassword;
+//   const updateClause = updateClauseHandler(req.body);
+//   const sql = `UPDATE users SET ${updateClause} WHERE id = ${id}`;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("updateUsers error in controller");
+//       res.status(500).send("Internal Server Error");
+//       return;
+//     }
+//     const rbacValues = {
+//       1: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
+//       2: 'leads,callbacks,team',
+//       3: 'leads,callbacks',
+//       4: 'leads,callbacks,files,partial,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess',
+//       5: 'leads,callbacks,files,partial,credit'
+//     };
+//     const rbacValue = rbacValues[req.body.userType];
+//     if (rbacValue) {
+//       const updateRbacQuery = `UPDATE users SET rbac = ? WHERE id = ?`;
+//       dbConnect.query(updateRbacQuery, [rbacValue, id], (err, updateResult) => {
+//         if (err) {
+//           console.error("Error updating RBAC:", err);
+//           res.status(500).send("Internal Server Error");
+//           return;
+//         }
+//         res.status(200).send(result);
+//       });
+//     } else {
+//       res.status(200).send(result);
+//     }
+//   });
+// });
+
 const deleteUsers = asyncHandler((req, res) => {
   const sql = `DELETE FROM users WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
@@ -106,6 +202,7 @@ const deleteUsers = asyncHandler((req, res) => {
     res.status(200).send("users Deleted Successfully");
   });
 });
+
 const getUsersById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM users WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
@@ -116,6 +213,7 @@ const getUsersById = asyncHandler((req, res) => {
     res.status(200).send(result);
   });
 });
+
 const getUsers = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM users";
   const queryParams = req.query;
@@ -130,6 +228,7 @@ const getUsers = asyncHandler(async (req, res) => {
     res.status(200).send(leadUsersData);
   });
 });
+
 // const exportLeads = asyncHandler(async (req, res) => {
 //   let sql = "SELECT * FROM leads";
 //   console.log(req)
@@ -177,8 +276,6 @@ const getUsers = asyncHandler(async (req, res) => {
 //     }
 //   });
 // });
-
-
 
 const getSourceName = async (userId) => {
   try {
@@ -271,27 +368,191 @@ const updateUserStatus = asyncHandler(async (req, res) => {
 });
 
 
+// const exportLeads = asyncHandler(async (req, res) => {
+//   let sql = "SELECT * FROM leads";
+//   const queryParams = req.query;
+//   queryParams["sort"] = "createdOn";
+//   console.log(queryParams)
+//   const filtersQuery = handleGlobalFilters(queryParams);
+//   sql += filtersQuery;
+//   console.log(sql)
+//   dbConnect.query(sql, async (err, result) => {
+//     if (err) {
+//       console.log("Error exporting leads: ", err);
+//       res.status(500).json({ error: "Internal server error" });
+//       return;
+//     }
+//     try {
+//       for (let i = 0; i < result.length; i++) {
+//         result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
+//       }
+//       result = parseNestedJSON(result);
+//       const csvWriter = createObjectCsvWriter({
+//         path: "leads1.csv",
+//         header: [
+//           { id: "id", title: "ID" },
+//           { id: "leadId", title: "Lead Id" },
+//           { id: "businessName", title: "Business Name" },
+//           { id: "businessEmail", title: "Business Email" },
+//           { id: "contactPerson", title: "Contact Person" },
+//           { id: "primaryPhone", title: "Primary Phone" },
+//           { id: "secondaryPhone", title: "Secondary Phone" },
+//           { id: "city", title: "City" },
+//           { id: "state", title: "State" },
+//           { id: "businessEntity", title: "Business Entity" },
+//           { id: "businessTurnover", title: "Business Turnover" },
+//           { id: "natureOfBusiness", title: "Nature Of Business" },
+//           { id: "product", title: "Product" },
+//           { id: "businessOperatingSince", title: "Business Vintage" },
+//           { id: "loanRequirement", title: "Loan Requirement" },
+//           { id: "odRequirement", title: "OD Requirement" },
+//           { id: "sourcedBy", title: "Sourced By" },
+//           { id: "createdOn", title: "Created On" },
+//         ],
+//       });
+//       csvWriter
+//         .writeRecords(result)
+//         .then(() => {
+//           console.log("CSV file created successfully");
+//           res.download("leads1.csv", "downloads/leads1.csv");
+//           res.status(200).json(true);
+//         })
+//         .catch((error) => {
+//           console.error("Error writing CSV file:", error);
+//           res.status(500).json({ error: "Internal server error" });
+//         });
+//     } catch (error) {
+//       console.error("Error getting sourcedBy names:", error);
+//       res.status(500).json({ error: "Internal server error" });
+//     }
+//   });
+// });
+
+// const exportLeads = asyncHandler(async (req, res) => {
+//   let sql = "SELECT * FROM leads";
+//   const queryParams = req.query;
+//   queryParams["sort"] = "createdOn";
+//   const filtersQuery = handleGlobalFilters(queryParams);
+//   sql += filtersQuery;
+
+//   dbConnect.query(sql, async (err, result) => {
+//     if (err) {
+//       console.error("Error exporting leads: ", err);
+//       res.status(500).json({ error: "Internal server error" });
+//       return;
+//     }
+//     try {
+//       for (let i = 0; i < result.length; i++) {
+//         result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
+//       }
+//       result = parseNestedJSON(result);
+
+//       const uploadDirectory = path.join(__dirname, '../csvFiles');
+//       if (!fs.existsSync(uploadDirectory)) {
+//         fs.mkdirSync(uploadDirectory, { recursive: true });
+//       }
+
+//       const csvFilePath = path.join(uploadDirectory, 'leads1.csv');
+//       const csvWriter = createObjectCsvWriter({
+//         path: csvFilePath,
+//         header: [
+//           { id: "id", title: "ID" },
+//           { id: "leadId", title: "Lead Id" },
+//           { id: "businessName", title: "Business Name" },
+//           { id: "businessEmail", title: "Business Email" },
+//           { id: "contactPerson", title: "Contact Person" },
+//           { id: "primaryPhone", title: "Primary Phone" },
+//           { id: "secondaryPhone", title: "Secondary Phone" },
+//           { id: "city", title: "City" },
+//           { id: "state", title: "State" },
+//           { id: "businessEntity", title: "Business Entity" },
+//           { id: "businessTurnover", title: "Business Turnover" },
+//           { id: "natureOfBusiness", title: "Nature Of Business" },
+//           { id: "product", title: "Product" },
+//           { id: "businessOperatingSince", title: "Business Vintage" },
+//           { id: "loanRequirement", title: "Loan Requirement" },
+//           { id: "odRequirement", title: "OD Requirement" },
+//           { id: "sourcedBy", title: "Sourced By" },
+//           { id: "createdOn", title: "Created On" },
+//         ],
+//       });
+
+//       await csvWriter.writeRecords(result);
+//       console.log("CSV file created successfully at", csvFilePath);
+
+//       if (!fs.existsSync(csvFilePath)) {
+//         console.error('File does not exist:', csvFilePath);
+//         res.status(500).json({ error: "File not found" });
+//         return;
+//       }
+
+//       const formData = {
+//         file: {
+//           value: fs.createReadStream(csvFilePath),
+//           options: {
+//             filename: 'leads1.csv',
+//             contentType: 'text/csv'
+//           }
+//         }
+//       };
+//       const options = {
+//         url: 'https://files.thefintalk.in/files?type=LEADS&leadId=REPORTS',
+//         formData: formData
+//       };
+//       console.log("options", options)
+//       request.post(options, (err, httpResponse, body) => {
+//         if (err) {
+//           console.error('Error uploading file:', err);
+//           res.status(500).json({ error: "Error uploading file" });
+//         } else {
+//           try {
+//             let response = body;
+//             if (typeof body === 'string') {
+//               response = JSON.parse(body);
+//             }
+//             console.log(response)
+//             const fileUrl = response.fileUrl || response.url || response.link;
+//             console.log('File uploaded successfully', fileUrl);
+//             res.status(200).json({ success: true, fileUrl });
+//           } catch (error) {
+//             console.error('Error parsing response:', error);
+//             res.status(500).json({ error: "Error parsing server response" });
+//           }
+//         }
+//       });
+
+//     } catch (error) {
+//       console.error("Error processing leads:", error);
+//       res.status(500).json({ error: "Internal server error" });
+//     }
+//   });
+// });
+
 const exportLeads = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM leads";
   const queryParams = req.query;
   queryParams["sort"] = "createdOn";
-  console.log(queryParams)
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  console.log(sql)
   dbConnect.query(sql, async (err, result) => {
     if (err) {
-      console.log("Error exporting leads: ", err);
+      console.error("Error exporting leads: ", err);
       res.status(500).json({ error: "Internal server error" });
       return;
     }
     try {
       for (let i = 0; i < result.length; i++) {
         result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
+        //result[i].createdOn = moment(result[i].createdOn).format('YYYY-MM-DD');
       }
       result = parseNestedJSON(result);
+      const uploadDirectory = path.join(__dirname, '../csvFiles');
+      if (!fs.existsSync(uploadDirectory)) {
+        fs.mkdirSync(uploadDirectory, { recursive: true });
+      }
+      const csvFilePath = path.join(uploadDirectory, 'leads1.csv');
       const csvWriter = createObjectCsvWriter({
-        path: "leads1.csv",
+        path: csvFilePath,
         header: [
           { id: "id", title: "ID" },
           { id: "leadId", title: "Lead Id" },
@@ -313,23 +574,73 @@ const exportLeads = asyncHandler(async (req, res) => {
           { id: "createdOn", title: "Created On" },
         ],
       });
-      csvWriter
-        .writeRecords(result)
-        .then(() => {
-          console.log("CSV file created successfully");
-          res.download("leads1.csv", "downloads/leads1.csv");
-          res.status(200).json(true);
-        })
-        .catch((error) => {
-          console.error("Error writing CSV file:", error);
-          res.status(500).json({ error: "Internal server error" });
-        });
+      await csvWriter.writeRecords(result);
+      console.log("CSV file created successfully at", csvFilePath);
+      if (!fs.existsSync(csvFilePath)) {
+        console.error('File does not exist:', csvFilePath);
+        res.status(500).json({ error: "File not found" });
+        return;
+      }
+      res.download(csvFilePath, "leads1.csv");
+      res.status(200).json(true);
     } catch (error) {
-      console.error("Error getting sourcedBy names:", error);
+      console.error("Error processing leads:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });
 });
+const exportCallbacks = asyncHandler(async (req, res) => {
+  let sql = "SELECT * FROM callbacks";
+  const queryParams = req.query;
+  queryParams["sort"] = "createdOn";
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+
+  dbConnect.query(sql, async (err, result) => {
+    if (err) {
+      console.error("Error exporting leads: ", err);
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+    try {
+      for (let i = 0; i < result.length; i++) {
+        result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
+      }
+      result = parseNestedJSON(result);
+      const uploadDirectory = path.join(__dirname, '../csvFiles');
+      if (!fs.existsSync(uploadDirectory)) {
+        fs.mkdirSync(uploadDirectory, { recursive: true });
+      }
+      const csvFilePath = path.join(uploadDirectory, 'callbacks1.csv');
+      const csvWriter = createObjectCsvWriter({
+        path: csvFilePath,
+        header: [
+          { id: "id", title: "ID" },
+          { id: "callBackId", title: "CallBack Id" },
+          { id: "businessName", title: "Business Name" },
+          { id: "phone", title: "Phone" },
+          { id: "date", title: "Callback Date" },
+          { id: "remarks", title: "Remarks" },
+          { id: "sourcedBy", title: "Sourced By" },
+          { id: "createdOn", title: "Created On" },
+        ],
+      });
+      await csvWriter.writeRecords(result);
+      console.log("CSV file created successfully at", csvFilePath);
+      if (!fs.existsSync(csvFilePath)) {
+        console.error('File does not exist:', csvFilePath);
+        res.status(500).json({ error: "File not found" });
+        return;
+      }
+      res.download(csvFilePath, "callbacks1.csv");
+      res.status(200).json(true);
+    } catch (error) {
+      console.error("Error processing leads:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+});
+
 module.exports = {
   createUsers,
   deleteUsers,
@@ -342,4 +653,5 @@ module.exports = {
   updateUserStatus,
   getActiveUsers,
   exportLeads,
+  exportCallbacks
 };

@@ -14,10 +14,7 @@ app.use("/callbacks", require("./routes/callbackRoutes"));
 app.use("/files", require("./routes/fileHandlerRoutes"));
 app.use("/counts", require("./routes/allCountRoutes"));
 app.use("/users", require("./routes/teamRoutes"));
-
 app.use("/logins", require("./routes/loginsRoutes"));
-
-
 app.use("/lenders", require("./routes/lenderRoutes"));
 app.use("/bankdocuments", require("./routes/bankDocumentsRoutes"));
 app.use("/bankers", require("./routes/bankersRoutes"));
