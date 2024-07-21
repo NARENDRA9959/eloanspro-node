@@ -185,7 +185,7 @@ const getCreditEvaluationCountStatus = asyncHandler(async (req, res) => {
     res.status(200).send(String(creditEvaluationCount));
   });
 });
-
+//leads
 const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
   //   let sql = `
   //   SELECT 
@@ -291,6 +291,68 @@ seq DESC; `
     res.status(200).json(monthWiseCallbacksCountList);
   });
 });
+
+//files
+
+const getMonthWiseFilesCountStatus = asyncHandler(async (req, res) => {
+  let sql = `SELECT 
+      DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month,
+      COALESCE(
+        (
+          SELECT COUNT(leads.id)
+          FROM leads 
+          WHERE leadInternalStatus = 3
+          AND YEAR(leads.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
+          AND MONTH(leads.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
+        ), 0
+      ) AS leadCount
+    FROM 
+      (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq
+    ORDER BY 
+      seq DESC; `
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    const monthWiseFilesCountList = result;
+    res.status(200).json(monthWiseFilesCountList);
+  });
+});
+
+//logins
+
+const getMonthWiseLoginsCountStatus = asyncHandler(async (req, res) => {
+  let sql = `SELECT 
+      DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month,
+      COALESCE(
+        (
+          SELECT COUNT(leads.id)
+          FROM leads 
+          WHERE leadInternalStatus = 11
+          AND YEAR(leads.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
+          AND MONTH(leads.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
+        ), 0
+      ) AS leadCount
+    FROM 
+      (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq
+    ORDER BY 
+      seq DESC; `
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    const monthWiseLoginsCountList = result;
+    res.status(200).json(monthWiseLoginsCountList);
+  });
+});
+
+
+
+
 const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
   let sql = `SELECT 
       COUNT(*) AS leadCount
@@ -673,4 +735,6 @@ module.exports = {
   getLoginsCountStatus,
   getApprovalsCountStatus,
   getDisbursalsCountStatus,
+  getMonthWiseLoginsCountStatus,
+  getMonthWiseFilesCountStatus
 };

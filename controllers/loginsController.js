@@ -1026,7 +1026,6 @@ const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
     res.status(500).json({ error: "Error in getFIPProcessDistinctLeads function" });
   }
 });
-
 const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchFIPProcessDistinctLeadIds();

@@ -27,7 +27,7 @@ const getLeads = asyncHandler(async (req, res) => {
   queryParams["sort"] = "lastUpdatedOn";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  console.log(sql)
+  // console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLeads Error in controller");
@@ -372,6 +372,7 @@ const createLead = asyncHandler((req, res) => {
         req.body["lastLeadInternalStatus"] = 1;
         req.body["createdBy"] = req.user.name;
         req.body["lastUpdatedBy"] = req.user.name;
+        // console.log(req.user.name)
         const createClause = createClauseHandler(req.body);
         const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
         dbConnect.query(sql, (err, result) => {
@@ -628,7 +629,7 @@ const changeLeadStatus = asyncHandler((req, res) => {
 });
 
 const getCreditSummary = asyncHandler(async (req, res) => {
- // console.log(req);
+  // console.log(req);
   const { id } = req.params;
   let sql = `SELECT creditSummary FROM dscr_values WHERE leadId = ?`;
   dbConnect.query(sql, [id], (err, result) => {
