@@ -262,11 +262,15 @@ const calculateBTOProgram = asyncHandler((req, res) => {
   });
 });
 
+
+// IMPORTANT CODE
+
 // const createLead = asyncHandler((req, res) => {
-//   console.log(req);
 //   const phoneNumber = req.body.primaryPhone;
-//   console.log(phoneNumber);
-//   const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
+//   const checkPhoneQuery = `SELECT leads.*, leadstatus.displayName 
+//     FROM leads 
+//     LEFT JOIN leadstatus ON leads.leadInternalStatus = leadstatus.id 
+//     WHERE leads.primaryPhone = ?`;
 //   dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
 //     if (err) {
 //       console.error("Error checking phone number:", err);
@@ -277,7 +281,7 @@ const calculateBTOProgram = asyncHandler((req, res) => {
 //         res
 //           .status(500)
 //           .send(
-//             `Lead already exists with phone number ${phoneNumber}, created by ${lead.createdBy}`
+//             `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}, lead Status - ${lead.displayName}`
 //           );
 //       } else {
 //         let leadId = "L-" + generateRandomNumber(6);
@@ -288,58 +292,15 @@ const calculateBTOProgram = asyncHandler((req, res) => {
 //         req.body["lastLeadInternalStatus"] = 1;
 //         req.body["createdBy"] = req.user.name;
 //         req.body["lastUpdatedBy"] = req.user.name;
-
 //         const createClause = createClauseHandler(req.body);
 //         const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-
-//         // Execute the SQL query to insert data into the "leads" table
 //         dbConnect.query(sql, (err, result) => {
 //           if (err) {
 //             console.error("Error inserting data into leads table:", err);
 //             res.status(500).send("Internal server error");
 //             return;
 //           }
-
-//           // Construct the SQL query for inserting the id into the "leaddocuments" table
-//           const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
-
-//           // Execute the SQL query to insert the id into the "leaddocuments" table
-//           dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
-//             if (leaddocumentsErr) {
-//               console.error(
-//                 "Error inserting id into leaddocuments table:",
-//                 leaddocumentsErr
-//               );
-//               res
-//                 .status(500)
-//                 .send(`Failed to insert id ${id} into leaddocuments table`);
-//               return;
-//             }
-
-//             console.log("ID inserted into leaddocuments successfully:", id);
-
-//             // Construct the SQL query for inserting the id into the "dscr_value" table
-//             const dscrValueSql = `INSERT INTO dscr_values (leadid) VALUES ('${id}')`;
-
-//             // Execute the SQL query to insert the id into the "dscr_value" table
-//             dbConnect.query(dscrValueSql, (dscrValueErr) => {
-//               if (dscrValueErr) {
-//                 console.error(
-//                   "Error inserting id into dscr_value table:",
-//                   dscrValueErr
-//                 );
-//                 res
-//                   .status(500)
-//                   .send(`Failed to insert id ${id} into dscr_value table`);
-//                 return;
-//               }
-
-//               console.log("ID inserted into dscr_value successfully:", id);
-//               res.status(200).send(true);
-
-//               // Send response after both insertions are complete
-//             });
-//           });
+//           res.status(200).send(true);
 //         });
 //       }
 //     }
@@ -361,7 +322,7 @@ const createLead = asyncHandler((req, res) => {
         res
           .status(500)
           .send(
-            `Lead already exists with phone number ${phoneNumber}, created by ${lead.createdBy}`
+            `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}`
           );
       } else {
         let leadId = "L-" + generateRandomNumber(6);
@@ -388,183 +349,7 @@ const createLead = asyncHandler((req, res) => {
   });
 });
 
-// const createLead = asyncHandler((req, res) => {
-//   let leadId = "L-" + generateRandomNumber(6);
-//   let id = generateRandomNumber(9);
-//   req.body["id"] = id;
-//   req.body["leadId"] = leadId;
-//   req.body["leadInternalStatus"] = 1;
-//   req.body["lastLeadInternalStatus"] = 1;
-//   const createClause = createClauseHandler(req.body);
-//   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.error("createLead error in controller:", err);
-//       res.status(500).send("Internal severerver error");
-//       return; // Return to prevent further execution
-//     }
-//     const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
-//     console.log("leaddocumentsSql:", leaddocumentsSql);
-//     dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
-//       if (leaddocumentsErr) {
-//         console.error(
-//           "Error inserting leadId into leaddocuments table:",
-//           leaddocumentsErr
-//         );
-//         res
-//           .status(500)
-//           .send(`Failed to insert leadId ${id} into leaddocuments table`);
-//         return;
-//       }
-//       console.log("Lead ID inserted into leaddocuments successfully:", id);
-//       res.status(200).send(true); // Send response after both insertions are complete
-//     });
-//   });
-// });
 
-// const createLead = asyncHandler((req, res) => {
-//   let leadId = 'L-' + generateRandomNumber(6);
-//   req.body['leadId'] = leadId;
-//   req.body['leadInternalStatus'] = 1;
-//   req.body['lastLeadInternalStatus'] = 1;
-
-//   const createClause = createClauseHandler(req.body);
-//   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.error("Error creating lead:", err);
-//       res.status(500).send("Internal Server Error");
-//       return;
-//     }
-//     const id = result.insertId;
-//     // Insert leadId into leaddocuments table
-//     const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
-//     dbConnect.query(leaddocumentsSql, (leaddocumentsErr, leaddocumentsResult) => {
-//       if (leaddocumentsErr) {
-//         console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
-//         // Rollback lead insertion in leads table
-//         const rollbackSql = `DELETE FROM leads WHERE leadId = '${id}'`;
-//         dbConnect.query(rollbackSql, rollbackErr => {
-//           if (rollbackErr) {
-//             console.error("Error rolling back lead insertion in leads table:", rollbackErr);
-//           }
-//           res.status(500).send("Internal Server Error");
-//         });
-//         return;
-//       }
-
-//       res.status(200).send(true);
-//     });
-//   });
-// });
-
-// const createLead = asyncHandler((req, res) => {
-//   let leadId = "L-" + generateRandomNumber(6);
-//   req.body["leadId"] = leadId;
-//   req.body["leadInternalStatus"] = 1;
-//   req.body["lastLeadInternalStatus"] = 1;
-//   const createClause = createClauseHandler(req.body);
-//   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.log("Create lead  error:");
-//     }
-//     const id = result.insertId;
-//     // Insert leadId into leaddocuments table
-//     const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES ('${id}')`;
-//     dbConnect.query(
-//       leaddocumentsSql,
-//       (leaddocumentsErr, leaddocumentsResult) => {
-//         if (leaddocumentsErr) {
-//           console.error(
-//             "Error inserting leadId into leaddocuments table:",
-//             leaddocumentsErr
-//           );
-//           // Rollback lead insertion in leads table
-//           const rollbackSql = `DELETE FROM leads WHERE id = '${id}'`;
-//           dbConnect.query(rollbackSql, (rollbackErr) => {
-//             if (rollbackErr) {
-//               console.error(
-//                 "Error rolling back lead insertion in leads table:",
-//                 rollbackErr
-//               );
-//             }
-//             res.status(500).send("Internal Server Error");
-//           });
-//           return;
-//         }
-
-//         res.status(200).send(true);
-//       }
-//     );
-//     res.status(200).send(true);
-//   });
-// });
-
-// const createLead = asyncHandler((req, res) => {
-//   let leadId = "L-" + generateRandomNumber(6);
-//   req.body["leadId"] = leadId;
-//   req.body["leadInternalStatus"] = 1;
-//   req.body["lastLeadInternalStatus"] = 1;
-//   const createClause = createClauseHandler(req.body);
-//   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.error("Create lead error:", err);
-//       return res.status(500).send("Internal severe Error");
-//     }
-
-//     const id = result.insertId;
-//     console.log("Inserted lead ID:", id);
-
-//     // Use LAST_INSERT_ID() to retrieve the last inserted ID
-//     const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (LAST_INSERT_ID())`;
-//     dbConnect.query(leaddocumentsSql, (leaddocumentsErr) => {
-//       if (leaddocumentsErr) {
-//         console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
-//         return res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
-//       }
-
-//       // Both insertions succeeded, send response
-//       res.status(200).send(true);
-//     });
-//   });
-// });
-
-// const createLead = asyncHandler((req, res) => {
-//   let leadId = "L-" + generateRandomNumber(6);
-//   req.body["leadId"] = leadId;
-//   req.body["leadInternalStatus"] = 1;
-//   req.body["lastLeadInternalStatus"] = 1;
-//   const createClause = createClauseHandler(req.body);
-//   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.error("Create lead error:", err);
-//       res.status(500).send("Internal Server Error");
-//       return;
-//     }
-//     // const id = result.insertId; // Obtain the insertId from the result object
-//     // console.log("Inserted lead ID:", id);
-//     // // Insert leadId into leaddocuments table
-//     // const leaddocumentsSql = `INSERT INTO leaddocuments (leadId) VALUES (${id})`;
-//     // console.log("leaddocumentsSql:", leaddocumentsSql); // Log the leaddocuments SQL query
-//     // dbConnect.query(leaddocumentsSql, (leaddocumentsErr, leaddocumentsResult) => {
-//     //   if (leaddocumentsErr) {
-//     //     console.error("Error inserting leadId into leaddocuments table:", leaddocumentsErr);
-//     //     res.status(500).send(`Failed to insert leadId ${id} into leaddocuments table`);
-//     //     return;
-//     //   } else {
-//     //     console.log("Lead ID inserted into leaddocuments successfully:", id);
-//     //     res.status(200).send(true);
-//     //   }
-//   // });
-//     res.status(200).send(true);
-
-//   });
-// });
 
 const updateLead = asyncHandler((req, res) => {
   const id = req.params.id;
@@ -582,6 +367,53 @@ const updateLead = asyncHandler((req, res) => {
     res.status(200).send(result);
   });
 });
+// const updateLead = asyncHandler((req, res) => {
+//   const id = req.params.id;
+//   console.log(id)
+//   const phoneNumber = req.body.primaryPhone;
+//   const checkRequiredFields = handleRequiredFields("leads", req.body);
+//   if (!checkRequiredFields) {
+//     res.status(422).send("Please fill all required fields");
+//     return;
+//   }
+//   console.log(`Phone Number: ${phoneNumber}`);
+//   const checkPhoneQuery = `SELECT leads.*, leadstatus.displayName 
+//     FROM leads 
+//     LEFT JOIN leadstatus ON leads.leadInternalStatus = leadstatus.id 
+//     WHERE leads.primaryPhone = ? AND leads.id != ?`;
+//   dbConnect.query(checkPhoneQuery, [phoneNumber, id], (err, result) => {
+//     if (err) {
+//       console.error("Error checking phone number:", err);
+//       res.status(500).json({ error: "Internal server error" });
+//       return;
+//     }
+//     console.log(`Check Phone Query: ${checkPhoneQuery}`);
+//     if (result.length > 0) {
+//       console.log(checkPhoneQuery)
+//       console.log("result,", result)
+//       const lead = result[0];
+//       console.log(`Existing Lead:`, lead);
+//       res.status(409).send(
+//         `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}, lead Status - ${lead.displayName}`
+//       );
+//       return;
+//     }
+//     const updateClause = updateClauseHandler(req.body);
+//     console.log(`Request Body:`, req.body);
+//     const sql = `UPDATE leads SET ${updateClause} WHERE id = ?`;
+//     dbConnect.query(sql, [id], (err, result) => {
+//       if (err) {
+//         console.error("updateLead error in controller:", err);
+//         res.status(500).send("Error updating lead");
+//         return;
+//       }
+//       console.log(sql)
+//       res.status(200).send(result);
+//     });  
+//   });  
+// });
+
+
 
 const deleteLead = asyncHandler((req, res) => {
   const sql = `DELETE FROM leads WHERE id = ${req.params.id}`;
@@ -617,19 +449,10 @@ const changeLeadStatus = asyncHandler((req, res) => {
     } else {
       res.status(422).send("No Leads Found");
     }
-    // const updateClause = updateClauseHandler(req.body);
-    // const sql = `UPDATE leads SET ${updateClause} WHERE id = ${id}`;
-    // dbConnect.query(sql, (err, result) => {
-    //   if (err) {
-    //     throw err;
-    //   }
-    //   res.status(404).send("No Lead Found");
-    // });
   });
 });
 
 const getCreditSummary = asyncHandler(async (req, res) => {
-  // console.log(req);
   const { id } = req.params;
   let sql = `SELECT creditSummary FROM dscr_values WHERE leadId = ?`;
   dbConnect.query(sql, [id], (err, result) => {

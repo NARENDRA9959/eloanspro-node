@@ -61,45 +61,13 @@ let leadUsersData = []; // Define a variable to store lead users
 //   });
 // });
 
-const createUsers = asyncHandler(async (req, res) => {
-  let phoneNumber = req.body.phone;
-  let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
-  req.body["userInternalStatus"] = 1;
-  req.body["lastUserInternalStatus"] = 1;
-  req.body["password"] = encryptedPassword;
-  console.log(req)
-  const checkIfExistsQuery = `SELECT * FROM users WHERE name = ?`;
-  dbConnect.query(checkIfExistsQuery, [req.body.name], (err, results) => {
-    if (err) {
-      console.error("Error checking if user exists:", err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    if (results.length > 0) {
-      res.status(400).send("User with this username already exists");
-      return;
-    }
-    const createClause = createClauseHandler(req.body);
-    const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
-    dbConnect.query(sql, (err, result) => {
-      if (err) {
-        console.error("Error creating user:", err);
-        res.status(500).send("Internal Server Error");
-        return;
-      }
-      res.status(200).send(true);
-    });
-  });
-});
-
-
-
 // const createUsers = asyncHandler(async (req, res) => {
 //   let phoneNumber = req.body.phone;
 //   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
 //   req.body["userInternalStatus"] = 1;
 //   req.body["lastUserInternalStatus"] = 1;
 //   req.body["password"] = encryptedPassword;
+//   console.log(req)
 //   const checkIfExistsQuery = `SELECT * FROM users WHERE name = ?`;
 //   dbConnect.query(checkIfExistsQuery, [req.body.name], (err, results) => {
 //     if (err) {
@@ -119,44 +87,60 @@ const createUsers = asyncHandler(async (req, res) => {
 //         res.status(500).send("Internal Server Error");
 //         return;
 //       }
-//       const rbacValues = {
-//         1: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
-//         2: 'leads,callbacks,team',
-//         3: 'leads,callbacks',
-//         4: 'leads,callbacks,files,partial,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess',
-//         5: 'leads,callbacks,files,partial,credit'
-//       };
-//       const rbacValue = rbacValues[req.body.userType];
-//       if (rbacValue) {
-//         const updateRbacQuery = `UPDATE users SET rbac = ? WHERE id = ?`;
-//         dbConnect.query(updateRbacQuery, [rbacValue, result.insertId], (err, updateResult) => {
-//           if (err) {
-//             console.error("Error updating RBAC:", err);
-//             res.status(500).send("Internal Server Error");
-//             return;
-//           }
-//           res.status(200).send(true);
-//         });
-//       } else {
-//         res.status(200).send(true);
-//       }
+//       res.status(200).send(true);
 //     });
 //   });
 // });
 
 
-const updateUsers = asyncHandler(async (req, res) => {
-  const id = req.params.id;
-  let phoneNumber = req.body.phone.toString();
+
+const createUsers = asyncHandler(async (req, res) => {
+  let phoneNumber = req.body.phone;
   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
+  req.body["userInternalStatus"] = 1;
+  req.body["lastUserInternalStatus"] = 1;
   req.body["password"] = encryptedPassword;
-  const updateClause = updateClauseHandler(req.body);
-  const sql = `UPDATE users SET ${updateClause} WHERE id = ${id}`;
-  dbConnect.query(sql, (err, result) => {
+  const checkIfExistsQuery = `SELECT * FROM users WHERE name = ?`;
+  dbConnect.query(checkIfExistsQuery, [req.body.name], (err, results) => {
     if (err) {
-      console.log("updateUsers error in controller");
+      console.error("Error checking if user exists:", err);
+      res.status(500).send("Internal Server Error");
+      return;
     }
-    res.status(200).send(result);
+    if (results.length > 0) {
+      res.status(400).send("User with this username already exists");
+      return;
+    }
+    const createClause = createClauseHandler(req.body);
+    const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
+    dbConnect.query(sql, (err, result) => {
+      if (err) {
+        console.error("Error creating user:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const rbacValues = {
+        1: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
+        2: 'leads,callbacks,team',
+        3: 'leads,callbacks',
+        4: 'leads,callbacks,files,partial,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess',
+        5: 'leads,callbacks,files,partial,credit'
+      };
+      const rbacValue = rbacValues[req.body.userType];
+      if (rbacValue) {
+        const updateRbacQuery = `UPDATE users SET rbac = ? WHERE id = ?`;
+        dbConnect.query(updateRbacQuery, [rbacValue, result.insertId], (err, updateResult) => {
+          if (err) {
+            console.error("Error updating RBAC:", err);
+            res.status(500).send("Internal Server Error");
+            return;
+          }
+          res.status(200).send(true);
+        });
+      } else {
+        res.status(200).send(true);
+      }
+    });
   });
 });
 
@@ -171,32 +155,48 @@ const updateUsers = asyncHandler(async (req, res) => {
 //   dbConnect.query(sql, (err, result) => {
 //     if (err) {
 //       console.log("updateUsers error in controller");
-//       res.status(500).send("Internal Server Error");
-//       return;
 //     }
-//     const rbacValues = {
-//       1: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
-//       2: 'leads,callbacks,team',
-//       3: 'leads,callbacks',
-//       4: 'leads,callbacks,files,partial,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess',
-//       5: 'leads,callbacks,files,partial,credit'
-//     };
-//     const rbacValue = rbacValues[req.body.userType];
-//     if (rbacValue) {
-//       const updateRbacQuery = `UPDATE users SET rbac = ? WHERE id = ?`;
-//       dbConnect.query(updateRbacQuery, [rbacValue, id], (err, updateResult) => {
-//         if (err) {
-//           console.error("Error updating RBAC:", err);
-//           res.status(500).send("Internal Server Error");
-//           return;
-//         }
-//         res.status(200).send(result);
-//       });
-//     } else {
-//       res.status(200).send(result);
-//     }
+//     res.status(200).send(result);
 //   });
 // });
+
+
+const updateUsers = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  let phoneNumber = req.body.phone.toString();
+  let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
+  req.body["password"] = encryptedPassword;
+  const updateClause = updateClauseHandler(req.body);
+  const sql = `UPDATE users SET ${updateClause} WHERE id = ${id}`;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("updateUsers error in controller");
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    const rbacValues = {
+      1: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
+      2: 'leads,callbacks,team',
+      3: 'leads,callbacks',
+      4: 'leads,callbacks,files,partial,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess',
+      5: 'leads,callbacks,files,partial,credit'
+    };
+    const rbacValue = rbacValues[req.body.userType];
+    if (rbacValue) {
+      const updateRbacQuery = `UPDATE users SET rbac = ? WHERE id = ?`;
+      dbConnect.query(updateRbacQuery, [rbacValue, id], (err, updateResult) => {
+        if (err) {
+          console.error("Error updating RBAC:", err);
+          res.status(500).send("Internal Server Error");
+          return;
+        }
+        res.status(200).send(result);
+      });
+    } else {
+      res.status(200).send(result);
+    }
+  });
+});
 
 const deleteUsers = asyncHandler((req, res) => {
   const sql = `DELETE FROM users WHERE id = ${req.params.id}`;
@@ -473,7 +473,7 @@ const exportLeads = asyncHandler(async (req, res) => {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Leads');
       worksheet.columns = [
-        { header: 'Lead Id', key: 'leadId' },
+        { header: 'Lead Id', key: 'id' },
         { header: 'Business Name', key: 'businessName' },
         { header: 'Business Email', key: 'businessEmail' },
         { header: 'Contact Person', key: 'contactPerson' },
@@ -604,7 +604,7 @@ const exportCallbacks = asyncHandler(async (req, res) => {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Callbacks');
       worksheet.columns = [
-       
+
         { header: 'CallBack Id', key: 'callBackId' },
         { header: 'Business Name', key: 'businessName' },
         { header: 'Phone', key: 'phone' },
@@ -711,5 +711,9 @@ module.exports = {
   exportLeads,
   exportCallbacks,
   getReports,
-  getReportsCount
+  getReportsCount,
+
+
+
+  getSourceName
 };
