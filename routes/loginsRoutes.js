@@ -27,7 +27,6 @@ const {
   getFIPProcessDistinctLeadsCount
 } = require("../controllers/loginsController");
 const validateToken = require("../middleware/validateTokenHandler");
-
 const router = express.Router();
 router
   .route("/")
@@ -35,13 +34,10 @@ router
   .get(validateToken, getDistinctLeads);
 router.route("/fipDistinctLeads").get(validateToken, getFIPProcessDistinctLeads);
 router.route("/fipcount").get(validateToken, getFIPProcessDistinctLeadsCount);
-
-
 router.route("/approvals").get(validateToken, getApprovalsLeads);
 router.route("/disbursals").get(validateToken, getDisbursalLeads);
 router.route("/bankRejects").get(validateToken, getBankRejectsLeads);
 router.route("/cniRejects").get(validateToken, getCNIRejectsLeads);
-
 router.route("/total").get(validateToken, getDistinctLeadCount);
 router.route("/approvalCount").get(validateToken, getApprovedLeadCount);
 router.route("/rejectedCount").get(validateToken, getBankRejectedLeadCount);

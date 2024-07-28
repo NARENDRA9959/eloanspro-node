@@ -4,16 +4,13 @@ const path = require("path");
 const app = express();
 app.use(express.json());
 // const ipWhitelist = require('./middleware/ipAddress');
-
 app.use(
   cors({
     origin: "*",
   })
 );
-
 // app.use("/user", ipWhitelist, require("./routes/userRoutes"));
 app.use("/user", require("./routes/userRoutes"));
-
 app.use("/leads", require("./routes/leadsRoutes"));
 app.use("/callbacks", require("./routes/callbackRoutes"));
 app.use("/files", require("./routes/fileHandlerRoutes"));

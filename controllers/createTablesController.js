@@ -64,5 +64,5 @@ const createleadDocumentsTable = asyncHandler(async (req, res) => {
 module.exports = {
   createDscrTable,
   createleadDocumentsTable
- 
+
 };
