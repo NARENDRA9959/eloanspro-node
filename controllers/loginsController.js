@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const dbConnect = require("../config/dbConnection");
-
+const moment = require('moment');
 const handleGlobalFilters = require("../middleware/filtersHandler");
 const parseNestedJSON = require("../middleware/parseHandler");
 const {
@@ -334,7 +334,7 @@ const getFIPDetailsById = asyncHandler((req, res) => {
 const getApprovalsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
   const sql = `
-    SELECT id, program, bankName, lan, sanctionedAmount, disbursedAmount, roi, tenure, processCode, approvalDate, approvedStatus, approvedRemarks
+    SELECT id, program, bankName, lan, sanctionedAmount, disbursedAmount, roi, tenure, processCode, approvalDate, disbursalDate, approvedStatus, approvedRemarks
     FROM logins
     WHERE leadId = ? AND fipStatus = 'approved'
   `;
@@ -354,7 +354,7 @@ const getDisbursalsDetailsById = asyncHandler((req, res) => {
   const sql = `
   SELECT id, businessName, approvalDate, lan, program, bankName, bankId, processCode, sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule 
     FROM logins
-    WHERE leadId = ? AND approvedStatus = 'disbursed'
+    WHERE leadId = ? AND approvedStatus = 'disbursed' AND fipStatus='approved'
   `;
   const queryParams = [leadId];
   //console.log(queryParams);
@@ -408,6 +408,7 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
     "tenure",
     "processCode",
     "approvalDate",
+    "disbursalDate",
     "approvedStatus",
     "approvedRemarks",
   ];
@@ -520,7 +521,7 @@ async function fetchDistinctDisbursedLeadIds() {
   const sql = `
     SELECT DISTINCT leadId
     FROM logins
-    WHERE approvedStatus = 'disbursed'
+    WHERE approvedStatus = 'disbursed' AND fipStatus = 'approved'
   `;
   return new Promise((resolve, reject) => {
     dbConnect.query(sql, (err, result) => {
@@ -815,18 +816,48 @@ const getSanctionedAmountSum = asyncHandler(async (req, res) => {
   let sql = `
     SELECT SUM(sanctionedAmount) AS total_sanctioned_amount
     FROM logins
-    WHERE leadId = ?;
   `;
+  const queryParams = req.query || {};
+  queryParams["leadId-eq"] = leadId;
+  queryParams["fipStatus-eq"] = 'approved';
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+  console.log(sql)
   dbConnect.query(sql, [leadId], (err, result) => {
     if (err) {
       console.log("getSanctionedAmountSum error:", err);
       return res.status(500).send("Error retrieving sanctioned amount sum");
     }
-    // console.log(result);
     const totalSanctionedAmount = result[0].total_sanctioned_amount;
     res.status(200).json({ totalSanctionedAmount });
   });
 });
+
+
+const getDisbursedAmountSum = asyncHandler(async (req, res) => {
+  const { leadId } = req.params;
+  let sql = `
+    SELECT SUM(disbursedAmount) AS total_disbursed_amount
+    FROM logins
+  `;
+  const queryParams = req.query || {};
+  queryParams["leadId-eq"] = leadId;
+  queryParams["fipStatus-eq"] = 'approved';
+  queryParams["approvedStatus-eq"] = 'disbursed';
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+  console.log(sql)
+  dbConnect.query(sql, [leadId], (err, result) => {
+    if (err) {
+      console.log("getDisbursedAmountSum error:", err);
+      return res.status(500).send("Error retrieving sanctioned amount sum");
+    }
+    // console.log(result);
+    const totalDisbursedAmount = result[0].total_disbursed_amount;
+    res.status(200).json({ totalDisbursedAmount });
+  });
+});
+
 
 const getLoginsDoneById = asyncHandler((req, res) => {
   const sql = `SELECT businessName, program, bankName, fipStatus, fipRemarks FROM logins WHERE bankId = ${req.params.leadId}`;
@@ -945,11 +976,11 @@ const getLoginsDoneById = asyncHandler((req, res) => {
 //       .json({ error: "Error in getTotalDisbursedAmountSum function" });
 //   }
 // });
-
+//============================
 const getTotalSanctionedAmountSum = asyncHandler(async (req, res) => {
   let sql = `
     SELECT SUM(sanctionedAmount) AS total_sanctioned_amount
-    FROM logins
+    FROM logins Where fipStatus = 'approved'
    ;
   `;
   dbConnect.query(sql, (err, result) => {
@@ -957,26 +988,107 @@ const getTotalSanctionedAmountSum = asyncHandler(async (req, res) => {
       console.log("getTotalSanctionedAmountSum error:", err);
       return res.status(500).send("Error retrieving sanctioned amount sum");
     }
-    //console.log(result);
+
     const totalSanctionedAmount = result[0].total_sanctioned_amount;
     res.status(200).json({ totalSanctionedAmount });
   });
 });
+
+//=============
+
+
+// const getTotalSanctionedAmountSum = asyncHandler(async (req, res) => {
+//   const currentDate = new Date();
+//   const lastMonthStartDate = moment(new Date(
+//     currentDate.getFullYear(),
+//     currentDate.getMonth() - 1,
+//     1
+//   )).format('YYYY-MM-DD');
+//   const lastMonthEndDate = moment(new Date(
+//     currentDate.getFullYear(),
+//     currentDate.getMonth(),
+//     0
+//   )).format('YYYY-MM-DD');
+
+//   console.log(lastMonthStartDate)
+//   console.log(lastMonthEndDate)
+//   let sql = `
+//  SELECT SUM(lg.sanctionedAmount) AS totalSanctionedAmount
+// FROM logins lg
+// WHERE lg.fipstatus = 'approved'
+//   AND lg.leadId IN (
+//     SELECT id
+//     FROM leads
+//     WHERE createdOn >= ? AND createdOn <= ?
+//   );
+
+//   `;
+//   console.log(sql)
+//   dbConnect.query(sql, [lastMonthStartDate, lastMonthEndDate], (err, result) => {
+//     if (err) {
+//       console.log("getTotalSanctionedAmountSum error:", err);
+//       return res.status(500).send("Error retrieving sanctioned amount sum");
+//     }
+
+//     const totalSanctionedAmount = result[0].totalSanctionedAmount;
+//     console.log("totalSanctionedAmount", totalSanctionedAmount);
+//     res.status(200).json({ totalSanctionedAmount });
+//   });
+// });
+//===============
 const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
   let sql = `
     SELECT SUM(disbursedAmount) AS total_disbursed_amount
-    FROM logins;
+    FROM logins WHERE approvedStatus = 'disbursed' AND fipStatus = 'approved';
   `;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getTotalSanctionedAmountSum error:", err);
       return res.status(500).send("Error retrieving sanctioned amount sum");
     }
-    // console.log(result);
+   
     const totalDisbursedAmount = result[0].total_disbursed_amount;
     res.status(200).json({ totalDisbursedAmount });
   });
 });
+//============
+
+// const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
+//   const currentDate = new Date();
+//   const lastMonthStartDate1 = moment(new Date(
+//     currentDate.getFullYear(),
+//     currentDate.getMonth() - 1,
+//     1
+//   )).format('YYYY-MM-DD');
+//   const lastMonthEndDate1 = moment(new Date(
+//     currentDate.getFullYear(),
+//     currentDate.getMonth(),
+//     0
+//   )).format('YYYY-MM-DD');
+
+//   console.log(lastMonthStartDate1)
+//   console.log(lastMonthEndDate1)
+
+//   let sql = `
+//       SELECT SUM(lg.disbursedAmount) AS totalDisbursedAmount
+//       FROM logins lg
+//       WHERE lg.fipstatus = 'approved' 
+//       AND lg.approvedStatus='disbursed'
+//         AND lg.leadId IN ( SELECT id
+//     FROM leads
+//     WHERE createdOn >= ? AND createdOn <= ?);
+//     `;
+//   console.log(sql)
+//   dbConnect.query(sql, [lastMonthStartDate1, lastMonthEndDate1], (err, result) => {
+//     if (err) {
+//       console.log("totalDisbursedAmount error:", err);
+//       return res.status(500).send("Error retrieving totalDisbursedAmount  sum");
+//     }
+//     const totalDisbursedAmount = result[0].totalDisbursedAmount;
+//     console.log("totalDisbursedAmount", totalDisbursedAmount);
+//     res.status(200).json({ totalDisbursedAmount });
+//   });
+// });
 
 async function fetchFIPProcessDistinctLeadIds() {
   const sql = `
@@ -1075,15 +1187,12 @@ module.exports = {
   getBankRejectsDetailsById,
   getCNIRejectsDetailsById,
   getSanctionedAmountSum,
+  getDisbursedAmountSum,
   getLoginsDoneById,
   getTotalSanctionedAmountSum,
   getTotalDisbursedAmountSum,
   getFIPProcessDistinctLeads,
   getFIPProcessDistinctLeadsCount,
-
-
-
-
   fetchFIPProcessDistinctLeadIds,
   fetchDistinctApprovedLeadIds,
   fetchDistinctDisbursedLeadIds,

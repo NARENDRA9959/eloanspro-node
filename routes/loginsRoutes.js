@@ -24,7 +24,8 @@ const {
   getTotalDisbursedAmountSum,
   getTotalSanctionedAmountSum,
   getFIPProcessDistinctLeads,
-  getFIPProcessDistinctLeadsCount
+  getFIPProcessDistinctLeadsCount,
+  getDisbursedAmountSum
 } = require("../controllers/loginsController");
 const validateToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
@@ -64,6 +65,9 @@ router
   .route("/sancAmountSum/:leadId")
   .get(validateToken, getSanctionedAmountSum);
 
+router
+  .route("/disAmountSum/:leadId")
+  .get(validateToken, getDisbursedAmountSum);
 router
   .route("/disbursed/:leadId")
   .get(validateToken, getDisbursalsDetailsById)

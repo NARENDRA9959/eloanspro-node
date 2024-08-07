@@ -230,6 +230,7 @@ const getUsers = asyncHandler(async (req, res) => {
       console.log("getUsers Error in controller");
     }
     leadUsersData = parseNestedJSON(result);
+   // console.log(leadUsersData)
     res.status(200).send(leadUsersData);
   });
 });
@@ -237,6 +238,7 @@ const getSourceName = async (userId) => {
   try {
     //console.log("leadUsersData:", leadUsersData)
     const leadUser = leadUsersData.find((user) => user.id == userId);
+    //console.log(leadUser)
     return leadUser ? leadUser.name : "";
   } catch (error) {
     console.error("Error getting sourcedBy names:", error);
@@ -282,6 +284,21 @@ const changeUsersStatus = asyncHandler((req, res) => {
     }
   });
 });
+
+const getActiveUsersCount = asyncHandler(async (req, res) => {
+  let sql = "SELECT COUNT(*) AS activeUsersCount FROM users WHERE status = 'Active'";
+  const filtersQuery = handleGlobalFilters(req.query);
+  sql += filtersQuery;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("getActiveUsersCount Error in controller");
+      return res.status(500).send("Internal Server Error");
+    }
+    const count = result[0].activeUsersCount;
+    res.status(200).send(String(count));
+  });
+});
+
 const getUsersCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as usersCount FROM users";
   const filtersQuery = handleGlobalFilters(req.query, true);
@@ -512,8 +529,8 @@ const exportLeads = asyncHandler(async (req, res) => {
           ...formData.getHeaders(),
         },
       });
-      console.log('Response Status:', response.status);
-      console.log('Response Data:', response.data);
+      // console.log('Response Status:', response.status);
+      // console.log('Response Data:', response.data);
       if (response.status === 200) {
         if (response.data && response.data.links && response.data.links.length > 0) {
           const fileUrl = response.data.links[0];
@@ -631,8 +648,8 @@ const exportCallbacks = asyncHandler(async (req, res) => {
           ...formData.getHeaders(),
         },
       });
-      console.log('Response Status:', response.status);
-      console.log('Response Data:', response.data);
+      // console.log('Response Status:', response.status);
+      // console.log('Response Data:', response.data);
       if (response.status === 200) {
         if (response.data && response.data.links && response.data.links.length > 0) {
           const fileUrl = response.data.links[0];
@@ -712,7 +729,7 @@ module.exports = {
   exportCallbacks,
   getReports,
   getReportsCount,
-
+  getActiveUsersCount,
 
 
   getSourceName

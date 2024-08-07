@@ -42,5 +42,21 @@ const userLogout = asyncHandler(async (req, res) => {
     process.env.ACCESS_TOKEN_SECRET
   );
   res.status(200).json({ message: "Logout successful" });
+
 });
-module.exports = { userLogout, userLogin };
+
+const userLogoutforIp = asyncHandler(async (req, res) => {
+  const expiredToken = (
+    req.headers.authorization || req.headers.Authorization
+  ).replace("Bearer ", "");
+  const decodedToken = jwt.decode(expiredToken);
+  decodedToken.exp = Math.floor(Date.now() / 1000) - 60;
+  const invalidatedToken = jwt.sign(
+    decodedToken,
+    process.env.ACCESS_TOKEN_SECRET
+  );
+  res.status(419).json({ message: "Logout successful" });
+  //if ip address based login then return the status 419 
+  //and when the first api calls tatus is 419 then stop another api calls 
+});
+module.exports = { userLogout, userLogin, userLogoutforIp };

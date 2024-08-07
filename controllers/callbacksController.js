@@ -28,7 +28,7 @@ const getCallBacks = asyncHandler(async (req, res) => {
   queryParams["sort"] = "createdOn";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
- // console.log(sql)
+  // console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getCallBacks error:");

@@ -22,8 +22,9 @@ const {
   getApprovalsCountStatus,
   getDisbursalsCountStatus,
   getMonthWiseFilesCountStatus,
-  getmonthwiseSanctionsAndDisbursedAmount,
-  getMonthWiseLoginsCountStatus
+  getmonthwiseSanctionedAmount,
+  getMonthWiseLoginsCountStatus,
+  getmonthwiseDisbursedAmount
 } = require("../controllers/allCountsController");
 const router = express.Router();
 const validateToken = require("../middleware/validateTokenHandler");
@@ -39,7 +40,9 @@ router.route("/credit").get(validateToken, getCreditEvaluationCountStatus);
 router.route("/monthcallbacks").get(validateToken, getMonthWiseCallBacksCount);
 router.route("/monthleads").get(validateToken, getMonthWiseLeadCountStatus);
 router.route("/monthfiles").get(validateToken, getMonthWiseFilesCountStatus);
-router.route("/monthwiseamount").get(validateToken, getmonthwiseSanctionsAndDisbursedAmount);
+router.route("/monthwisesanction").get(validateToken, getmonthwiseSanctionedAmount);
+router.route("/monthwisedisbursed").get(validateToken, getmonthwiseDisbursedAmount);
+
 router.route("/monthlogins").get(validateToken, getMonthWiseLoginsCountStatus);
 router.route("/daywise/leads").get(validateToken, getDaywiseLeadsCount);
 router.route("/daywise/callback").get(validateToken, getDaywiseCallBacksCount);

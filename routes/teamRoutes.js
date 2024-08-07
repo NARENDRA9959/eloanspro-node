@@ -14,12 +14,15 @@ const {
   exportLeads,
   exportCallbacks,
   getReports,
-  getReportsCount
+  getReportsCount,
+  getActiveUsersCount
 } = require("../controllers/teamController");
 const validateToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
 router.route("/").get(validateToken, getUsers).post(validateToken, createUsers);
 router.route("/total").get(validateToken, getUsersCount);
+router.route("/activeCount").get(validateToken, getActiveUsersCount);
+
 router
   .route("/:userId/changestatus/:statusId")
   .put(validateToken, changeUsersStatus);

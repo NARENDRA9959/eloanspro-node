@@ -181,32 +181,8 @@ const getCreditEvaluationCountStatus = asyncHandler(async (req, res) => {
 });
 //leads
 const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
-  //   let sql = `
-  //   SELECT 
-  //   YEAR(dates.date) AS year,
-  //   DATE_FORMAT(dates.date, '%b') AS month,
-  //   COALESCE(COUNT(leads.id), 0) AS leadCount
-  // FROM 
-  //   (
-  //       SELECT LAST_DAY(DATE_SUB(CURDATE(), INTERVAL (a.a + (10 * b.a) + (100 * c.a)) MONTH)) AS date
-  //       FROM 
-  //           (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS a
-  //       CROSS JOIN 
-  //           (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS b
-  //       CROSS JOIN 
-  //           (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS c
-  //   ) AS dates
-  // LEFT JOIN 
-  //   leads ON YEAR(leads.createdOn) = YEAR(dates.date) AND MONTH(leads.createdOn) = MONTH(dates.date) AND leadInternalStatus = 1
-  // WHERE 
-  //   dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH)
-  // GROUP BY 
-  //   YEAR(dates.date),MONTH(dates.date)
-  // ORDER BY 
-  //   YEAR(dates.date) DESC, MONTH(dates.date) DESC;
-  // `;
-
-  let sql = `SELECT 
+  let sql = `
+    SELECT 
       DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month,
       COALESCE(
         (
@@ -220,44 +196,22 @@ const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
     FROM 
       (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq
     ORDER BY 
-      seq DESC; `
+      seq DESC;
+  `;
+
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
       res.status(500).send("Internal Server Error");
       return;
     }
-    const monthWiseLeadCountList = result;
-    res.status(200).json(monthWiseLeadCountList);
+    const months = result.map(item => item.month);
+    const leadCounts = result.map(item => item.leadCount);
+    res.status(200).json({ months, leadCounts });
   });
 });
+
 const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
-  // let sql = `
-  //   SELECT 
-  //     YEAR(dates.date) AS year,
-  //     DATE_FORMAT(dates.date, '%b') AS month,
-  //     COALESCE(COUNT(callbacks.id), 0) AS callbacksCount
-  //   FROM 
-  //     (
-  //         SELECT LAST_DAY(DATE_SUB(CURDATE(), INTERVAL (a.a + (10 * b.a) + (100 * c.a)) MONTH)) AS date
-  //         FROM 
-  //             (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS a
-  //         CROSS JOIN 
-  //             (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS b
-  //         CROSS JOIN 
-  //             (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) AS c
-  //     ) AS dates
-  //   LEFT JOIN 
-  //     callbacks ON YEAR(callbacks.createdOn) = YEAR(dates.date) AND MONTH(callbacks.createdOn) = MONTH(dates.date)
-  //   WHERE 
-  //     dates.date >= DATE_SUB(LAST_DAY(CURDATE()), INTERVAL 5 MONTH)
-  //   GROUP BY 
-  //     YEAR(dates.date), MONTH(dates.date)
-  //   ORDER BY 
-  //     YEAR(dates.date) DESC, MONTH(dates.date) DESC;
-  // `;
-
-
 
   let sql = `SELECT 
 DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month,
@@ -280,8 +234,8 @@ seq DESC; `
       res.status(500).send("Internal Server Error");
       return;
     }
-    const monthWiseCallbacksCountList = result;
-    res.status(200).json(monthWiseCallbacksCountList);
+    const callbackCounts = result.map(item => item.callbackCount);
+    res.status(200).json({ callbackCounts });
   });
 });
 
@@ -298,7 +252,7 @@ const getMonthWiseFilesCountStatus = asyncHandler(async (req, res) => {
           AND YEAR(leads.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
           AND MONTH(leads.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
         ), 0
-      ) AS leadCount
+      ) AS filesCount
     FROM 
       (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq
     ORDER BY 
@@ -309,8 +263,8 @@ const getMonthWiseFilesCountStatus = asyncHandler(async (req, res) => {
       res.status(500).send("Internal Server Error");
       return;
     }
-    const monthWiseFilesCountList = result;
-    res.status(200).json(monthWiseFilesCountList);
+    const filesCount = result.map(item => item.filesCount);
+    res.status(200).json({ filesCount });
   });
 });
 
@@ -327,7 +281,7 @@ const getMonthWiseLoginsCountStatus = asyncHandler(async (req, res) => {
           AND YEAR(leads.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
           AND MONTH(leads.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
         ), 0
-      ) AS leadCount
+      ) AS loginsCount
     FROM 
       (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq
     ORDER BY 
@@ -338,15 +292,15 @@ const getMonthWiseLoginsCountStatus = asyncHandler(async (req, res) => {
       res.status(500).send("Internal Server Error");
       return;
     }
-    const monthWiseLoginsCountList = result;
-    res.status(200).json(monthWiseLoginsCountList);
+    const loginsCount = result.map(item => item.loginsCount);
+    res.status(200).json({ loginsCount });
   });
 });
 const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
   let sql = `SELECT 
       COUNT(*) AS leadCount
     FROM leads`;
-  console.log(req.query)
+  //console.log(req.query)
   const queryParams = req.query;
   queryParams["leadInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
@@ -370,14 +324,14 @@ const getPast7DaysCallBacksCount = asyncHandler(async (req, res) => {
   let sql = `SELECT 
   COUNT(*) AS count
 FROM callbacks`;
-  console.log(req.query)
+  //console.log(req.query)
   const queryParams = req.query;
   queryParams["callbackInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`;
   sql += sql2;
-  console.log(sql)
+  // console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -385,7 +339,7 @@ FROM callbacks`;
       return;
     }
     const past7DaysCallBacksCount = result[0].count;
-    console.log(past7DaysCallBacksCount)
+    // console.log(past7DaysCallBacksCount)
     res.status(200).send(String(past7DaysCallBacksCount));
   });
 });
@@ -402,19 +356,19 @@ const getLastMonthLeadCountStatus = asyncHandler(async (req, res) => {
     0
   )).format('YYYY-MM-DD');
 
-  console.log(lastMonthStartDate)
-  console.log(lastMonthEndDate)
+  // console.log("lastMonthStartDate - LEADS:", lastMonthStartDate)
+  //console.log("lastMonthEndDate - LEADS", lastMonthEndDate)
   let sql = `SELECT 
   COUNT(*) AS leadCount
 FROM leads`;
-  console.log(req.query)
+  // console.log(req.query)
   const queryParams = req.query;
   queryParams["leadInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  console.log(sql)
+  // console.log(sql)
   dbConnect.query(
     sql,
     [lastMonthStartDate, lastMonthEndDate],
@@ -425,7 +379,7 @@ FROM leads`;
         return;
       }
       const lastMonthLeadCount = result[0].leadCount;
-      console.log("lastMonthLeadCount", lastMonthLeadCount)
+      //console.log("lastMonthLeadCount", lastMonthLeadCount)
       res.status(200).send(String(lastMonthLeadCount));
     }
   );
@@ -443,19 +397,19 @@ const getLastMonthCallBacksCount = asyncHandler(async (req, res) => {
     0
   )).format('YYYY-MM-DD');
 
-  console.log(lastMonthStartDate)
-  console.log(lastMonthEndDate)
+  // console.log("lastMonthStartDate - CALLBACKS:", lastMonthStartDate)
+  // console.log("lastMonthEndDate - CALLBACKS", lastMonthEndDate)
   let sql = `SELECT 
   COUNT(*) AS count
 FROM callbacks`;
-  console.log(req.query)
+  //  console.log(req.query)
   const queryParams = req.query;
   queryParams["callbackInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  console.log(sql)
+  //  console.log(sql)
   dbConnect.query(
     sql,
     [lastMonthStartDate, lastMonthEndDate],
@@ -466,7 +420,7 @@ FROM callbacks`;
         return;
       }
       const lastMonthCallBacksCount = result[0].count;
-      console.log(lastMonthCallBacksCount)
+      // console.log(lastMonthCallBacksCount)
       res.status(200).send(String(lastMonthCallBacksCount));
     }
   );
@@ -483,21 +437,22 @@ const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     0
   )).format('YYYY-MM-DD');
-  console.log(last6MonthsStartDate)
-  console.log(lastMonthEndDate)
+
+  // console.log("last6MonthsStartDate - LEADS:", last6MonthsStartDate)
+  // console.log("last6MonthEndDate - LEADS", lastMonthEndDate)
   let sql = `
       SELECT 
           COUNT(*) AS leadCount
       FROM 
           leads`;
-  console.log(req.query)
+  //  console.log(req.query)
   const queryParams = req.query;
   queryParams["leadInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  console.log(sql)
+  // console.log(sql)
   dbConnect.query(
     sql,
     [last6MonthsStartDate, lastMonthEndDate],
@@ -508,7 +463,7 @@ const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
         return;
       }
       const last6MonthsLeadCountList = result[0].leadCount
-      console.log("last6MonthsLeadCountList", last6MonthsLeadCountList)
+      //console.log("last6MonthsLeadCountList", last6MonthsLeadCountList)
       res.status(200).send(String(last6MonthsLeadCountList));
     }
   );
@@ -525,19 +480,22 @@ const getLast6MonthsCallBacksCount = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     0
   )).format('YYYY-MM-DD');
+
+  //  console.log("last6MonthsStartDate - CALLBACKS:", last6MonthsStartDate)
+  // console.log("last6MonthEndDate - CALLBACKS", lastMonthEndDate)
   let sql = `
       SELECT 
           COUNT(*) AS count
       FROM 
           callbacks`;
-  console.log(req.query)
+  // console.log(req.query)
   const queryParams = req.query;
   queryParams["callbackInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  console.log(sql)
+  // console.log(sql)
   dbConnect.query(
     sql,
     [last6MonthsStartDate, lastMonthEndDate],
@@ -548,7 +506,7 @@ const getLast6MonthsCallBacksCount = asyncHandler(async (req, res) => {
         return;
       }
       const last6MonthsCallBacksCount = result[0].count;
-      console.log("last6MonthsCallBacksCount", last6MonthsCallBacksCount)
+      // console.log("last6MonthsCallBacksCount", last6MonthsCallBacksCount)
       res.status(200).send(String(last6MonthsCallBacksCount));
     }
   );
@@ -557,25 +515,26 @@ const getLastYearLeadCountStatus = asyncHandler(async (req, res) => {
   const currentDate = new Date();
   const lastYearStartDate = moment(new Date(
     currentDate.getFullYear() - 1,
-    currentDate.getMonth(),
+    0,
     1
   )).format('YYYY-MM-DD');
   const lastYearEndDate = moment(new Date(currentDate.getFullYear() - 1, 11, 31)).format('YYYY-MM-DD');
-  console.log(lastYearStartDate)
-  console.log(lastYearEndDate)
+
+  // console.log("lastYearStartDate - LEADS:", lastYearStartDate)
+  // console.log("lastYearEndDate - LEADS", lastYearEndDate)
   let sql = `
   SELECT 
       COUNT(*) AS leadCount
   FROM 
       leads`;
-  console.log(req.query)
+  // console.log(req.query)
   const queryParams = req.query;
   queryParams["leadInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  console.log(sql)
+  // console.log(sql)
   dbConnect.query(sql, [lastYearStartDate, lastYearEndDate], (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -583,7 +542,7 @@ const getLastYearLeadCountStatus = asyncHandler(async (req, res) => {
       return;
     }
     const lastYearLeadCount = result[0].leadCount;
-    console.log("lastYearLeadCount", lastYearLeadCount)
+    // console.log("lastYearLeadCount", lastYearLeadCount)
     res.status(200).send(String(lastYearLeadCount));
   });
 });
@@ -591,25 +550,25 @@ const getLastYearCallBacksCount = asyncHandler(async (req, res) => {
   const currentDate = new Date();
   const lastYearStartDate = moment(new Date(
     currentDate.getFullYear() - 1,
-    currentDate.getMonth(),
+    0,
     1
   )).format('YYYY-MM-DD');
   const lastYearEndDate = moment(new Date(currentDate.getFullYear() - 1, 11, 31)).format('YYYY-MM-DD');
-  console.log(lastYearStartDate)
-  console.log(lastYearEndDate)
+  // console.log("lastYearStartDate - CALLBACKS:", lastYearStartDate)
+  //  console.log("lastYearEndDate - CALLBACKS", lastYearEndDate)
   let sql = `
   SELECT 
       COUNT(*) AS count
   FROM 
       callbacks`;
-  console.log(req.query)
+  //  console.log(req.query)
   const queryParams = req.query;
   queryParams["callbackInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  console.log(sql)
+  // console.log(sql)
   dbConnect.query(sql, [lastYearStartDate, lastYearEndDate], (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -690,17 +649,58 @@ const getDaywiseCallBacksCount = asyncHandler(async (req, res) => {
   });
 });
 
-const getmonthwiseSanctionsAndDisbursedAmount = asyncHandler(async (req, res) => {
-  let sql = `SELECT DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month, 
-  COALESCE( ( SELECT SUM(logins.sanctionedAmount) FROM logins WHERE YEAR(logins.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) AND MONTH(logins.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) ), 0 ) AS totalSanctionedAmount, COALESCE( ( SELECT SUM(logins.disbursedAmount) FROM logins WHERE YEAR(logins.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) AND MONTH(logins.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) ), 0 ) AS totalDisbursedAmount FROM (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq ORDER BY seq DESC; `
+const getmonthwiseSanctionedAmount = asyncHandler(async (req, res) => {
+  let sql = `SELECT 
+    DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month, 
+    COALESCE(
+        ( 
+            SELECT SUM(logins.sanctionedAmount) 
+            FROM logins 
+            WHERE YEAR(logins.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) 
+            AND MONTH(logins.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) 
+        ), 0 
+    ) AS totalSanctionedAmount 
+FROM 
+    (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq 
+ORDER BY 
+    seq DESC;
+`
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
       res.status(500).send("Internal Server Error");
       return;
     }
-    const monthwiseSanctionsAndDisbursedAmount = result;
-    res.status(200).json(monthwiseSanctionsAndDisbursedAmount);
+    const sanctionedAmount = result.map(item => item.totalSanctionedAmount);
+    res.status(200).json({ sanctionedAmount });
+  });
+});
+
+const getmonthwiseDisbursedAmount = asyncHandler(async (req, res) => {
+  let sql = `SELECT 
+    DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month, 
+    COALESCE(
+        ( 
+            SELECT SUM(logins.disbursedAmount) 
+            FROM logins 
+            WHERE YEAR(logins.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) 
+            AND MONTH(logins.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) 
+        ), 0 
+    ) AS totalDisbursedAmount 
+FROM 
+    (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq 
+ORDER BY 
+    seq DESC;
+;
+`
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    const disbursedAmount = result.map(item => item.totalDisbursedAmount);
+    res.status(200).json({ disbursedAmount });
   });
 });
 module.exports = {
@@ -727,8 +727,6 @@ module.exports = {
   getDisbursalsCountStatus,
   getMonthWiseLoginsCountStatus,
   getMonthWiseFilesCountStatus,
-
-
-
-  getmonthwiseSanctionsAndDisbursedAmount
+  getmonthwiseSanctionedAmount,
+  getmonthwiseDisbursedAmount
 };

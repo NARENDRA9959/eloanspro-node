@@ -22,6 +22,21 @@ const getBankersCount = asyncHandler(async (req, res) => {
   });
 });
 
+
+const getNewBankersCount = asyncHandler(async (req, res) => {
+  let sql = "SELECT count(*) as bankersCount FROM bankers";
+  const queryParams = req.query;
+  queryParams["bankerInternalStatus-eq"] = "1";
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("getBankersCount error");
+    }
+    const bankersCount = result[0]["bankersCount"];
+    res.status(200).send(String(bankersCount));
+  });
+});
 const getBankers = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM bankers";
   const queryParams = req.query;
@@ -109,7 +124,7 @@ const createBanker = asyncHandler((req, res) => {
     req.body["bankerInternalStatus"] = 1;
     req.body["lastBankerInternalStatus"] = 1;
     req.body["lastUpdatedBy"] = req.user.name;
-   // console.log("Request Body:", req.body);
+
     const checkSql = `SELECT * FROM bankers WHERE name = ?`;
     dbConnect.query(checkSql, [req.body.name], (checkErr, checkResult) => {
       if (checkErr) {
@@ -121,7 +136,6 @@ const createBanker = asyncHandler((req, res) => {
         return res.status(400).send("Bank name already exists!!!");
       }
       const createClause = createClauseHandler(req.body);
-     // console.log("Generated SQL Clause:", createClause);
       const insertSql = `INSERT INTO bankers (${createClause[0]}) VALUES (${createClause[1]})`;
       dbConnect.query(insertSql, (err, result) => {
         if (err) {
@@ -193,8 +207,6 @@ const deleteBanker = asyncHandler((req, res) => {
 
 
 const getBankRevenueValue = asyncHandler(async (req, res) => {
-  //console.log(req)
-  // Check if bankid is present in the query parameters
   if (!req.params.id) {
     return res.status(400).send("bankid is required");
   }
@@ -211,9 +223,7 @@ const getBankRevenueValue = asyncHandler(async (req, res) => {
     if (result.length === 0) {
       return res.status(404).send("Bank not found");
     }
-    //console.log(result)
     const bankRevenueValue = result[0].bankRevenueValue;
-    //console.log(bankRevenueValue)
     res.status(200).send(bankRevenueValue);
   });
 });
@@ -228,5 +238,6 @@ module.exports = {
   updateBanker,
   deleteBanker,
   changeBankersStatus,
-  getBankRevenueValue
+  getBankRevenueValue,
+  getNewBankersCount
 };

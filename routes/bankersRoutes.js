@@ -8,7 +8,8 @@ const {
   deleteBanker,
   changeBankersStatus,
   getBanks,
-  getBankRevenueValue
+  getBankRevenueValue,
+  getNewBankersCount
 } = require("../controllers/bankersController");
 const validateToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
@@ -18,6 +19,8 @@ router
   .post(validateToken, createBanker);
 router.route("/banks").get(validateToken, getBanks);
 router.route("/total").get(validateToken, getBankersCount);
+router.route("/newBankerscount").get(validateToken, getNewBankersCount);
+
 router
   .route("/:bankerId/changestatus/:statusId")
   .put(validateToken, changeBankersStatus);
