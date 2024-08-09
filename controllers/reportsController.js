@@ -723,17 +723,20 @@ const exportCNILeads = asyncHandler(async (req, res) => {
 
 const exportSanctionDetails = asyncHandler(async (req, res) => {
     let reportId = "R-" + generateRandomNumber(6);
-    let sql = `SELECT leadId, businessName, SUM(sanctionedAmount) AS totalSanctionedAmount
-    FROM logins
-  `;
     const queryParams = req.query;
-    queryParams["fipStatus-eq"] = "approved";
+    queryParams["fipStatus-eq"] = 'approved';
     const filtersQuery = handleGlobalFilters(queryParams);
+    let sql2 = `AND sub.leadId = main.leadId`
+    let sql = `SELECT DISTINCT leadId, businessName, 
+    (
+      SELECT SUM(sanctionedAmount)
+      FROM logins AS sub
+           ${filtersQuery}
+          ${sql2}
+        ) AS totalSanctionedAmount
+  FROM logins AS main
+  `;
     sql += filtersQuery;
-    let sql2 = `  GROUP BY leadId`;
-    sql += sql2;
-    // let sql3 = `  ORDER BY createdOn DESC`;
-    // sql += sql3;
     console.log(sql)
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'sanctionDetails1.xlsx';
@@ -769,10 +772,7 @@ const exportSanctionDetails = asyncHandler(async (req, res) => {
         try {
             console.log(result)
             for (let i = 0; i < result.length; i++) {
-
                 result[i].createdOn = moment(result[i].createdOn).format('YYYY-MM-DD');
-                //  result[i].approvalDate = moment(result[i].approvalDate).format('YYYY-MM-DD');
-
             }
             result = parseNestedJSON(result);
             if (!fs.existsSync(uploadDirectory)) {
@@ -784,8 +784,6 @@ const exportSanctionDetails = asyncHandler(async (req, res) => {
                 { header: 'Lead Id', key: 'leadId' },
                 { header: 'Business Name', key: 'businessName' },
                 { header: 'Sanctioned Amount', key: 'totalSanctionedAmount' },
-                // { header: 'Approval Date', key: 'approvalDate' },
-
             ];
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
@@ -846,17 +844,21 @@ const exportSanctionDetails = asyncHandler(async (req, res) => {
 
 const exportDisbursalDetails = asyncHandler(async (req, res) => {
     let reportId = "R-" + generateRandomNumber(6);
-    let sql = `SELECT leadId, businessName, SUM(disbursedAmount) AS totalDisbursedAmount
-    FROM logins
-  `;
     const queryParams = req.query;
-    queryParams["approvedStatus-eq"] = "disbursed";
+    queryParams["approvedStatus-eq"] = 'disbursed';
+    queryParams["fipStatus-eq"] = 'approved';
     const filtersQuery = handleGlobalFilters(queryParams);
+    let sql2 = `AND sub.leadId = main.leadId`
+    let sql = `SELECT DISTINCT leadId, businessName, 
+        (
+          SELECT SUM(disbursedAmount)
+          FROM logins AS sub
+           ${filtersQuery}
+          ${sql2}
+        ) AS totalDisbursedAmount
+      FROM logins AS main
+  `;
     sql += filtersQuery;
-    let sql2 = `  GROUP BY leadId`;
-    sql += sql2;
-    // let sql3 = `  ORDER BY createdOn DESC`;
-    // sql += sql3;
     console.log(sql)
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'disbursalDetails1.xlsx';
@@ -893,7 +895,6 @@ const exportDisbursalDetails = asyncHandler(async (req, res) => {
             console.log(result)
             for (let i = 0; i < result.length; i++) {
                 result[i].createdOn = moment(result[i].createdOn).format('YYYY-MM-DD');
-
             }
             result = parseNestedJSON(result);
             if (!fs.existsSync(uploadDirectory)) {
@@ -905,7 +906,6 @@ const exportDisbursalDetails = asyncHandler(async (req, res) => {
                 { header: 'Lead Id', key: 'leadId' },
                 { header: 'Business Name', key: 'businessName' },
                 { header: 'Disbursed Amount', key: 'totalDisbursedAmount' },
-
             ];
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
@@ -968,11 +968,9 @@ const exportloginsDoneDetails = asyncHandler(async (req, res) => {
     let sql = `SELECT leadId, businessName, program, bankName, fipStatus, fipRemarks FROM logins
   `;
     const queryParams = req.query;
-    queryParams["sort"] = "createdOn";
+    queryParams["sort"] = "leadId";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
-    // let sql2 = `  ORDER BY createdOn DESC`;
-    // sql += sql2;
     console.log(sql)
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'loginsDoneDetails1.xlsx';

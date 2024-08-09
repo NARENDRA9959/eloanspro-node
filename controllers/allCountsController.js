@@ -307,7 +307,7 @@ const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`;
   sql += sql2;
-  console.log(sql)
+  //console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -649,59 +649,440 @@ const getDaywiseCallBacksCount = asyncHandler(async (req, res) => {
   });
 });
 
-const getmonthwiseSanctionedAmount = asyncHandler(async (req, res) => {
+
+
+
+
+
+const getCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const currentMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  )).format('MM/DD/YYYY');
+  const currentMonthEndDate = moment(currentDate).format('MM/DD/YYYY');
+  // console.log("currentMonthStartDate", currentMonthStartDate);
+  // console.log("currentMonthEndDate", currentMonthEndDate);
   let sql = `SELECT 
-    DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month, 
-    COALESCE(
-        ( 
-            SELECT SUM(logins.sanctionedAmount) 
-            FROM logins 
-            WHERE YEAR(logins.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) 
-            AND MONTH(logins.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) 
-        ), 0 
-    ) AS totalSanctionedAmount 
-FROM 
-    (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq 
-ORDER BY 
-    seq DESC;
-`
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
-      return;
+    COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
+   FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
+  let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
+  sql += sql2;
+  //console.log(sql);
+  dbConnect.query(
+    sql,
+    [currentMonthStartDate, currentMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalDisbursedAmount = result[0].totalDisbursedAmount;
+      // console.log("totalDisbursedAmount", totalDisbursedAmount);
+      res.status(200).send(String(totalDisbursedAmount));
     }
-    const sanctionedAmount = result.map(item => item.totalSanctionedAmount);
-    res.status(200).json({ sanctionedAmount });
-  });
+  );
+});
+const getLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const lastMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 1,
+    1
+  )).format('MM/DD/YYYY');
+  const lastMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    0
+  )).format('MM/DD/YYYY');
+  // console.log("lastMonthStartDate", lastMonthStartDate)
+  // console.log("lastMonthEndDate", lastMonthEndDate)
+  let sql = `SELECT 
+    COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
+ FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
+  let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
+  sql += sql2;
+  //console.log(sql)
+  dbConnect.query(
+    sql,
+    [lastMonthStartDate, lastMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalDisbursedAmount = result[0].totalDisbursedAmount;
+      // console.log("totalDisbursedAmount", totalDisbursedAmount)
+      res.status(200).send(String(totalDisbursedAmount));
+    }
+  );
 });
 
-const getmonthwiseDisbursedAmount = asyncHandler(async (req, res) => {
+const getLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const lastLastMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 2,
+    1
+  )).format('MM/DD/YYYY');
+  const lastLastMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 1,
+    0
+  )).format('MM/DD/YYYY');
+  // console.log("lastLastMonthStartDate", lastLastMonthStartDate);
+  // console.log("lastLastMonthEndDate", lastLastMonthEndDate);
   let sql = `SELECT 
-    DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month, 
-    COALESCE(
-        ( 
-            SELECT SUM(logins.disbursedAmount) 
-            FROM logins 
-            WHERE YEAR(logins.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) 
-            AND MONTH(logins.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) 
-        ), 0 
-    ) AS totalDisbursedAmount 
-FROM 
-    (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq 
-ORDER BY 
-    seq DESC;
-;
-`
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
-      return;
+    COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
+ FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
+  let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
+  sql += sql2;
+  //console.log(sql);
+  dbConnect.query(
+    sql,
+    [lastLastMonthStartDate, lastLastMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalDisbursedAmount = result[0].totalDisbursedAmount;
+      // console.log("totalDisbursedAmount", totalDisbursedAmount);
+      res.status(200).send(String(totalDisbursedAmount));
     }
-    const disbursedAmount = result.map(item => item.totalDisbursedAmount);
-    res.status(200).json({ disbursedAmount });
-  });
+  );
+});
+
+const getLastLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const lastLastLastMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 3,
+    1
+  )).format('MM/DD/YYYY');
+  const lastLastLastMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 2,
+    0
+  )).format('MM/DD/YYYY');
+  // console.log("lastLastLastMonthStartDate", lastLastLastMonthStartDate);
+  // console.log("lastLastLastMonthEndDate", lastLastLastMonthEndDate);
+  let sql = `SELECT 
+    COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
+  FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
+  let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
+  sql += sql2;
+  // console.log(sql);
+  dbConnect.query(
+    sql,
+    [lastLastLastMonthStartDate, lastLastLastMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalDisbursedAmount = result[0].totalDisbursedAmount;
+      //console.log("totalDisbursedAmount", totalDisbursedAmount);
+      res.status(200).send(String(totalDisbursedAmount));
+    }
+  );
+});
+
+const getLastLastLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const lastLastLastLastMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 4,
+    1
+  )).format('MM/DD/YYYY');
+  const lastLastLastLastMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 3,
+    0
+  )).format('MM/DD/YYYY');
+  // console.log("lastLastLastLastMonthStartDate", lastLastLastLastMonthStartDate);
+  // console.log("lastLastLastLastMonthEndDate", lastLastLastLastMonthEndDate);
+  let sql = `SELECT 
+    COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
+  FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
+
+  let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
+  sql += sql2;
+  // console.log(sql);
+  dbConnect.query(
+    sql,
+    [lastLastLastLastMonthStartDate, lastLastLastLastMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalDisbursedAmount = result[0].totalDisbursedAmount;
+      // console.log("totalDisbursedAmount", totalDisbursedAmount);
+      res.status(200).send(String(totalDisbursedAmount));
+    }
+  );
+});
+const getfirstMonthDisbursedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const firstMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 5,
+    1
+  )).format('MM/DD/YYYY');
+  const firstMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 4,
+    0
+  )).format('MM/DD/YYYY');
+  // console.log("firstMonthStartDate", firstMonthStartDate);
+  // console.log("firstMonthEndDate", firstMonthEndDate);
+  let sql = `SELECT 
+    COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
+  FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
+  let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
+  sql += sql2;
+  // console.log(sql);
+  dbConnect.query(
+    sql,
+    [firstMonthStartDate, firstMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalDisbursedAmount = result[0].totalDisbursedAmount;
+      // console.log("totalDisbursedAmount", totalDisbursedAmount);
+      res.status(200).send(String(totalDisbursedAmount));
+    }
+  );
+});
+
+
+
+
+
+
+const getCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const currentMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  )).format('MM/DD/YYYY');
+  const currentMonthEndDate = moment(currentDate).format('MM/DD/YYYY');
+  // console.log("currentMonthStartDate", currentMonthStartDate);
+  // console.log("currentMonthEndDate", currentMonthEndDate);
+  let sql = `SELECT 
+    COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
+   FROM logins WHERE fipStatus = 'approved'`;
+  let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
+  sql += sql2;
+  // console.log(sql);
+  dbConnect.query(
+    sql,
+    [currentMonthStartDate, currentMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalSanctionedAmount = result[0].totalSanctionedAmount;
+      // console.log("totalSanctionedAmount", totalSanctionedAmount);
+      res.status(200).send(String(totalSanctionedAmount));
+    }
+  );
+});
+
+
+const getLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const lastMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 1,
+    1
+  )).format('MM/DD/YYYY');
+  const lastMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    0
+  )).format('MM/DD/YYYY');
+  // console.log("lastMonthStartDate", lastMonthStartDate)
+  // console.log("lastMonthEndDate", lastMonthEndDate)
+  let sql = `SELECT 
+  COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
+ FROM logins WHERE fipStatus = 'approved'`;
+  let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
+  sql += sql2;
+  // console.log(sql)
+  dbConnect.query(
+    sql,
+    [lastMonthStartDate, lastMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalSanctionedAmount = result[0].totalSanctionedAmount;
+      //console.log("totalSanctionedAmount", totalSanctionedAmount)
+      res.status(200).send(String(totalSanctionedAmount));
+    }
+  );
+});
+
+const getLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const lastLastMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 2,
+    1
+  )).format('MM/DD/YYYY');
+  const lastLastMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 1,
+    0
+  )).format('MM/DD/YYYY');
+  // console.log("lastLastMonthStartDate", lastLastMonthStartDate);
+  // console.log("lastLastMonthEndDate", lastLastMonthEndDate);
+  let sql = `SELECT 
+  COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
+ FROM logins WHERE fipStatus = 'approved'`;
+  let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
+  sql += sql2;
+  //console.log(sql);
+  dbConnect.query(
+    sql,
+    [lastLastMonthStartDate, lastLastMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalSanctionedAmount = result[0].totalSanctionedAmount;
+      //console.log("totalSanctionedAmount", totalSanctionedAmount);
+      res.status(200).send(String(totalSanctionedAmount));
+    }
+  );
+});
+
+
+const getLastLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const lastLastLastMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 3,
+    1
+  )).format('MM/DD/YYYY');
+  const lastLastLastMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 2,
+    0
+  )).format('MM/DD/YYYY');
+  // console.log("lastLastLastMonthStartDate", lastLastLastMonthStartDate);
+  // console.log("lastLastLastMonthEndDate", lastLastLastMonthEndDate);
+  let sql = `SELECT 
+  COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
+ FROM logins WHERE fipStatus = 'approved'`;
+  let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
+  sql += sql2;
+  //console.log(sql);
+  dbConnect.query(
+    sql,
+    [lastLastLastMonthStartDate, lastLastLastMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalSanctionedAmount = result[0].totalSanctionedAmount;
+      // console.log("totalSanctionedAmount", totalSanctionedAmount);
+      res.status(200).send(String(totalSanctionedAmount));
+    }
+  );
+});
+
+const getLastLastLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const lastLastLastLastMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 4,
+    1
+  )).format('MM/DD/YYYY');
+  const lastLastLastLastMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 3,
+    0
+  )).format('MM/DD/YYYY');
+  // console.log("lastLastLastLastMonthStartDate", lastLastLastLastMonthStartDate);
+  // console.log("lastLastLastLastMonthEndDate", lastLastLastLastMonthEndDate);
+  let sql = `SELECT 
+  COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
+ FROM logins WHERE fipStatus = 'approved'`;
+  let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
+  sql += sql2;
+  // console.log(sql);
+  dbConnect.query(
+    sql,
+    [lastLastLastLastMonthStartDate, lastLastLastLastMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalSanctionedAmount = result[0].totalSanctionedAmount;
+      // console.log("totalSanctionedAmount", totalSanctionedAmount);
+      res.status(200).send(String(totalSanctionedAmount));
+    }
+  );
+});
+
+
+const getfirstMonthSanctionedAmount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const firstMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 5,
+    1
+  )).format('MM/DD/YYYY');
+  const firstMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 4,
+    0
+  )).format('MM/DD/YYYY');
+  // console.log("firstMonthStartDate", firstMonthStartDate);
+  // console.log("firstMonthEndDate", firstMonthEndDate);
+  let sql = `SELECT 
+  COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
+ FROM logins WHERE fipStatus = 'approved'`;
+  let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
+  sql += sql2;
+  //console.log(sql);
+  dbConnect.query(
+    sql,
+    [firstMonthStartDate, firstMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalSanctionedAmount = result[0].totalSanctionedAmount;
+      //console.log("totalSanctionedAmount", totalSanctionedAmount);
+      res.status(200).send(String(totalSanctionedAmount));
+    }
+  );
 });
 module.exports = {
   getLeadCountStatus,
@@ -727,6 +1108,23 @@ module.exports = {
   getDisbursalsCountStatus,
   getMonthWiseLoginsCountStatus,
   getMonthWiseFilesCountStatus,
-  getmonthwiseSanctionedAmount,
-  getmonthwiseDisbursedAmount
+
+
+
+
+
+
+  getCurrentMonthDisbursedAmount,
+  getLastMonthDisbursedAmount,
+  getLastLastMonthDisbursedAmount,
+  getLastLastLastMonthDisbursedAmount,
+  getLastLastLastLastMonthDisbursedAmount,
+  getfirstMonthDisbursedAmount,
+
+  getCurrentMonthSanctionedAmount,
+  getLastMonthSanctionedAmount,
+  getLastLastMonthSanctionedAmount,
+  getLastLastLastMonthSanctionedAmount,
+  getLastLastLastLastMonthSanctionedAmount,
+  getfirstMonthSanctionedAmount
 };

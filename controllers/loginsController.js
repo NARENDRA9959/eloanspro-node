@@ -7,57 +7,9 @@ const {
   createClauseHandler,
   updateClauseHandler,
 } = require("../middleware/clauseHandler");
-// const createLogin = asyncHandler((req, res) => {
-//   console.log("Request body:", req.body);
-//   req.body["createdBy"] = req.user.name;
-//   const bankIds = req.body.bankId;
-//   const bankNames = req.body.Banks;
-//   delete req.body.bankId;
-//   delete req.body.Banks;
-//   if (
-//     !Array.isArray(bankIds) ||
-//     bankIds.length === 0 ||
-//     !Array.isArray(bankNames) ||
-//     bankNames.length === 0
-//   ) {
-//     return res
-//       .status(400)
-//       .send("Bank IDs and names are required and should not be empty");
-//   }
-//   if (bankIds.length !== bankNames.length) {
-//     return res.status(400).send("Bank IDs and names array lengths must match");
-//   }
-//   const insertQueries = bankIds.map((bankId, index) => {
-//     const bankName = bankNames[index];
-//     const rowData = { ...req.body, bankId, bankName };
-//     const createClause = createClauseHandler(rowData);
-//     console.log("Row data:", rowData);
-//     console.log("Create clause:", createClause);
-//     return `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
-//   });
-//   console.log("Insert queries:", insertQueries);
-//   let queryPromises = insertQueries.map((query) => {
-//     return new Promise((resolve, reject) => {
-//       dbConnect.query(query, (err, result) => {
-//         if (err) {
-//           return reject(err);
-//         }
-//         resolve(result);
-//       });
-//     });
-//   });
-//   Promise.all(queryPromises)
-//     .then((results) => {
-//       res.status(200).send(true);
-//     })
-//     .catch((err) => {
-//       console.log("createLogin error:", err);
-//       res.status(500).send("Error inserting data");
-//     });
-// });
 
 const createLogin = asyncHandler((req, res) => {
-  //console.log("Request body:", req.body);
+  console.log("Request body:", req.body);
   const bankIds = req.body.bankId;
   const bankNames = req.body.Banks;
   delete req.body.bankId;
@@ -79,12 +31,9 @@ const createLogin = asyncHandler((req, res) => {
     const bankName = bankNames[index];
     const rowData = { ...req.body, bankId, bankName };
     const createClause = createClauseHandler(rowData);
-    //console.log("Row data:", rowData);
-    //console.log("Create clause:", createClause);
     const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
     return query;
   });
-  //console.log("Insert queries:", insertQueries);
   let completedQueries = 0;
   insertQueries.forEach((query) => {
     dbConnect.query(query, (err, result) => {
@@ -93,7 +42,6 @@ const createLogin = asyncHandler((req, res) => {
         res.status(500).send("Error inserting data");
         return;
       }
-      // console.log("Insert result:", result);
       completedQueries++;
       if (completedQueries === insertQueries.length) {
         res.status(200).send(true);
@@ -102,93 +50,70 @@ const createLogin = asyncHandler((req, res) => {
   });
 });
 
+
+
 // const createLogin = asyncHandler((req, res) => {
 //   console.log("Request body:", req.body);
-
+//   const leadId = req.body.leadId;
+//   const businessName = req.body.businessName;
 //   const bankIds = req.body.bankId;
 //   const bankNames = req.body.Banks;
-//   const bankRevenueValues = req.body.bankRevenueValue;
-
-//   console.log("bankIds:", bankIds);
-//   console.log("bankNames:", bankNames);
-//   console.log("bankRevenueValues:", bankRevenueValues);
-
 //   delete req.body.bankId;
 //   delete req.body.Banks;
-//   delete req.body.bankRevenueValues;
 
 //   if (
+//     !leadId ||
 //     !Array.isArray(bankIds) ||
 //     bankIds.length === 0 ||
 //     !Array.isArray(bankNames) ||
-//     bankNames.length === 0
+//     bankNames.length === 0 ||
+//     bankIds.length !== bankNames.length
 //   ) {
 //     return res
 //       .status(400)
 //       .send(
-//         "Bank IDs and names are required and should be non-empty arrays of the same length"
+//         "Lead ID, bank IDs, and names are required and should be non-empty arrays of the same length"
 //       );
 //   }
-
-//   const insertQueries = bankIds.map((bankId, index) => {
-//     const bankName = bankNames[index];
-//     const bankRevenueValue = bankRevenueValues[index];
-//     const rowData = { ...req.body, bankId, bankName, bankRevenueValue };
-//     const createClause = createClauseHandler(rowData);
-//     console.log("Row data:", rowData);
-//     console.log("Create clause:", createClause);
-//     const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
-//     return query;
-//   });
-//   console.log("Insert queries:", insertQueries);
-
-//   let completedQueries = 0;
-//   let hasError = false;
-
-//   insertQueries.forEach((query) => {
-//     dbConnect.query(query, (err, result) => {
-//       if (err) {
-//         console.log("createLogin error:", err);
-//         if (!hasError) {
-//           hasError = true;
-//           res.status(500).send("Error inserting data");
-//         }
-//         return;
-//       }
-//       console.log("Insert result:", result);
-//       completedQueries++;
-//       if (completedQueries === insertQueries.length && !hasError) {
-//         res.status(200).send(true);
-//       }
-//     });
-//   });
-// });
-
-// const getDistinctLeads = asyncHandler(async (req, res) => {
-//   try {
-//     const distinctLeadIds = await fetchDistinctLeadIds();
-//     if (distinctLeadIds.length === 0) {
-//       return res.status(200).json([]);
+//   const checkExistingQuery = `
+//       SELECT bankId, bankName
+//       FROM logins
+//       WHERE leadId = ?
+//       AND bankId IN (${bankIds.map(() => '?').join(', ')})
+//   `;
+//   dbConnect.query(checkExistingQuery, [leadId, ...bankIds], (err, results) => {
+//     if (err) {
+//       console.error("Error checking existing logins:", err);
+//       return res.status(500).send("Error checking existing data");
 //     }
-//     let sql = "SELECT * FROM leads WHERE id IN (?)";
-//     const queryParams = [distinctLeadIds];
-//     const filtersQuery = handleGlobalFilters(req.query);
-//     sql += filtersQuery;
-//     dbConnect.query(sql, queryParams, (err, result) => {
-//       if (err) {
-//         console.error("Error fetching leads:", err);
-//         res.status(500).json({ error: "Error fetching leads" });
-//         return;
-//       }
-//       result = parseNestedJSON(result);
-//       console.log(result);
-//       res.status(200).json(result);
+//     if (results.length > 0) {
+//       const existingBanks = results.map((row) => row.bankName);
+//       return res.status(400).send(`${existingBanks.join(', ')} already exists for lead ID - ${leadId} , Business Name - ${businessName}`);
+//     }
+//     const insertQueries = bankIds.map((bankId, index) => {
+//       const bankName = bankNames[index];
+//       const rowData = { ...req.body, bankId, bankName };
+//       const createClause = createClauseHandler(rowData);
+//       const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
+//       return query;
 //     });
-//   } catch (error) {
-//     console.error("Error in getDistinctLeads function:", error);
-//     res.status(500).json({ error: "Error in getDistinctLeads function" });
-//   }
+//     let completedQueries = 0;
+//     insertQueries.forEach((query) => {
+//       dbConnect.query(query, (err, result) => {
+//         if (err) {
+//           console.error("createLogin error:", err);
+//           res.status(500).send("Error inserting data");
+//           return;
+//         }
+//         completedQueries++;
+//         if (completedQueries === insertQueries.length) {
+//           res.status(200).send(true);
+//         }
+//       });
+//     });
+//   });
 // });
+
 
 const getDistinctLeads = asyncHandler(async (req, res) => {
   try {
@@ -320,7 +245,6 @@ const getDisbursalLeadCount = asyncHandler(async (req, res) => {
 const getFIPDetailsById = asyncHandler((req, res) => {
   const sql = `SELECT id, program, bankName, fipStatus, fipRemarks FROM logins WHERE leadId = ${req.params.leadId}`;
   const queryParams = [req.params.leadId];
-  // console.log(queryParams);
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getLoginDetailsById error in controller:", err);
@@ -352,7 +276,7 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
 const getDisbursalsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
   const sql = `
-  SELECT id, businessName, approvalDate, lan, program, bankName, bankId, processCode, sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule 
+  SELECT id, businessName, approvalDate, disbursalDate, lan, program, bankName, bankId, processCode, sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule 
     FROM logins
     WHERE leadId = ? AND approvedStatus = 'disbursed' AND fipStatus='approved'
   `;
@@ -1046,7 +970,7 @@ const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
       console.log("getTotalSanctionedAmountSum error:", err);
       return res.status(500).send("Error retrieving sanctioned amount sum");
     }
-   
+
     const totalDisbursedAmount = result[0].total_disbursed_amount;
     res.status(200).json({ totalDisbursedAmount });
   });
