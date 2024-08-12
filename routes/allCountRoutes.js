@@ -22,9 +22,7 @@ const {
   getApprovalsCountStatus,
   getDisbursalsCountStatus,
   getMonthWiseFilesCountStatus,
- 
   getMonthWiseLoginsCountStatus,
-
   getLastMonthDisbursedAmount,
   getCurrentMonthDisbursedAmount,
   getLastLastMonthDisbursedAmount,
@@ -52,7 +50,6 @@ router.route("/credit").get(validateToken, getCreditEvaluationCountStatus);
 router.route("/monthcallbacks").get(validateToken, getMonthWiseCallBacksCount);
 router.route("/monthleads").get(validateToken, getMonthWiseLeadCountStatus);
 router.route("/monthfiles").get(validateToken, getMonthWiseFilesCountStatus);
-
 router.route("/monthlogins").get(validateToken, getMonthWiseLoginsCountStatus);
 router.route("/daywise/leads").get(validateToken, getDaywiseLeadsCount);
 router.route("/daywise/callback").get(validateToken, getDaywiseCallBacksCount);
@@ -64,53 +61,42 @@ router
 router
   .route("/lastmonth/callback")
   .get(validateToken, getLastMonthCallBacksCount);
-
-
 router
   .route("/lastmonth/disbursed")
   .get(validateToken, getLastMonthDisbursedAmount);
-
 router
   .route("/lastmonth/approved")
   .get(validateToken, getLastMonthSanctionedAmount);
 router
   .route("/lastlastmonth/disbursed")
   .get(validateToken, getLastLastMonthDisbursedAmount);
-
 router
   .route("/lastlastmonth/approved")
   .get(validateToken, getLastLastMonthSanctionedAmount);
-
 router
   .route("/currentmonth/disbursed")
   .get(validateToken, getCurrentMonthDisbursedAmount);
-
 router
   .route("/currentmonth/approved")
   .get(validateToken, getCurrentMonthSanctionedAmount);
 router
   .route("/lastlastlastmonth/disbursed")
   .get(validateToken, getLastLastLastMonthDisbursedAmount);
-
 router
   .route("/lastlastlastmonth/approved")
   .get(validateToken, getLastLastLastMonthSanctionedAmount);
 router
   .route("/lastlastlastlastmonth/disbursed")
   .get(validateToken, getLastLastLastLastMonthDisbursedAmount);
-
 router
   .route("/lastlastlastlastmonth/approved")
   .get(validateToken, getLastLastLastLastMonthSanctionedAmount);
 router
   .route("/firstmonth/disbursed")
   .get(validateToken, getfirstMonthDisbursedAmount);
-
-  router
+router
   .route("/firstmonth/approved")
   .get(validateToken, getfirstMonthSanctionedAmount);
-
-
 router
   .route("/last6months/leads")
   .get(validateToken, getLast6MonthsLeadCountStatus);

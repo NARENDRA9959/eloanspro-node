@@ -378,44 +378,6 @@ const createLead = asyncHandler((req, res) => {
   }
 });
 
-// const createLead = asyncHandler(async (req, res) => {
-//   try {
-//     // console.log(req.user.userType);
-//     const phoneNumber = req.body.primaryPhone;
-
-//     if (req.user.userType === 1) {
-//       // Directly create a new lead for userType 1
-//       createNewLead(req, res);
-//     } else {
-//       const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
-
-//       dbConnect.query(checkPhoneQuery, [phoneNumber], async (err, result) => {
-//         if (err) {
-//           console.error("Error checking phone number:", err);
-//           return res.status(500).json({ error: "Internal server error" });
-//         }
-
-//         if (result.length > 0) {
-//           const lead = result[0];
-//           console.log(result)
-//           console.log(lead.sourcedBy);
-
-//           // Ensure getSourceName is synchronous or handle async result
-//           const sourceName = await getSourceName(lead.sourcedBy);
-//           console.log(sourceName)
-//           res.status(409).send(
-//             `Lead already exists with phone number ${phoneNumber}, created by - ${sourceName}, Lead id - ${lead.id}`
-//           );
-//         } else {
-//           createNewLead(req, res);
-//         }
-//       });
-//     }
-//   } catch (error) {
-//     console.error("Error in createLead:", error);
-//     res.status(500).json({ error: "An unexpected error occurred" });
-//   }
-// });
 function createNewLead(req, res) {
   let leadId = "L-" + generateRandomNumber(6);
   let id = generateRandomNumber(9);
@@ -437,67 +399,58 @@ function createNewLead(req, res) {
   });
 }
 
-const updateLead = asyncHandler((req, res) => {
-  const id = req.params.id;
-  const checkRequiredFields = handleRequiredFields("leads", req.body);
-  if (!checkRequiredFields) {
-    res.status(422).send("Please Fill all required fields");
-    return;
-  }
-  const updateClause = updateClauseHandler(req.body);
-  const sql = `UPDATE leads SET ${updateClause} WHERE id = ${id}`;
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.log("updateLead error in controller");
-    }
-    res.status(200).send(result);
-  });
-});
 // const updateLead = asyncHandler((req, res) => {
 //   const id = req.params.id;
-//   console.log(id)
-//   const phoneNumber = req.body.primaryPhone;
+//   console.log(req.body)
 //   const checkRequiredFields = handleRequiredFields("leads", req.body);
 //   if (!checkRequiredFields) {
-//     res.status(422).send("Please fill all required fields");
+//     res.status(422).send("Please Fill all required fields");
 //     return;
 //   }
-//   console.log(`Phone Number: ${phoneNumber}`);
-//   const checkPhoneQuery = `SELECT leads.*, leadstatus.displayName 
-//     FROM leads 
-//     LEFT JOIN leadstatus ON leads.leadInternalStatus = leadstatus.id 
-//     WHERE leads.primaryPhone = ? AND leads.id != ?`;
-//   dbConnect.query(checkPhoneQuery, [phoneNumber, id], (err, result) => {
+//   const updateClause = updateClauseHandler(req.body);
+//   const sql = `UPDATE leads SET ${updateClause} WHERE id = ${id}`;
+//   dbConnect.query(sql, (err, result) => {
 //     if (err) {
-//       console.error("Error checking phone number:", err);
-//       res.status(500).json({ error: "Internal server error" });
-//       return;
+//       console.log("updateLead error in controller");
 //     }
-//     console.log(`Check Phone Query: ${checkPhoneQuery}`);
-//     if (result.length > 0) {
-//       console.log(checkPhoneQuery)
-//       console.log("result,", result)
-//       const lead = result[0];
-//       console.log(`Existing Lead:`, lead);
-//       res.status(409).send(
-//         `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}, lead Status - ${lead.displayName}`
-//       );
-//       return;
-//     }
-//     const updateClause = updateClauseHandler(req.body);
-//     console.log(`Request Body:`, req.body);
-//     const sql = `UPDATE leads SET ${updateClause} WHERE id = ?`;
-//     dbConnect.query(sql, [id], (err, result) => {
-//       if (err) {
-//         console.error("updateLead error in controller:", err);
-//         res.status(500).send("Error updating lead");
-//         return;
-//       }
-//       console.log(sql)
-//       res.status(200).send(result);
-//     });  
-//   });  
+//     res.status(200).send(result);
+//   });
 // });
+
+
+const updateLead = asyncHandler((req, res) => {
+  const id = req.params.id;
+  const { primaryPhone } = req.body;
+  const checkRequiredFields = handleRequiredFields("leads", req.body);
+  if (!checkRequiredFields) {
+    return res.status(422).send("Please fill all required fields");
+  }
+  const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ? AND id != ?`;
+  dbConnect.query(checkPhoneQuery, [primaryPhone, id], (err, result) => {
+    if (err) {
+      console.error("Error checking phone number:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+    if (result.length > 0) {
+      console.log(result)
+      const lead = result[0];
+      return res
+        .status(409)
+        .send(
+          `Lead already exists with phone number ${primaryPhone}, created by - ${lead.createdBy}, Lead ID - ${lead.id}`
+        );
+    }
+    const updateClause = updateClauseHandler(req.body);
+    const updateSql = `UPDATE leads SET ${updateClause} WHERE id = ?`;
+    dbConnect.query(updateSql, [id], (updateErr, updateResult) => {
+      if (updateErr) {
+        console.error("updateLead error in controller:", updateErr);
+        return res.status(500).send("Internal server error");
+      }
+      return res.status(200).send(updateResult);
+    });
+  });
+});
 
 const deleteLead = asyncHandler((req, res) => {
   const sql = `DELETE FROM leads WHERE id = ${req.params.id}`;

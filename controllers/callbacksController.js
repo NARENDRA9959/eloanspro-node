@@ -106,22 +106,56 @@ const createCallBack = asyncHandler((req, res) => {
 //   });
 // });
 
+// const updateCallBack = asyncHandler((req, res) => {
+//   const id = req.params.id;
+//   const checkRequiredFields = handleRequiredFields("callbacks", req.body);
+//   if (!checkRequiredFields) {
+//     res.status(422).send("Please Fill all required fields");
+//     return;
+//   }
+//   const updateClause = updateClauseHandler(req.body);
+//   const sql = `UPDATE callbacks SET ${updateClause} WHERE id = ${id}`;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("updateCallBack error:");
+//     }
+//     res.status(200).send(result);
+//   });
+// });
+
 const updateCallBack = asyncHandler((req, res) => {
   const id = req.params.id;
+  const { phone } = req.body;
   const checkRequiredFields = handleRequiredFields("callbacks", req.body);
   if (!checkRequiredFields) {
-    res.status(422).send("Please Fill all required fields");
-    return;
+    return res.status(422).send("Please fill all required fields");
   }
-  const updateClause = updateClauseHandler(req.body);
-  const sql = `UPDATE callbacks SET ${updateClause} WHERE id = ${id}`;
-  dbConnect.query(sql, (err, result) => {
+  const checkPhoneQuery = `SELECT * FROM callbacks WHERE phone = ? AND id != ?`;
+  dbConnect.query(checkPhoneQuery, [phone, id], (err, result) => {
     if (err) {
-      console.log("updateCallBack error:");
+      console.error("Error checking phone number:", err);
+      return res.status(500).json({ error: "Internal server error" });
     }
-    res.status(200).send(result);
+    if (result.length > 0) {
+      const callback = result[0];
+      return res
+        .status(409)
+        .send(
+          `Callback already exists with phone number ${phone}, created by - ${callback.createdBy}, Callback ID - ${callback.id}`
+        );
+    }
+    const updateClause = updateClauseHandler(req.body);
+    const updateSql = `UPDATE callbacks SET ${updateClause} WHERE id = ?`;
+    dbConnect.query(updateSql, [id], (updateErr, updateResult) => {
+      if (updateErr) {
+        console.error("updateCallBack error:", updateErr);
+        return res.status(500).send("Internal server error");
+      }
+      return res.status(200).send(updateResult);
+    });
   });
 });
+
 
 const changeCallbackStatus = asyncHandler((req, res) => {
   const id = req.params.callBackId;

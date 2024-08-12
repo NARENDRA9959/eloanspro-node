@@ -8,61 +8,13 @@ const {
   updateClauseHandler,
 } = require("../middleware/clauseHandler");
 
-const createLogin = asyncHandler((req, res) => {
-  console.log("Request body:", req.body);
-  const bankIds = req.body.bankId;
-  const bankNames = req.body.Banks;
-  delete req.body.bankId;
-  delete req.body.Banks;
-  if (
-    !Array.isArray(bankIds) ||
-    bankIds.length === 0 ||
-    !Array.isArray(bankNames) ||
-    bankNames.length === 0 ||
-    bankIds.length !== bankNames.length
-  ) {
-    return res
-      .status(400)
-      .send(
-        "Bank IDs and names are required and should be non-empty arrays of the same length"
-      );
-  }
-  const insertQueries = bankIds.map((bankId, index) => {
-    const bankName = bankNames[index];
-    const rowData = { ...req.body, bankId, bankName };
-    const createClause = createClauseHandler(rowData);
-    const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
-    return query;
-  });
-  let completedQueries = 0;
-  insertQueries.forEach((query) => {
-    dbConnect.query(query, (err, result) => {
-      if (err) {
-        console.log("createLogin error:", err);
-        res.status(500).send("Error inserting data");
-        return;
-      }
-      completedQueries++;
-      if (completedQueries === insertQueries.length) {
-        res.status(200).send(true);
-      }
-    });
-  });
-});
-
-
-
 // const createLogin = asyncHandler((req, res) => {
 //   console.log("Request body:", req.body);
-//   const leadId = req.body.leadId;
-//   const businessName = req.body.businessName;
 //   const bankIds = req.body.bankId;
 //   const bankNames = req.body.Banks;
 //   delete req.body.bankId;
 //   delete req.body.Banks;
-
 //   if (
-//     !leadId ||
 //     !Array.isArray(bankIds) ||
 //     bankIds.length === 0 ||
 //     !Array.isArray(bankNames) ||
@@ -72,47 +24,93 @@ const createLogin = asyncHandler((req, res) => {
 //     return res
 //       .status(400)
 //       .send(
-//         "Lead ID, bank IDs, and names are required and should be non-empty arrays of the same length"
+//         "Bank IDs and names are required and should be non-empty arrays of the same length"
 //       );
 //   }
-//   const checkExistingQuery = `
-//       SELECT bankId, bankName
-//       FROM logins
-//       WHERE leadId = ?
-//       AND bankId IN (${bankIds.map(() => '?').join(', ')})
-//   `;
-//   dbConnect.query(checkExistingQuery, [leadId, ...bankIds], (err, results) => {
-//     if (err) {
-//       console.error("Error checking existing logins:", err);
-//       return res.status(500).send("Error checking existing data");
-//     }
-//     if (results.length > 0) {
-//       const existingBanks = results.map((row) => row.bankName);
-//       return res.status(400).send(`${existingBanks.join(', ')} already exists for lead ID - ${leadId} , Business Name - ${businessName}`);
-//     }
-//     const insertQueries = bankIds.map((bankId, index) => {
-//       const bankName = bankNames[index];
-//       const rowData = { ...req.body, bankId, bankName };
-//       const createClause = createClauseHandler(rowData);
-//       const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
-//       return query;
-//     });
-//     let completedQueries = 0;
-//     insertQueries.forEach((query) => {
-//       dbConnect.query(query, (err, result) => {
-//         if (err) {
-//           console.error("createLogin error:", err);
-//           res.status(500).send("Error inserting data");
-//           return;
-//         }
-//         completedQueries++;
-//         if (completedQueries === insertQueries.length) {
-//           res.status(200).send(true);
-//         }
-//       });
+//   const insertQueries = bankIds.map((bankId, index) => {
+//     const bankName = bankNames[index];
+//     const rowData = { ...req.body, bankId, bankName };
+//     const createClause = createClauseHandler(rowData);
+//     const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
+//     return query;
+//   });
+//   let completedQueries = 0;
+//   insertQueries.forEach((query) => {
+//     dbConnect.query(query, (err, result) => {
+//       if (err) {
+//         console.log("createLogin error:", err);
+//         res.status(500).send("Error inserting data");
+//         return;
+//       }
+//       completedQueries++;
+//       if (completedQueries === insertQueries.length) {
+//         res.status(200).send(true);
+//       }
 //     });
 //   });
 // });
+
+const createLogin = asyncHandler((req, res) => {
+  console.log("Request body:", req.body);
+  const leadId = req.body.leadId;
+  const businessName = req.body.businessName;
+  const bankIds = req.body.bankId;
+  const bankNames = req.body.Banks;
+  delete req.body.bankId;
+  delete req.body.Banks;
+  if (
+    !leadId ||
+    !Array.isArray(bankIds) ||
+    bankIds.length === 0 ||
+    !Array.isArray(bankNames) ||
+    bankNames.length === 0 ||
+    bankIds.length !== bankNames.length
+  ) {
+    return res
+      .status(400)
+      .send(
+        "Lead ID, bank IDs, and names are required and should be non-empty arrays of the same length"
+      );
+  }
+  const checkExistingQuery = `
+      SELECT bankId, bankName
+      FROM logins
+      WHERE leadId = ?
+      AND bankId IN (${bankIds.map(() => '?').join(', ')})
+  `;
+  console.log(checkExistingQuery)
+  dbConnect.query(checkExistingQuery, [leadId, ...bankIds], (err, results) => {
+    if (err) {
+      console.error("Error checking existing logins:", err);
+      return res.status(500).send("Error checking existing data");
+    }
+    if (results.length > 0) {
+      const existingBanks = results.map((row) => row.bankName);
+      return res.status(400).send(`${existingBanks.join(', ')} already exists for lead ID - ${leadId} , Business Name - ${businessName}`);
+    }
+    const insertQueries = bankIds.map((bankId, index) => {
+      const bankName = bankNames[index];
+      const rowData = { ...req.body, bankId, bankName };
+      const createClause = createClauseHandler(rowData);
+      const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
+      return query;
+    });
+    let completedQueries = 0;
+    insertQueries.forEach((query) => {
+      dbConnect.query(query, (err, result) => {
+        if (err) {
+          console.error("createLogin error:", err);
+          res.status(500).send("Error inserting data");
+          return;
+        }
+        completedQueries++;
+        if (completedQueries === insertQueries.length) {
+          res.status(200).send(true);
+        }
+      });
+    });
+  });
+});
 
 
 const getDistinctLeads = asyncHandler(async (req, res) => {
@@ -158,7 +156,6 @@ async function fetchDistinctLeadIds() {
     });
   });
 }
-
 const getDistinctLeadCount = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctLeadIds();
@@ -168,19 +165,15 @@ const getDistinctLeadCount = asyncHandler(async (req, res) => {
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
-    // console.log("query params ", queryParams)
     queryParams["id-or"] = inClause;
     const filtersQuery = handleGlobalFilters(queryParams, true);
-    // console.log("filtersQuery", filtersQuery)
     countSql += filtersQuery;
-    // console.log("countSql", countSql)
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
         console.error("Error counting leads:", err);
         res.status(500).json({ error: "Error counting leads" });
         return;
       }
-      //  console.log("countResult", countResult)
       const count = countResult[0].count;
       res.status(200).send(String(count));
     });
@@ -251,7 +244,6 @@ const getFIPDetailsById = asyncHandler((req, res) => {
       return res.status(500).json({ error: "Error fetching login details" });
     }
     result = result.map(parseNestedJSON);
-    //console.log(result);
     res.status(200).json(result);
   });
 });
@@ -269,7 +261,6 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
       return res.status(500).json({ error: "Error fetching login details" });
     }
     result = result.map(parseNestedJSON);
-    //console.log(result);
     res.status(200).json(result);
   });
 });
@@ -281,14 +272,12 @@ const getDisbursalsDetailsById = asyncHandler((req, res) => {
     WHERE leadId = ? AND approvedStatus = 'disbursed' AND fipStatus='approved'
   `;
   const queryParams = [leadId];
-  //console.log(queryParams);
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getDisbursalsDetailsById error in controller:", err);
       return res.status(500).json({ error: "Error fetching login details" });
     }
     result = result.map(parseNestedJSON);
-    // console.log(result);
     res.status(200).json(result);
   });
 });
@@ -308,14 +297,11 @@ const updateFIPDetails = asyncHandler((req, res) => {
   });
   sql += ` WHERE id IN (${updates.map((update) => "?").join(", ")})`;
   params.push(...updates.map((update) => update.id));
-  // console.log(sql);
-  // console.log(params);
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateFIPDetails error in query:", err);
       return res.status(500).json({ error: "Error updating FIP details" });
     }
-    //console.log(result);
     res.status(200).json({ message: "FIP details updated successfully" });
   });
 });
@@ -356,7 +342,6 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
       console.error("updateApprovalsDetails error in query:", err);
       return res.status(500).json({ error: "Error updating approval details" });
     }
-    //console.log(result);
     res.status(200).json({ message: "Approval details updated successfully" });
   });
 });
@@ -370,12 +355,10 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
-    // console.log(inClause);
     queryParams["id-or"] = inClause;
     queryParams["sort"] = "createdOn";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
-    // console.log(sql);
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error fetching approval details:", err);
@@ -383,7 +366,6 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
         return;
       }
       result = parseNestedJSON(result);
-      //console.log(result);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -415,16 +397,13 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    //console.log(req);
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
-    // console.log(inClause);
     queryParams["id-or"] = inClause;
     queryParams["sort"] = "createdOn";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
-    // console.log(sql);
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching disbursal details:", err);
@@ -432,7 +411,6 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
         return;
       }
       result = parseNestedJSON(result);
-      console.log(result);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -479,8 +457,6 @@ const updateDisbursalDetails = asyncHandler((req, res) => {
   });
   sql += ` WHERE id IN (${updates.map((update) => "?").join(", ")})`;
   params.push(...updates.map((update) => update.id));
-  //console.log(sql);
-  //console.log(params);
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateDisbursalDetails error in query:", err);
@@ -488,7 +464,6 @@ const updateDisbursalDetails = asyncHandler((req, res) => {
         .status(500)
         .json({ error: "Error updating disbursal details" });
     }
-    // console.log(result);
     res.status(200).json({ message: "Disbursal details updated successfully" });
   });
 });
@@ -499,25 +474,13 @@ const getBankRejectsLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    // let sql = `
-    //   SELECT *
-    //   FROM leads
-    //   WHERE id IN (?)
-    // `;
-    // const queryParams = [distinctLeadIds];
-    // queryParams.push(req.query.sort || "createdOn");
-    // const filtersQuery = handleGlobalFilters(req.query);
-    // sql += filtersQuery;
-    // console.log(req);
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
-    // console.log(inClause);
     queryParams["id-or"] = inClause;
     queryParams["sort"] = "createdOn";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
-    // console.log(sql);
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching approval details:", err);
@@ -525,7 +488,6 @@ const getBankRejectsLeads = asyncHandler(async (req, res) => {
         return;
       }
       result = parseNestedJSON(result);
-      // console.log(result);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -584,25 +546,13 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    // let sql = `
-    //   SELECT *
-    //   FROM leads
-    //   WHERE id IN (?)
-    // `;
-    // const queryParams = [distinctLeadIds];
-    // queryParams.push(req.query.sort || "createdOn");
-    // const filtersQuery = handleGlobalFilters(req.query);
-    // sql += filtersQuery;
-    // console.log(req);
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
-    // console.log(inClause);
     queryParams["id-or"] = inClause;
     queryParams["sort"] = "createdOn";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
-    // console.log(sql);
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching cni rejected details:", err);
@@ -610,7 +560,6 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
         return;
       }
       result = parseNestedJSON(result);
-      //console.log(result);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -699,7 +648,6 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
     WHERE leadId = ? AND fipStatus = 'rejected'
   `;
   const queryParams = [leadId];
-  //console.log(queryParams);
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getBankRejectsDetailsById error in controller:", err);
@@ -708,7 +656,6 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
         .json({ error: "Error fetching getBankRejectsDetailsById details" });
     }
     result = result.map(parseNestedJSON);
-    //console.log(result);
     res.status(200).json(result);
   });
 });
@@ -721,7 +668,6 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
     WHERE leadId = ? AND approvedStatus = 'cnis'
   `;
   const queryParams = [leadId];
-  //console.log(queryParams);
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getCNIRejectsDetailsById error in controller:", err);
@@ -730,7 +676,6 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
         .json({ error: "Error fetching getCNIRejectsDetailsById details" });
     }
     result = result.map(parseNestedJSON);
-    //console.log(result);
     res.status(200).json(result);
   });
 });
@@ -776,7 +721,6 @@ const getDisbursedAmountSum = asyncHandler(async (req, res) => {
       console.log("getDisbursedAmountSum error:", err);
       return res.status(500).send("Error retrieving sanctioned amount sum");
     }
-    // console.log(result);
     const totalDisbursedAmount = result[0].total_disbursed_amount;
     res.status(200).json({ totalDisbursedAmount });
   });
@@ -1041,12 +985,10 @@ const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
-    //console.log(inClause);
     queryParams["id-or"] = inClause;
     queryParams["sort"] = "createdOn";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
-    // console.log(sql);
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error fetching leads:", err);
@@ -1054,7 +996,6 @@ const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
         return;
       }
       result = parseNestedJSON(result);
-      // console.log(result);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -1071,18 +1012,15 @@ const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
     let sql = `SELECT COUNT(*) as count FROM leads`;
     const queryParams = req.query || {};
-    // console.log(inClause);
     queryParams["id-or"] = inClause;
     const filtersQuery = handleGlobalFilters(queryParams, true);
     sql += filtersQuery;
-    // console.log(sql);
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error counting leads:", err);
         res.status(500).json({ error: "Error counting leads" });
         return;
       }
-      //console.log(result);
       res.status(200).send(String(result[0].count));
     });
   } catch (error) {

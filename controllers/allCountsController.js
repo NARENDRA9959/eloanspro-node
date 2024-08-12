@@ -300,14 +300,12 @@ const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
   let sql = `SELECT 
       COUNT(*) AS leadCount
     FROM leads`;
-  //console.log(req.query)
   const queryParams = req.query;
   queryParams["leadInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`;
   sql += sql2;
-  //console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -315,7 +313,6 @@ const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
       return;
     }
     const past7DaysLeadCount = result[0].leadCount;
-    console.log(past7DaysLeadCount)
     res.status(200).send(String(past7DaysLeadCount));
   });
 });
@@ -324,14 +321,12 @@ const getPast7DaysCallBacksCount = asyncHandler(async (req, res) => {
   let sql = `SELECT 
   COUNT(*) AS count
 FROM callbacks`;
-  //console.log(req.query)
   const queryParams = req.query;
   queryParams["callbackInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`;
   sql += sql2;
-  // console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -339,7 +334,6 @@ FROM callbacks`;
       return;
     }
     const past7DaysCallBacksCount = result[0].count;
-    // console.log(past7DaysCallBacksCount)
     res.status(200).send(String(past7DaysCallBacksCount));
   });
 });
@@ -355,20 +349,15 @@ const getLastMonthLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     0
   )).format('YYYY-MM-DD');
-
-  // console.log("lastMonthStartDate - LEADS:", lastMonthStartDate)
-  //console.log("lastMonthEndDate - LEADS", lastMonthEndDate)
   let sql = `SELECT 
   COUNT(*) AS leadCount
 FROM leads`;
-  // console.log(req.query)
   const queryParams = req.query;
   queryParams["leadInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  // console.log(sql)
   dbConnect.query(
     sql,
     [lastMonthStartDate, lastMonthEndDate],
@@ -379,7 +368,6 @@ FROM leads`;
         return;
       }
       const lastMonthLeadCount = result[0].leadCount;
-      //console.log("lastMonthLeadCount", lastMonthLeadCount)
       res.status(200).send(String(lastMonthLeadCount));
     }
   );
@@ -396,20 +384,15 @@ const getLastMonthCallBacksCount = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     0
   )).format('YYYY-MM-DD');
-
-  // console.log("lastMonthStartDate - CALLBACKS:", lastMonthStartDate)
-  // console.log("lastMonthEndDate - CALLBACKS", lastMonthEndDate)
   let sql = `SELECT 
   COUNT(*) AS count
 FROM callbacks`;
-  //  console.log(req.query)
   const queryParams = req.query;
   queryParams["callbackInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  //  console.log(sql)
   dbConnect.query(
     sql,
     [lastMonthStartDate, lastMonthEndDate],
@@ -420,7 +403,6 @@ FROM callbacks`;
         return;
       }
       const lastMonthCallBacksCount = result[0].count;
-      // console.log(lastMonthCallBacksCount)
       res.status(200).send(String(lastMonthCallBacksCount));
     }
   );
@@ -437,22 +419,17 @@ const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     0
   )).format('YYYY-MM-DD');
-
-  // console.log("last6MonthsStartDate - LEADS:", last6MonthsStartDate)
-  // console.log("last6MonthEndDate - LEADS", lastMonthEndDate)
   let sql = `
       SELECT 
           COUNT(*) AS leadCount
       FROM 
           leads`;
-  //  console.log(req.query)
   const queryParams = req.query;
   queryParams["leadInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  // console.log(sql)
   dbConnect.query(
     sql,
     [last6MonthsStartDate, lastMonthEndDate],
@@ -463,7 +440,6 @@ const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
         return;
       }
       const last6MonthsLeadCountList = result[0].leadCount
-      //console.log("last6MonthsLeadCountList", last6MonthsLeadCountList)
       res.status(200).send(String(last6MonthsLeadCountList));
     }
   );
@@ -480,22 +456,17 @@ const getLast6MonthsCallBacksCount = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     0
   )).format('YYYY-MM-DD');
-
-  //  console.log("last6MonthsStartDate - CALLBACKS:", last6MonthsStartDate)
-  // console.log("last6MonthEndDate - CALLBACKS", lastMonthEndDate)
   let sql = `
       SELECT 
           COUNT(*) AS count
       FROM 
           callbacks`;
-  // console.log(req.query)
   const queryParams = req.query;
   queryParams["callbackInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  // console.log(sql)
   dbConnect.query(
     sql,
     [last6MonthsStartDate, lastMonthEndDate],
@@ -506,7 +477,6 @@ const getLast6MonthsCallBacksCount = asyncHandler(async (req, res) => {
         return;
       }
       const last6MonthsCallBacksCount = result[0].count;
-      // console.log("last6MonthsCallBacksCount", last6MonthsCallBacksCount)
       res.status(200).send(String(last6MonthsCallBacksCount));
     }
   );
@@ -519,22 +489,17 @@ const getLastYearLeadCountStatus = asyncHandler(async (req, res) => {
     1
   )).format('YYYY-MM-DD');
   const lastYearEndDate = moment(new Date(currentDate.getFullYear() - 1, 11, 31)).format('YYYY-MM-DD');
-
-  // console.log("lastYearStartDate - LEADS:", lastYearStartDate)
-  // console.log("lastYearEndDate - LEADS", lastYearEndDate)
   let sql = `
   SELECT 
       COUNT(*) AS leadCount
   FROM 
       leads`;
-  // console.log(req.query)
   const queryParams = req.query;
   queryParams["leadInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  // console.log(sql)
   dbConnect.query(sql, [lastYearStartDate, lastYearEndDate], (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -542,7 +507,6 @@ const getLastYearLeadCountStatus = asyncHandler(async (req, res) => {
       return;
     }
     const lastYearLeadCount = result[0].leadCount;
-    // console.log("lastYearLeadCount", lastYearLeadCount)
     res.status(200).send(String(lastYearLeadCount));
   });
 });
@@ -554,21 +518,17 @@ const getLastYearCallBacksCount = asyncHandler(async (req, res) => {
     1
   )).format('YYYY-MM-DD');
   const lastYearEndDate = moment(new Date(currentDate.getFullYear() - 1, 11, 31)).format('YYYY-MM-DD');
-  // console.log("lastYearStartDate - CALLBACKS:", lastYearStartDate)
-  //  console.log("lastYearEndDate - CALLBACKS", lastYearEndDate)
   let sql = `
   SELECT 
       COUNT(*) AS count
   FROM 
       callbacks`;
-  //  console.log(req.query)
   const queryParams = req.query;
   queryParams["callbackInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  // console.log(sql)
   dbConnect.query(sql, [lastYearStartDate, lastYearEndDate], (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -662,14 +622,12 @@ const getCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
     1
   )).format('MM/DD/YYYY');
   const currentMonthEndDate = moment(currentDate).format('MM/DD/YYYY');
-  // console.log("currentMonthStartDate", currentMonthStartDate);
-  // console.log("currentMonthEndDate", currentMonthEndDate);
   let sql = `SELECT 
     COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
    FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
   let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
   sql += sql2;
-  //console.log(sql);
+
   dbConnect.query(
     sql,
     [currentMonthStartDate, currentMonthEndDate],
@@ -680,7 +638,6 @@ const getCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
         return;
       }
       const totalDisbursedAmount = result[0].totalDisbursedAmount;
-      // console.log("totalDisbursedAmount", totalDisbursedAmount);
       res.status(200).send(String(totalDisbursedAmount));
     }
   );
@@ -697,14 +654,11 @@ const getLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     0
   )).format('MM/DD/YYYY');
-  // console.log("lastMonthStartDate", lastMonthStartDate)
-  // console.log("lastMonthEndDate", lastMonthEndDate)
   let sql = `SELECT 
     COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
  FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
   let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
   sql += sql2;
-  //console.log(sql)
   dbConnect.query(
     sql,
     [lastMonthStartDate, lastMonthEndDate],
@@ -715,7 +669,6 @@ const getLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
         return;
       }
       const totalDisbursedAmount = result[0].totalDisbursedAmount;
-      // console.log("totalDisbursedAmount", totalDisbursedAmount)
       res.status(200).send(String(totalDisbursedAmount));
     }
   );
@@ -733,14 +686,11 @@ const getLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
     currentDate.getMonth() - 1,
     0
   )).format('MM/DD/YYYY');
-  // console.log("lastLastMonthStartDate", lastLastMonthStartDate);
-  // console.log("lastLastMonthEndDate", lastLastMonthEndDate);
   let sql = `SELECT 
     COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
  FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
   let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
   sql += sql2;
-  //console.log(sql);
   dbConnect.query(
     sql,
     [lastLastMonthStartDate, lastLastMonthEndDate],
@@ -751,7 +701,6 @@ const getLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
         return;
       }
       const totalDisbursedAmount = result[0].totalDisbursedAmount;
-      // console.log("totalDisbursedAmount", totalDisbursedAmount);
       res.status(200).send(String(totalDisbursedAmount));
     }
   );
@@ -769,14 +718,11 @@ const getLastLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
     currentDate.getMonth() - 2,
     0
   )).format('MM/DD/YYYY');
-  // console.log("lastLastLastMonthStartDate", lastLastLastMonthStartDate);
-  // console.log("lastLastLastMonthEndDate", lastLastLastMonthEndDate);
   let sql = `SELECT 
     COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
   FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
   let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
   sql += sql2;
-  // console.log(sql);
   dbConnect.query(
     sql,
     [lastLastLastMonthStartDate, lastLastLastMonthEndDate],
@@ -787,7 +733,6 @@ const getLastLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
         return;
       }
       const totalDisbursedAmount = result[0].totalDisbursedAmount;
-      //console.log("totalDisbursedAmount", totalDisbursedAmount);
       res.status(200).send(String(totalDisbursedAmount));
     }
   );
@@ -805,15 +750,12 @@ const getLastLastLastLastMonthDisbursedAmount = asyncHandler(async (req, res) =>
     currentDate.getMonth() - 3,
     0
   )).format('MM/DD/YYYY');
-  // console.log("lastLastLastLastMonthStartDate", lastLastLastLastMonthStartDate);
-  // console.log("lastLastLastLastMonthEndDate", lastLastLastLastMonthEndDate);
   let sql = `SELECT 
     COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
   FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
 
   let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
   sql += sql2;
-  // console.log(sql);
   dbConnect.query(
     sql,
     [lastLastLastLastMonthStartDate, lastLastLastLastMonthEndDate],
@@ -824,7 +766,6 @@ const getLastLastLastLastMonthDisbursedAmount = asyncHandler(async (req, res) =>
         return;
       }
       const totalDisbursedAmount = result[0].totalDisbursedAmount;
-      // console.log("totalDisbursedAmount", totalDisbursedAmount);
       res.status(200).send(String(totalDisbursedAmount));
     }
   );
@@ -841,14 +782,11 @@ const getfirstMonthDisbursedAmount = asyncHandler(async (req, res) => {
     currentDate.getMonth() - 4,
     0
   )).format('MM/DD/YYYY');
-  // console.log("firstMonthStartDate", firstMonthStartDate);
-  // console.log("firstMonthEndDate", firstMonthEndDate);
   let sql = `SELECT 
     COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
   FROM logins WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed'`;
   let sql2 = ` AND disbursalDate >= ? AND disbursalDate <= ?`;
   sql += sql2;
-  // console.log(sql);
   dbConnect.query(
     sql,
     [firstMonthStartDate, firstMonthEndDate],
@@ -859,7 +797,6 @@ const getfirstMonthDisbursedAmount = asyncHandler(async (req, res) => {
         return;
       }
       const totalDisbursedAmount = result[0].totalDisbursedAmount;
-      // console.log("totalDisbursedAmount", totalDisbursedAmount);
       res.status(200).send(String(totalDisbursedAmount));
     }
   );
@@ -878,14 +815,11 @@ const getCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
     1
   )).format('MM/DD/YYYY');
   const currentMonthEndDate = moment(currentDate).format('MM/DD/YYYY');
-  // console.log("currentMonthStartDate", currentMonthStartDate);
-  // console.log("currentMonthEndDate", currentMonthEndDate);
   let sql = `SELECT 
     COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
    FROM logins WHERE fipStatus = 'approved'`;
   let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
   sql += sql2;
-  // console.log(sql);
   dbConnect.query(
     sql,
     [currentMonthStartDate, currentMonthEndDate],
@@ -896,7 +830,6 @@ const getCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
         return;
       }
       const totalSanctionedAmount = result[0].totalSanctionedAmount;
-      // console.log("totalSanctionedAmount", totalSanctionedAmount);
       res.status(200).send(String(totalSanctionedAmount));
     }
   );
@@ -915,14 +848,11 @@ const getLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     0
   )).format('MM/DD/YYYY');
-  // console.log("lastMonthStartDate", lastMonthStartDate)
-  // console.log("lastMonthEndDate", lastMonthEndDate)
   let sql = `SELECT 
   COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
  FROM logins WHERE fipStatus = 'approved'`;
   let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
   sql += sql2;
-  // console.log(sql)
   dbConnect.query(
     sql,
     [lastMonthStartDate, lastMonthEndDate],
@@ -933,7 +863,6 @@ const getLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
         return;
       }
       const totalSanctionedAmount = result[0].totalSanctionedAmount;
-      //console.log("totalSanctionedAmount", totalSanctionedAmount)
       res.status(200).send(String(totalSanctionedAmount));
     }
   );
@@ -951,14 +880,11 @@ const getLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
     currentDate.getMonth() - 1,
     0
   )).format('MM/DD/YYYY');
-  // console.log("lastLastMonthStartDate", lastLastMonthStartDate);
-  // console.log("lastLastMonthEndDate", lastLastMonthEndDate);
   let sql = `SELECT 
   COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
  FROM logins WHERE fipStatus = 'approved'`;
   let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
   sql += sql2;
-  //console.log(sql);
   dbConnect.query(
     sql,
     [lastLastMonthStartDate, lastLastMonthEndDate],
@@ -969,7 +895,6 @@ const getLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
         return;
       }
       const totalSanctionedAmount = result[0].totalSanctionedAmount;
-      //console.log("totalSanctionedAmount", totalSanctionedAmount);
       res.status(200).send(String(totalSanctionedAmount));
     }
   );
@@ -988,14 +913,11 @@ const getLastLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
     currentDate.getMonth() - 2,
     0
   )).format('MM/DD/YYYY');
-  // console.log("lastLastLastMonthStartDate", lastLastLastMonthStartDate);
-  // console.log("lastLastLastMonthEndDate", lastLastLastMonthEndDate);
   let sql = `SELECT 
   COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
  FROM logins WHERE fipStatus = 'approved'`;
   let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
   sql += sql2;
-  //console.log(sql);
   dbConnect.query(
     sql,
     [lastLastLastMonthStartDate, lastLastLastMonthEndDate],
@@ -1006,7 +928,6 @@ const getLastLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
         return;
       }
       const totalSanctionedAmount = result[0].totalSanctionedAmount;
-      // console.log("totalSanctionedAmount", totalSanctionedAmount);
       res.status(200).send(String(totalSanctionedAmount));
     }
   );
@@ -1024,14 +945,11 @@ const getLastLastLastLastMonthSanctionedAmount = asyncHandler(async (req, res) =
     currentDate.getMonth() - 3,
     0
   )).format('MM/DD/YYYY');
-  // console.log("lastLastLastLastMonthStartDate", lastLastLastLastMonthStartDate);
-  // console.log("lastLastLastLastMonthEndDate", lastLastLastLastMonthEndDate);
   let sql = `SELECT 
   COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
  FROM logins WHERE fipStatus = 'approved'`;
   let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
   sql += sql2;
-  // console.log(sql);
   dbConnect.query(
     sql,
     [lastLastLastLastMonthStartDate, lastLastLastLastMonthEndDate],
@@ -1042,7 +960,6 @@ const getLastLastLastLastMonthSanctionedAmount = asyncHandler(async (req, res) =
         return;
       }
       const totalSanctionedAmount = result[0].totalSanctionedAmount;
-      // console.log("totalSanctionedAmount", totalSanctionedAmount);
       res.status(200).send(String(totalSanctionedAmount));
     }
   );
@@ -1061,14 +978,11 @@ const getfirstMonthSanctionedAmount = asyncHandler(async (req, res) => {
     currentDate.getMonth() - 4,
     0
   )).format('MM/DD/YYYY');
-  // console.log("firstMonthStartDate", firstMonthStartDate);
-  // console.log("firstMonthEndDate", firstMonthEndDate);
   let sql = `SELECT 
   COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
  FROM logins WHERE fipStatus = 'approved'`;
   let sql2 = ` AND approvalDate >= ? AND approvalDate <= ?`;
   sql += sql2;
-  //console.log(sql);
   dbConnect.query(
     sql,
     [firstMonthStartDate, firstMonthEndDate],
@@ -1079,7 +993,6 @@ const getfirstMonthSanctionedAmount = asyncHandler(async (req, res) => {
         return;
       }
       const totalSanctionedAmount = result[0].totalSanctionedAmount;
-      //console.log("totalSanctionedAmount", totalSanctionedAmount);
       res.status(200).send(String(totalSanctionedAmount));
     }
   );
