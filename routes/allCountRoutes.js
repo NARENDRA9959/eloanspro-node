@@ -22,7 +22,8 @@ const {
   getApprovalsCountStatus,
   getDisbursalsCountStatus,
   getMonthWiseFilesCountStatus,
-  getMonthWiseLoginsCountStatus,
+  getMonthWiseCreditsCountStatus,
+  getMonthWisePartialCountStatus,
   getLastMonthDisbursedAmount,
   getCurrentMonthDisbursedAmount,
   getLastLastMonthDisbursedAmount,
@@ -50,7 +51,9 @@ router.route("/credit").get(validateToken, getCreditEvaluationCountStatus);
 router.route("/monthcallbacks").get(validateToken, getMonthWiseCallBacksCount);
 router.route("/monthleads").get(validateToken, getMonthWiseLeadCountStatus);
 router.route("/monthfiles").get(validateToken, getMonthWiseFilesCountStatus);
-router.route("/monthlogins").get(validateToken, getMonthWiseLoginsCountStatus);
+router.route("/monthcredits").get(validateToken, getMonthWiseCreditsCountStatus);
+router.route("/monthpartial").get(validateToken, getMonthWisePartialCountStatus);
+
 router.route("/daywise/leads").get(validateToken, getDaywiseLeadsCount);
 router.route("/daywise/callback").get(validateToken, getDaywiseCallBacksCount);
 router.route("/week/leads").get(validateToken, getPast7DaysLeadCountStatus);

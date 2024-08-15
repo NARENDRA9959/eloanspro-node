@@ -1,6 +1,7 @@
 const express = require("express");
 const {
   getLeads,
+  searchLeads,
   getLeadById,
   getLeadsCount,
   createLead,
@@ -25,6 +26,7 @@ const router = express.Router();
 
 router.route("/").get(validateToken, getLeads).post(validateToken, createLead);
 
+router.route("/search").get(validateToken, searchLeads);
 router.route("/total").get(validateToken, getLeadsCount);
 
 router.route("/sources").get(validateToken, getLeadSources);

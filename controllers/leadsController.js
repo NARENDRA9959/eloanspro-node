@@ -9,6 +9,12 @@ const {
 
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
+const { fetchDistinctApprovedLeadIds } = require("../controllers/loginsController")
+const { fetchFIPProcessDistinctLeadIds } = require("../controllers/loginsController")
+const { fetchDistinctBankRejectedLeadIds } = require("../controllers/loginsController")
+
+
+
 const getLeadsCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as leadsCount FROM leads";
   const filtersQuery = handleGlobalFilters(req.query, true);
@@ -128,7 +134,7 @@ const calculateGstProgram = asyncHandler((req, res) => {
   const { totalEmi, odCcInterestAy1, gstTurnover, margin, months } = req.body;
   const margin1 = margin / 100;
   const monthlyInterest = (gstTurnover * margin1) / months;
-  const monthlyPayment = monthlyInterest * 0.8; // 80% of monthly interest
+  const monthlyPayment = monthlyInterest * 0.8;
   const finalMonthlyPayment = monthlyPayment - totalEmi - odCcInterestAy1;
   const gstValue = Math.round(finalMonthlyPayment);
   const updateClause = updateClauseHandler(req.body);
@@ -349,6 +355,74 @@ const calculateBTOProgram = asyncHandler((req, res) => {
 //     }
 //   });
 // });
+const searchLeads = asyncHandler(async (req, res) => {
+  let sql = "SELECT * FROM leads";
+  const queryParams = req.query;
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+  console.log(sql);
+  dbConnect.query(sql, async (err, leadsResult) => {
+    if (err) {
+      console.log("getLeads Error in controller");
+      return res.status(500).send({ message: "Internal Server Error" });
+    }
+    leadsResult = parseNestedJSON(leadsResult);
+    if (leadsResult.length === 0) {
+      return res.status(404).send("No Leads Found.");
+    }
+    const statusSql = "SELECT id, displayName FROM leadStatus";
+    dbConnect.query(statusSql, async (err, statusResult) => {
+      if (err) {
+        console.log("Error fetching lead statuses");
+        return res.status(500).send({ message: "Internal Server Error" });
+      }
+      const statusMap = {};
+      statusResult.forEach(status => {
+        statusMap[status.id] = status.displayName;
+      });
+      try {
+        const approvedLeadIds = await fetchDistinctApprovedLeadIds();
+        const fipLeadsIds = await fetchFIPProcessDistinctLeadIds();
+        const bankRejectedLeadsIds = await fetchDistinctBankRejectedLeadIds();
+
+        // Process each lead in the array
+        const processedLeads = leadsResult.map(lead => {
+          let leadStatusName;
+
+          if (lead.leadInternalStatus == 12) {
+            if (approvedLeadIds.includes(lead.id.toString())) {
+              leadStatusName = "Sanctions";
+            } else if (fipLeadsIds.includes(lead.id.toString())) {
+              leadStatusName = "Files In Process";
+            } else if (bankRejectedLeadsIds.includes(lead.id.toString())) {
+              leadStatusName = "Bank Rejects";
+            } else {
+              leadStatusName = statusMap[lead.leadInternalStatus] || lead.leadInternalStatus;
+            }
+          } else {
+            leadStatusName = statusMap[lead.leadInternalStatus] || lead.leadInternalStatus;
+          }
+
+          return {
+            ...lead,
+            leadStatusName,
+          };
+        });
+
+        console.log(processedLeads);
+        res.status(200).send({
+          message: "Leads fetched successfully.",
+          leadDetails: processedLeads,
+        });
+      } catch (error) {
+        console.log("Error processing leads", error);
+        return res.status(500).send({ message: "Internal Server Error" });
+      }
+    });
+  });
+});
+
+
 
 const createLead = asyncHandler((req, res) => {
   console.log(req.user.userType);
@@ -524,4 +598,5 @@ module.exports = {
   calculateBalanceSheet,
   calculateDscrRatio,
   calculateBTOProgram,
+  searchLeads
 };

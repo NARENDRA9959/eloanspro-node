@@ -570,9 +570,9 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
 
 async function fetchDistinctCNIRejectedLeadIds() {
   const sql = `
-    SELECT DISTINCT leadId
+    SELECT DISTINCT leadId 
     FROM logins
-    WHERE approvedStatus = 'cnis'
+    WHERE fipStatus = 'approved' AND approvedStatus = 'cnis'
   `;
   return new Promise((resolve, reject) => {
     dbConnect.query(sql, (err, result) => {
@@ -725,7 +725,6 @@ const getDisbursedAmountSum = asyncHandler(async (req, res) => {
     res.status(200).json({ totalDisbursedAmount });
   });
 });
-
 
 const getLoginsDoneById = asyncHandler((req, res) => {
   const sql = `SELECT businessName, program, bankName, fipStatus, fipRemarks FROM logins WHERE bankId = ${req.params.leadId}`;

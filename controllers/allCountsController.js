@@ -268,20 +268,20 @@ const getMonthWiseFilesCountStatus = asyncHandler(async (req, res) => {
   });
 });
 
-//logins
+//credits
 
-const getMonthWiseLoginsCountStatus = asyncHandler(async (req, res) => {
+const getMonthWiseCreditsCountStatus = asyncHandler(async (req, res) => {
   let sql = `SELECT 
       DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month,
       COALESCE(
         (
           SELECT COUNT(leads.id)
           FROM leads 
-          WHERE leadInternalStatus = 11
+          WHERE leadInternalStatus = 5
           AND YEAR(leads.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
           AND MONTH(leads.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
         ), 0
-      ) AS loginsCount
+      ) AS creditsCount
     FROM 
       (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq
     ORDER BY 
@@ -292,8 +292,35 @@ const getMonthWiseLoginsCountStatus = asyncHandler(async (req, res) => {
       res.status(500).send("Internal Server Error");
       return;
     }
-    const loginsCount = result.map(item => item.loginsCount);
-    res.status(200).json({ loginsCount });
+    const creditsCount = result.map(item => item.creditsCount);
+    res.status(200).json({ creditsCount });
+  });
+});
+
+const getMonthWisePartialCountStatus = asyncHandler(async (req, res) => {
+  let sql = `SELECT 
+      DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month,
+      COALESCE(
+        (
+          SELECT COUNT(leads.id)
+          FROM leads 
+          WHERE leadInternalStatus = 4
+          AND YEAR(leads.createdOn) = YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
+          AND MONTH(leads.createdOn) = MONTH(DATE_SUB(CURDATE(), INTERVAL seq MONTH))
+        ), 0
+      ) AS partialCount
+    FROM 
+      (SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5) AS seq
+    ORDER BY 
+      seq DESC; `
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    const partialCount = result.map(item => item.partialCount);
+    res.status(200).json({ partialCount });
   });
 });
 const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
@@ -1019,8 +1046,9 @@ module.exports = {
   getLoginsCountStatus,
   getApprovalsCountStatus,
   getDisbursalsCountStatus,
-  getMonthWiseLoginsCountStatus,
+  getMonthWiseCreditsCountStatus,
   getMonthWiseFilesCountStatus,
+  getMonthWisePartialCountStatus,
 
 
 
