@@ -370,7 +370,7 @@ const searchLeads = asyncHandler(async (req, res) => {
     if (leadsResult.length === 0) {
       return res.status(404).send("No Leads Found.");
     }
-    const statusSql = "SELECT id, displayName FROM leadStatus";
+    const statusSql = "SELECT id, displayName FROM leadstatus";
     dbConnect.query(statusSql, async (err, statusResult) => {
       if (err) {
         console.log("Error fetching lead statuses");
