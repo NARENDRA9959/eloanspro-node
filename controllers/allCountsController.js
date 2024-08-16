@@ -52,10 +52,12 @@ const getFilesCountStatus = asyncHandler(async (req, res) => {
   let sql = `
       SELECT COUNT(*) AS filesCountStatus
       FROM leads
-      WHERE leadInternalStatus = 3
   `;
-  const filtersQuery = handleGlobalFilters(req.query);
+  const queryParams = req.query;
+  queryParams["leadInternalStatus-eq"] = "3";
+  const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
+
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -108,10 +110,13 @@ const getPartialCountStatus = asyncHandler(async (req, res) => {
   let sql = `
       SELECT COUNT(*) AS partialCountStatus
       FROM leads
-      WHERE leadInternalStatus = 4
+     
   `;
-  const filtersQuery = handleGlobalFilters(req.query);
+  const queryParams = req.query;
+  queryParams["leadInternalStatus-eq"] = "4";
+  const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
+
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);

@@ -306,8 +306,52 @@ const updateFIPDetails = asyncHandler((req, res) => {
   });
 });
 
+// const updateApprovalsDetails = asyncHandler((req, res) => {
+//   const updates = req.body;
+//   const fields = [
+//     "program",
+//     "bankName",
+//     "lan",
+//     "sanctionedAmount",
+//     "disbursedAmount",
+//     "roi",
+//     "tenure",
+//     "processCode",
+//     "approvalDate",
+//     "disbursalDate",
+//     "approvedStatus",
+//     "approvedRemarks",
+//   ];
+//   let sql = "UPDATE logins SET ";
+//   const params = [];
+//   fields.forEach((field, fieldIndex) => {
+//     sql += `${field} = CASE `;
+//     updates.forEach((update, updateIndex) => {
+//       sql += `WHEN id = ? THEN ? `;
+//       params.push(update.id, update[field]);
+//     });
+//     sql += `ELSE ${field} END`;
+//     if (fieldIndex < fields.length - 1) {
+//       sql += ", ";
+//     }
+//   });
+//   sql += ` WHERE id IN (${updates.map(() => "?").join(", ")})`;
+//   params.push(...updates.map((update) => update.id));
+//   dbConnect.query(sql, params, (err, result) => {
+//     if (err) {
+//       console.error("updateApprovalsDetails error in query:", err);
+//       return res.status(500).json({ error: "Error updating approval details" });
+//     }
+//     res.status(200).json({ message: "Approval details updated successfully" });
+//   });
+// });
+
+
+
 const updateApprovalsDetails = asyncHandler((req, res) => {
   const updates = req.body;
+  const { leadId } = req.params;
+
   const fields = [
     "program",
     "bankName",
@@ -322,6 +366,7 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
     "approvedStatus",
     "approvedRemarks",
   ];
+
   let sql = "UPDATE logins SET ";
   const params = [];
   fields.forEach((field, fieldIndex) => {
@@ -337,14 +382,37 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
   });
   sql += ` WHERE id IN (${updates.map(() => "?").join(", ")})`;
   params.push(...updates.map((update) => update.id));
+
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateApprovalsDetails error in query:", err);
       return res.status(500).json({ error: "Error updating approval details" });
     }
-    res.status(200).json({ message: "Approval details updated successfully" });
+    const leadSumSql = `
+      UPDATE leads
+      SET 
+        sanctionedAmount = (
+          SELECT SUM(sanctionedAmount)
+          FROM logins
+          WHERE fipStatus = 'approved' AND leadId = ?
+        ),
+        disbursedAmount = (
+          SELECT SUM(disbursedAmount)
+          FROM logins
+          WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed' AND leadId = ?
+        )
+      WHERE id = ?
+    `;
+    dbConnect.query(leadSumSql, [leadId, leadId, leadId], (sumErr, sumResult) => {
+      if (sumErr) {
+        console.error("Error updating sanctionedAmount and disbursedAmount in leads table:", sumErr);
+        return res.status(500).json({ error: "Error updating leads table" });
+      }
+      res.status(200).json({ message: "Approval details and leads table updated successfully" });
+    });
   });
 });
+
 
 const getApprovalsLeads = asyncHandler(async (req, res) => {
   try {
@@ -1014,6 +1082,7 @@ const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
     queryParams["id-or"] = inClause;
     const filtersQuery = handleGlobalFilters(queryParams, true);
     sql += filtersQuery;
+    // console.log(sql)
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error counting leads:", err);

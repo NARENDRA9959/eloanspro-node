@@ -12,6 +12,8 @@ const { generateRandomNumber } = require("../middleware/valueGenerator");
 const { fetchDistinctApprovedLeadIds } = require("../controllers/loginsController")
 const { fetchFIPProcessDistinctLeadIds } = require("../controllers/loginsController")
 const { fetchDistinctBankRejectedLeadIds } = require("../controllers/loginsController")
+const { fetchDistinctDisbursedLeadIds } = require("../controllers/loginsController")
+
 
 
 
@@ -384,13 +386,18 @@ const searchLeads = asyncHandler(async (req, res) => {
         const approvedLeadIds = await fetchDistinctApprovedLeadIds();
         const fipLeadsIds = await fetchFIPProcessDistinctLeadIds();
         const bankRejectedLeadsIds = await fetchDistinctBankRejectedLeadIds();
+        const disbursalIds = await fetchDistinctDisbursedLeadIds();
+
+
 
         // Process each lead in the array
         const processedLeads = leadsResult.map(lead => {
           let leadStatusName;
 
           if (lead.leadInternalStatus == 12) {
-            if (approvedLeadIds.includes(lead.id.toString())) {
+            if (approvedLeadIds.includes(lead.id.toString()) && disbursalIds.includes(lead.id.toString())) {
+              leadStatusName = "Disbursal";
+            } else if (approvedLeadIds.includes(lead.id.toString())) {
               leadStatusName = "Sanctions";
             } else if (fipLeadsIds.includes(lead.id.toString())) {
               leadStatusName = "Files In Process";
@@ -402,7 +409,6 @@ const searchLeads = asyncHandler(async (req, res) => {
           } else {
             leadStatusName = statusMap[lead.leadInternalStatus] || lead.leadInternalStatus;
           }
-
           return {
             ...lead,
             leadStatusName,
