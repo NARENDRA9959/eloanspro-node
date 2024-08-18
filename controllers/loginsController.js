@@ -382,7 +382,7 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
   });
   sql += ` WHERE id IN (${updates.map(() => "?").join(", ")})`;
   params.push(...updates.map((update) => update.id));
-
+  console.log(params)
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateApprovalsDetails error in query:", err);
@@ -401,6 +401,18 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
           FROM logins
           WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed' AND leadId = ?
         )
+        //,
+        //   approvalDate = (
+        //   SELECT MAX(approvalDate)
+        //   FROM logins
+        //   WHERE fipStatus = 'approved' AND leadId = ?
+        // )
+        //   ,
+        //   disbursalDate = (
+        //   SELECT MAX(disbursalDate)
+        //   FROM logins
+        //   WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed' AND leadId = ?
+        // )
       WHERE id = ?
     `;
     dbConnect.query(leadSumSql, [leadId, leadId, leadId], (sumErr, sumResult) => {
@@ -472,6 +484,7 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
     queryParams["sort"] = "createdOn";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
+    //console.log(sql)
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching disbursal details:", err);

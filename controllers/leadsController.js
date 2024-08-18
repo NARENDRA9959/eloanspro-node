@@ -448,7 +448,7 @@ const createLead = asyncHandler((req, res) => {
           res
             .status(500)
             .send(
-              `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}`
+              `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}, Buisness Name - ${lead.businessName}`
             );
         } else {
           createNewLead(req, res);
@@ -517,7 +517,7 @@ const updateLead = asyncHandler((req, res) => {
       return res
         .status(409)
         .send(
-          `Lead already exists with phone number ${primaryPhone}, created by - ${lead.createdBy}, Lead ID - ${lead.id}`
+          `Lead already exists with phone number ${primaryPhone}, created by - ${lead.createdBy}, Lead ID - ${lead.id}, Business Name - ${lead.businessName}`
         );
     }
     const updateClause = updateClauseHandler(req.body);

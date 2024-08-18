@@ -14,13 +14,9 @@ const {
   getLast6MonthsCallBacksCount,
   getLastYearCallBacksCount,
   getLastYearLeadCountStatus,
-  getDaywiseLeadsCount,
-  getDaywiseCallBacksCount,
   getCallbackCountStatus,
   getRejectedCountStatus,
   getLoginsCountStatus,
-  getApprovalsCountStatus,
-  getDisbursalsCountStatus,
   getMonthWiseFilesCountStatus,
   getMonthWiseCreditsCountStatus,
   getMonthWisePartialCountStatus,
@@ -45,17 +41,12 @@ router.route("/files").get(validateToken, getFilesCountStatus);
 router.route("/partial").get(validateToken, getPartialCountStatus);
 router.route("/rejects").get(validateToken, getRejectedCountStatus);
 router.route("/logins").get(validateToken, getLoginsCountStatus);
-router.route("/approvals").get(validateToken, getApprovalsCountStatus);
-router.route("/disbursals").get(validateToken, getDisbursalsCountStatus);
 router.route("/credit").get(validateToken, getCreditEvaluationCountStatus);
 router.route("/monthcallbacks").get(validateToken, getMonthWiseCallBacksCount);
 router.route("/monthleads").get(validateToken, getMonthWiseLeadCountStatus);
 router.route("/monthfiles").get(validateToken, getMonthWiseFilesCountStatus);
 router.route("/monthcredits").get(validateToken, getMonthWiseCreditsCountStatus);
 router.route("/monthpartial").get(validateToken, getMonthWisePartialCountStatus);
-
-router.route("/daywise/leads").get(validateToken, getDaywiseLeadsCount);
-router.route("/daywise/callback").get(validateToken, getDaywiseCallBacksCount);
 router.route("/week/leads").get(validateToken, getPast7DaysLeadCountStatus);
 router.route("/week/callback").get(validateToken, getPast7DaysCallBacksCount);
 router

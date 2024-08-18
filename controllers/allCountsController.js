@@ -128,43 +128,7 @@ const getPartialCountStatus = asyncHandler(async (req, res) => {
   });
 });
 
-const getApprovalsCountStatus = asyncHandler(async (req, res) => {
-  let sql = `
-      SELECT COUNT(*) AS approvalCountStatus
-      FROM leads
-      WHERE leadInternalStatus = 7
-  `;
-  const filtersQuery = handleGlobalFilters(req.query);
-  sql += filtersQuery;
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    const approvalCountStatus = result[0].approvalCountStatus;
-    res.status(200).send(String(approvalCountStatus));
-  });
-});
 
-const getDisbursalsCountStatus = asyncHandler(async (req, res) => {
-  let sql = `
-      SELECT COUNT(*) AS disbursalsCountStatus
-      FROM leads
-      WHERE leadInternalStatus = 8
-  `;
-  const filtersQuery = handleGlobalFilters(req.query);
-  sql += filtersQuery;
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    const disbursalsCountStatus = result[0].disbursalsCountStatus;
-    res.status(200).send(String(disbursalsCountStatus));
-  });
-});
 
 const getCreditEvaluationCountStatus = asyncHandler(async (req, res) => {
   let sql = `
@@ -571,75 +535,7 @@ const getLastYearCallBacksCount = asyncHandler(async (req, res) => {
     res.status(200).send(String(lastYearCallBacksCount));
   });
 });
-const getDaywiseLeadsCount = asyncHandler(async (req, res) => {
-  let sql = `
-    SELECT
-      DATE_FORMAT(dateList.date, '%a') AS dayName,
-      DATE(dateList.date) AS date,
-      COALESCE(COUNT(leads.id), 0) AS leadCount
-    FROM
-      (
-        SELECT CURDATE() - INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS date
-        FROM
-          (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS a
-          CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS b
-          CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS c
-      ) AS dateList
-    LEFT JOIN leads ON DATE(leads.createdOn) = dateList.date
-    WHERE
-      dateList.date BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE() -- Select data for the last 7 days only
-      AND dateList.date < CURDATE() -- Exclude today's date
-      ${handleGlobalFilters(req.query)}
-    GROUP BY
-      DATE(dateList.date)
-    ORDER BY
-      DATE(dateList.date) DESC; -- Order by date in descending order to get the last 7 days
-  `;
 
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.error("Error:", err);
-      res.status(500).send("Internal month leads Error");
-      return;
-    }
-    const past7DaysLeadsCount = result;
-    res.status(200).send(past7DaysLeadsCount);
-  });
-});
-const getDaywiseCallBacksCount = asyncHandler(async (req, res) => {
-  let sql = `
-    SELECT 
-      DATE_FORMAT(dateList.date, '%a') AS dayName,
-      DATE(dateList.date) AS date,
-      COALESCE(COUNT(callbacks.id), 0) AS callBackCount
-    FROM 
-      (
-        SELECT CURDATE() - INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS date
-        FROM 
-          (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS a
-          CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS b
-          CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS c
-      ) AS dateList
-    LEFT JOIN callbacks ON DATE(callbacks.createdOn) = dateList.date
-    WHERE 
-      dateList.date BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE() -- Select data for the last 7 days only
-      AND dateList.date < CURDATE() -- Exclude today's date
-      ${handleGlobalFilters(req.query)}
-    GROUP BY 
-      DATE(dateList.date);
-    ORDER BY
-      DATE(dateList.date) DESC; -- Order by date in descending order to get the last 7 days
-  `;
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    const past7DaysCallBacksCount = result;
-    res.status(200).send(past7DaysCallBacksCount);
-  });
-});
 
 
 
@@ -1044,29 +940,18 @@ module.exports = {
   getLast6MonthsCallBacksCount,
   getLastYearCallBacksCount,
   getLastYearLeadCountStatus,
-  getDaywiseLeadsCount,
-  getDaywiseCallBacksCount,
   getCallbackCountStatus,
   getRejectedCountStatus,
   getLoginsCountStatus,
-  getApprovalsCountStatus,
-  getDisbursalsCountStatus,
   getMonthWiseCreditsCountStatus,
   getMonthWiseFilesCountStatus,
   getMonthWisePartialCountStatus,
-
-
-
-
-
-
   getCurrentMonthDisbursedAmount,
   getLastMonthDisbursedAmount,
   getLastLastMonthDisbursedAmount,
   getLastLastLastMonthDisbursedAmount,
   getLastLastLastLastMonthDisbursedAmount,
   getfirstMonthDisbursedAmount,
-
   getCurrentMonthSanctionedAmount,
   getLastMonthSanctionedAmount,
   getLastLastMonthSanctionedAmount,
