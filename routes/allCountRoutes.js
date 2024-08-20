@@ -31,7 +31,11 @@ const {
   getLastLastMonthSanctionedAmount,
   getLastLastLastMonthSanctionedAmount,
   getLastLastLastLastMonthSanctionedAmount,
-  getfirstMonthSanctionedAmount
+  getfirstMonthSanctionedAmount,
+  getLastBeforeMonthLeadCountStatus,
+  getThisMonthLeadCountStatus,
+  getThisMonthCallBacksCount,
+  getTwoMonthsAgoCallBacksCount
 } = require("../controllers/allCountsController");
 const router = express.Router();
 const validateToken = require("../middleware/validateTokenHandler");
@@ -52,6 +56,21 @@ router.route("/week/callback").get(validateToken, getPast7DaysCallBacksCount);
 router
   .route("/lastmonth/leads")
   .get(validateToken, getLastMonthLeadCountStatus);
+router
+  .route("/thismonth/leads")
+  .get(validateToken, getThisMonthLeadCountStatus);
+
+router
+  .route("/thismonth/callbacks")
+  .get(validateToken, getThisMonthCallBacksCount);
+
+router
+  .route("/lastbeforemonth/leads")
+  .get(validateToken, getLastBeforeMonthLeadCountStatus);
+
+router
+  .route("/lastbeforemonth/callbacks")
+  .get(validateToken, getTwoMonthsAgoCallBacksCount);
 router
   .route("/lastmonth/callback")
   .get(validateToken, getLastMonthCallBacksCount);

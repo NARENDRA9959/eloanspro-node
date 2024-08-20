@@ -400,22 +400,20 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
           SELECT SUM(disbursedAmount)
           FROM logins
           WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed' AND leadId = ?
+        ),
+          approvalDate = (
+          SELECT MAX(approvalDate)
+          FROM logins
+          WHERE fipStatus = 'approved' AND leadId = ?
+        ),
+          disbursalDate = (
+          SELECT MAX(disbursalDate)
+          FROM logins
+          WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed' AND leadId = ?
         )
-        //,
-        //   approvalDate = (
-        //   SELECT MAX(approvalDate)
-        //   FROM logins
-        //   WHERE fipStatus = 'approved' AND leadId = ?
-        // )
-        //   ,
-        //   disbursalDate = (
-        //   SELECT MAX(disbursalDate)
-        //   FROM logins
-        //   WHERE fipStatus = 'approved' AND approvedStatus = 'disbursed' AND leadId = ?
-        // )
       WHERE id = ?
     `;
-    dbConnect.query(leadSumSql, [leadId, leadId, leadId], (sumErr, sumResult) => {
+    dbConnect.query(leadSumSql, [leadId, leadId, leadId, leadId, leadId], (sumErr, sumResult) => {
       if (sumErr) {
         console.error("Error updating sanctionedAmount and disbursedAmount in leads table:", sumErr);
         return res.status(500).json({ error: "Error updating leads table" });
@@ -761,51 +759,9 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
   });
 });
 
-const getSanctionedAmountSum = asyncHandler(async (req, res) => {
-  const { leadId } = req.params;
-  let sql = `
-    SELECT SUM(sanctionedAmount) AS total_sanctioned_amount
-    FROM logins
-  `;
-  const queryParams = req.query || {};
-  queryParams["leadId-eq"] = leadId;
-  queryParams["fipStatus-eq"] = 'approved';
-  const filtersQuery = handleGlobalFilters(queryParams);
-  sql += filtersQuery;
-  console.log(sql)
-  dbConnect.query(sql, [leadId], (err, result) => {
-    if (err) {
-      console.log("getSanctionedAmountSum error:", err);
-      return res.status(500).send("Error retrieving sanctioned amount sum");
-    }
-    const totalSanctionedAmount = result[0].total_sanctioned_amount;
-    res.status(200).json({ totalSanctionedAmount });
-  });
-});
 
 
-const getDisbursedAmountSum = asyncHandler(async (req, res) => {
-  const { leadId } = req.params;
-  let sql = `
-    SELECT SUM(disbursedAmount) AS total_disbursed_amount
-    FROM logins
-  `;
-  const queryParams = req.query || {};
-  queryParams["leadId-eq"] = leadId;
-  queryParams["fipStatus-eq"] = 'approved';
-  queryParams["approvedStatus-eq"] = 'disbursed';
-  const filtersQuery = handleGlobalFilters(queryParams);
-  sql += filtersQuery;
-  console.log(sql)
-  dbConnect.query(sql, [leadId], (err, result) => {
-    if (err) {
-      console.log("getDisbursedAmountSum error:", err);
-      return res.status(500).send("Error retrieving sanctioned amount sum");
-    }
-    const totalDisbursedAmount = result[0].total_disbursed_amount;
-    res.status(200).json({ totalDisbursedAmount });
-  });
-});
+
 
 const getLoginsDoneById = asyncHandler((req, res) => {
   const sql = `SELECT businessName, program, bankName, fipStatus, fipRemarks FROM logins WHERE bankId = ${req.params.leadId}`;
@@ -1129,8 +1085,6 @@ module.exports = {
   getCNIRejectedLeadCount,
   getBankRejectsDetailsById,
   getCNIRejectsDetailsById,
-  getSanctionedAmountSum,
-  getDisbursedAmountSum,
   getLoginsDoneById,
   getTotalSanctionedAmountSum,
   getTotalDisbursedAmountSum,

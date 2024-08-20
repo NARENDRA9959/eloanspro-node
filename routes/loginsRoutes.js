@@ -19,13 +19,12 @@ const {
   getCNIRejectedLeadCount,
   getBankRejectsDetailsById,
   getCNIRejectsDetailsById,
-  getSanctionedAmountSum,
+ 
   getLoginsDoneById,
   getTotalDisbursedAmountSum,
   getTotalSanctionedAmountSum,
   getFIPProcessDistinctLeads,
   getFIPProcessDistinctLeadsCount,
-  getDisbursedAmountSum
 } = require("../controllers/loginsController");
 const validateToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
@@ -61,13 +60,6 @@ router
   .route("/approved/:leadId")
   .get(validateToken, getApprovalsDetailsById)
   .put(validateToken, updateApprovalsDetails);
-router
-  .route("/sancAmountSum/:leadId")
-  .get(validateToken, getSanctionedAmountSum);
-
-router
-  .route("/disAmountSum/:leadId")
-  .get(validateToken, getDisbursedAmountSum);
 router
   .route("/disbursed/:leadId")
   .get(validateToken, getDisbursalsDetailsById)

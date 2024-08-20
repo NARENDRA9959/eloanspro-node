@@ -354,6 +354,7 @@ FROM leads`;
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
+  console.log(sql)
   dbConnect.query(
     sql,
     [lastMonthStartDate, lastMonthEndDate],
@@ -364,10 +365,93 @@ FROM leads`;
         return;
       }
       const lastMonthLeadCount = result[0].leadCount;
+      console.log(lastMonthLeadCount)
       res.status(200).send(String(lastMonthLeadCount));
     }
   );
 });
+
+const getThisMonthLeadCountStatus = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const thisMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  )).format('YYYY-MM-DD');
+  const thisMonthEndDate = moment(currentDate).format('YYYY-MM-DD'); // Today's date
+
+  let sql = `SELECT 
+  COUNT(*) AS leadCount
+  FROM leads`;
+  const queryParams = req.query;
+  queryParams["leadInternalStatus-eq"] = "1";
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+  let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
+  sql += sql2;
+  console.log(sql)
+
+  dbConnect.query(
+    sql,
+    [thisMonthStartDate, thisMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const thisMonthLeadCount = result[0].leadCount;
+      console.log(thisMonthLeadCount)
+      res.status(200).send(String(thisMonthLeadCount));
+    }
+  );
+});
+
+const getLastBeforeMonthLeadCountStatus = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+
+  // Calculate the start and end dates for the month before last month
+  const lastBeforeMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 2, // Two months ago
+    1
+  )).format('YYYY-MM-DD');
+
+  const lastBeforeMonthEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 1, // End of the month before last month
+    0
+  )).format('YYYY-MM-DD');
+
+  let sql = `SELECT 
+  COUNT(*) AS leadCount
+  FROM leads`;
+
+  const queryParams = req.query;
+  queryParams["leadInternalStatus-eq"] = "1";
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+
+  let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
+  sql += sql2;
+  console.log(sql);
+
+  dbConnect.query(
+    sql,
+    [lastBeforeMonthStartDate, lastBeforeMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const lastBeforeMonthLeadCount = result[0].leadCount;
+      console.log(lastBeforeMonthLeadCount);
+      res.status(200).send(String(lastBeforeMonthLeadCount));
+    }
+  );
+});
+
 const getLastMonthCallBacksCount = asyncHandler(async (req, res) => {
   const currentDate = new Date();
   const lastMonthStartDate = moment(new Date(
@@ -403,6 +487,85 @@ FROM callbacks`;
     }
   );
 });
+
+const getThisMonthCallBacksCount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+  const thisMonthStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  )).format('YYYY-MM-DD');
+  const thisMonthEndDate = moment(currentDate).format('YYYY-MM-DD'); // Today's date
+
+  let sql = `SELECT 
+  COUNT(*) AS count
+  FROM callbacks`;
+  const queryParams = req.query;
+  queryParams["callbackInternalStatus-eq"] = "1"; // Adjust the status as needed
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+  let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
+  sql += sql2;
+
+  dbConnect.query(
+    sql,
+    [thisMonthStartDate, thisMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const thisMonthCallBacksCount = result[0].count;
+      res.status(200).send(String(thisMonthCallBacksCount));
+    }
+  );
+});
+
+const getTwoMonthsAgoCallBacksCount = asyncHandler(async (req, res) => {
+  const currentDate = new Date();
+
+  // Calculate the start and end dates for the month before last month
+  const twoMonthsAgoStartDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 2, // Two months ago
+    1
+  )).format('YYYY-MM-DD');
+
+  const twoMonthsAgoEndDate = moment(new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 1, // Last month
+    0
+  )).format('YYYY-MM-DD'); // Last day of the month before last month
+
+  let sql = `SELECT 
+  COUNT(*) AS count
+  FROM callbacks`;
+
+  const queryParams = req.query;
+  queryParams["callbackInternalStatus-eq"] = "1"; // Adjust the status as needed
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+
+  let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
+  sql += sql2;
+
+  dbConnect.query(
+    sql,
+    [twoMonthsAgoStartDate, twoMonthsAgoEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const twoMonthsAgoCallBacksCount = result[0].count;
+      res.status(200).send(String(twoMonthsAgoCallBacksCount));
+    }
+  );
+});
+
+
 const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
   const currentDate = new Date();
   const last6MonthsStartDate = moment(new Date(
@@ -957,5 +1120,10 @@ module.exports = {
   getLastLastMonthSanctionedAmount,
   getLastLastLastMonthSanctionedAmount,
   getLastLastLastLastMonthSanctionedAmount,
-  getfirstMonthSanctionedAmount
+  getfirstMonthSanctionedAmount,
+  getLastBeforeMonthLeadCountStatus,
+  getThisMonthLeadCountStatus,
+  getTwoMonthsAgoCallBacksCount,
+  getThisMonthCallBacksCount
 };
+  
