@@ -423,7 +423,6 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
   });
 });
 
-
 const getApprovalsLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctApprovedLeadIds();
@@ -482,7 +481,6 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
     queryParams["sort"] = "createdOn";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
-    //console.log(sql)
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching disbursal details:", err);
@@ -497,7 +495,6 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
     res.status(500).json({ error: "Error in getDisbursalLeads function" });
   }
 });
-
 async function fetchDistinctDisbursedLeadIds() {
   const sql = `
     SELECT DISTINCT leadId
@@ -758,10 +755,6 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
     res.status(200).json(result);
   });
 });
-
-
-
-
 
 const getLoginsDoneById = asyncHandler((req, res) => {
   const sql = `SELECT businessName, program, bankName, fipStatus, fipRemarks FROM logins WHERE bankId = ${req.params.leadId}`;

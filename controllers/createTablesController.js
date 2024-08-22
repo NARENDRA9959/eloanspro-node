@@ -32,12 +32,8 @@ const createDscrTable = asyncHandler(async (req, res) => {
   });
 });
 
-
 const createleadDocumentsTable = asyncHandler(async (req, res) => {
   const { id } = req.body;
-  // console.log(req)
-  // console.log(req.body)
-  // console.log(id);
   const checkQuery = `SELECT * FROM leaddocuments WHERE leadId = ?`;
   dbConnect.query(checkQuery, [id], (checkErr, checkResult) => {
     if (checkErr) {
@@ -47,7 +43,6 @@ const createleadDocumentsTable = asyncHandler(async (req, res) => {
     if (checkResult.length > 0) {
       return res.status(200).send(`ID ${id} already exists in leaddocuments table. Just upload the files.`);
     }
-
     const sql = `INSERT INTO leaddocuments (leadId) VALUES (?)`;
     dbConnect.query(sql, [id], (err, result) => {
       if (err) {
@@ -60,9 +55,7 @@ const createleadDocumentsTable = asyncHandler(async (req, res) => {
   });
 });
 
-
 module.exports = {
   createDscrTable,
   createleadDocumentsTable
-
 };

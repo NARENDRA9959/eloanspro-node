@@ -387,13 +387,8 @@ const searchLeads = asyncHandler(async (req, res) => {
         const fipLeadsIds = await fetchFIPProcessDistinctLeadIds();
         const bankRejectedLeadsIds = await fetchDistinctBankRejectedLeadIds();
         const disbursalIds = await fetchDistinctDisbursedLeadIds();
-
-
-
-        // Process each lead in the array
         const processedLeads = leadsResult.map(lead => {
           let leadStatusName;
-
           if (lead.leadInternalStatus == 12) {
             if (approvedLeadIds.includes(lead.id.toString()) && disbursalIds.includes(lead.id.toString())) {
               leadStatusName = "Disbursal";
@@ -414,7 +409,6 @@ const searchLeads = asyncHandler(async (req, res) => {
             leadStatusName,
           };
         });
-
         console.log(processedLeads);
         res.status(200).send({
           message: "Leads fetched successfully.",
@@ -427,8 +421,6 @@ const searchLeads = asyncHandler(async (req, res) => {
     });
   });
 });
-
-
 
 const createLead = asyncHandler((req, res) => {
   console.log(req.user.userType);

@@ -2,19 +2,6 @@ const asyncHandler = require("express-async-handler");
 const handleGlobalFilters = require("../middleware/filtersHandler");
 const dbConnect = require("../config/dbConnection");
 const moment = require('moment');
-// const getLeadsCount = asyncHandler(async (req, res) => {
-//     let sql = "SELECT count(*) as leadsCount FROM leads";
-//     const filtersQuery = handleGlobalFilters(req.query);
-//     sql += filtersQuery;
-//     dbConnect.query(sql, (err, result) => {
-//       if (err) {
-//         // throw err;
-//         console.log("getLeadsCount error")
-//       }
-//       const leadsCount = result[0]['leadsCount'];
-//       res.status(200).send(String(leadsCount))
-//     });
-//   });
 
 const getLeadCountStatus = asyncHandler(async (req, res) => {
   let sql = "SELECT COUNT(*) AS leadCountStatus FROM leads";
@@ -345,6 +332,8 @@ const getLastMonthLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     0
   )).format('YYYY-MM-DD');
+  console.log(lastMonthEndDate)
+  console.log(lastMonthStartDate)
   let sql = `SELECT 
   COUNT(*) AS leadCount
 FROM leads`;
@@ -378,8 +367,7 @@ const getThisMonthLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     1
   )).format('YYYY-MM-DD');
-  const thisMonthEndDate = moment(currentDate).format('YYYY-MM-DD'); // Today's date
-
+  const thisMonthEndDate = moment(currentDate).format('YYYY-MM-DD');
   let sql = `SELECT 
   COUNT(*) AS leadCount
   FROM leads`;
@@ -390,7 +378,6 @@ const getThisMonthLeadCountStatus = asyncHandler(async (req, res) => {
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
   console.log(sql)
-
   dbConnect.query(
     sql,
     [thisMonthStartDate, thisMonthEndDate],
@@ -409,33 +396,26 @@ const getThisMonthLeadCountStatus = asyncHandler(async (req, res) => {
 
 const getLastBeforeMonthLeadCountStatus = asyncHandler(async (req, res) => {
   const currentDate = new Date();
-
-  // Calculate the start and end dates for the month before last month
   const lastBeforeMonthStartDate = moment(new Date(
     currentDate.getFullYear(),
-    currentDate.getMonth() - 2, // Two months ago
+    currentDate.getMonth() - 2,
     1
   )).format('YYYY-MM-DD');
-
   const lastBeforeMonthEndDate = moment(new Date(
     currentDate.getFullYear(),
-    currentDate.getMonth() - 1, // End of the month before last month
+    currentDate.getMonth() - 1,
     0
   )).format('YYYY-MM-DD');
-
   let sql = `SELECT 
   COUNT(*) AS leadCount
   FROM leads`;
-
   const queryParams = req.query;
   queryParams["leadInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
   console.log(sql);
-
   dbConnect.query(
     sql,
     [lastBeforeMonthStartDate, lastBeforeMonthEndDate],
@@ -495,13 +475,13 @@ const getThisMonthCallBacksCount = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     1
   )).format('YYYY-MM-DD');
-  const thisMonthEndDate = moment(currentDate).format('YYYY-MM-DD'); // Today's date
+  const thisMonthEndDate = moment(currentDate).format('YYYY-MM-DD');
 
   let sql = `SELECT 
   COUNT(*) AS count
   FROM callbacks`;
   const queryParams = req.query;
-  queryParams["callbackInternalStatus-eq"] = "1"; // Adjust the status as needed
+  queryParams["callbackInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
@@ -524,32 +504,25 @@ const getThisMonthCallBacksCount = asyncHandler(async (req, res) => {
 
 const getTwoMonthsAgoCallBacksCount = asyncHandler(async (req, res) => {
   const currentDate = new Date();
-
-  // Calculate the start and end dates for the month before last month
   const twoMonthsAgoStartDate = moment(new Date(
     currentDate.getFullYear(),
-    currentDate.getMonth() - 2, // Two months ago
+    currentDate.getMonth() - 2,
     1
   )).format('YYYY-MM-DD');
-
   const twoMonthsAgoEndDate = moment(new Date(
     currentDate.getFullYear(),
-    currentDate.getMonth() - 1, // Last month
+    currentDate.getMonth() - 1,
     0
-  )).format('YYYY-MM-DD'); // Last day of the month before last month
-
+  )).format('YYYY-MM-DD');
   let sql = `SELECT 
   COUNT(*) AS count
   FROM callbacks`;
-
   const queryParams = req.query;
-  queryParams["callbackInternalStatus-eq"] = "1"; // Adjust the status as needed
+  queryParams["callbackInternalStatus-eq"] = "1";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-
   dbConnect.query(
     sql,
     [twoMonthsAgoStartDate, twoMonthsAgoEndDate],
@@ -698,13 +671,6 @@ const getLastYearCallBacksCount = asyncHandler(async (req, res) => {
     res.status(200).send(String(lastYearCallBacksCount));
   });
 });
-
-
-
-
-
-
-
 const getCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
   const currentDate = new Date();
   const currentMonthStartDate = moment(new Date(
@@ -892,12 +858,6 @@ const getfirstMonthDisbursedAmount = asyncHandler(async (req, res) => {
     }
   );
 });
-
-
-
-
-
-
 const getCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
   const currentDate = new Date();
   const currentMonthStartDate = moment(new Date(
@@ -925,8 +885,6 @@ const getCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
     }
   );
 });
-
-
 const getLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
   const currentDate = new Date();
   const lastMonthStartDate = moment(new Date(
@@ -990,7 +948,6 @@ const getLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
     }
   );
 });
-
 
 const getLastLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
   const currentDate = new Date();
@@ -1056,7 +1013,6 @@ const getLastLastLastLastMonthSanctionedAmount = asyncHandler(async (req, res) =
   );
 });
 
-
 const getfirstMonthSanctionedAmount = asyncHandler(async (req, res) => {
   const currentDate = new Date();
   const firstMonthStartDate = moment(new Date(
@@ -1088,6 +1044,137 @@ const getfirstMonthSanctionedAmount = asyncHandler(async (req, res) => {
     }
   );
 });
+
+const currentDate = new Date();
+const lastMonthStartDate = moment(new Date(
+  currentDate.getFullYear(),
+  currentDate.getMonth() - 1,
+  1
+)).format('MM/DD/YYYY');
+const lastMonthEndDate = moment(new Date(
+  currentDate.getFullYear(),
+  currentDate.getMonth(),
+  0
+)).format('MM/DD/YYYY');
+const getuserLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
+  let sql2 = `SELECT id FROM leads`
+  const queryParams = req.query;
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql2 += filtersQuery;
+  let sql = `
+  SELECT 
+    COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
+  FROM logins
+  WHERE fipStatus = 'approved'
+    AND approvalDate >= ?
+    AND approvalDate <= ?
+    AND leadId IN (
+      ${sql2}
+    )
+`;
+  console.log(lastMonthStartDate)
+  console.log(lastMonthEndDate)
+  console.log(sql);
+  dbConnect.query(
+    sql,
+    [lastMonthStartDate, lastMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalSanctionedAmount = result[0].totalSanctionedAmount;
+      console.log(totalSanctionedAmount)
+      res.status(200).send(String(totalSanctionedAmount));
+    }
+  );
+});
+const getuserLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
+  let sql2 = `SELECT id FROM leads`
+  const queryParams = req.query;
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql2 += filtersQuery;
+  let sql = `
+  SELECT 
+    COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
+  FROM logins
+  WHERE fipStatus = 'approved'
+  AND approvedStatus = 'disbursed'
+    AND disbursalDate >= ?
+    AND disbursalDate <= ?
+    AND leadId IN (
+      ${sql2}
+    )
+`;
+  console.log(lastMonthStartDate)
+  console.log(lastMonthEndDate)
+  console.log(sql);
+  dbConnect.query(
+    sql,
+    [lastMonthStartDate, lastMonthEndDate],
+    (err, result) => {
+      if (err) {
+        console.error("Error:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      const totalDisbursedAmount = result[0].totalDisbursedAmount;
+      console.log(totalDisbursedAmount)
+      res.status(200).send(String(totalDisbursedAmount));
+    }
+  );
+});
+
+
+
+
+// const currentMonthStartDate = moment(new Date(
+//   currentDate.getFullYear(),
+//   currentDate.getMonth(),
+//   1
+// )).format('MM/DD/YYYY');
+// const currentMonthEndDate = moment(new Date(
+//   currentDate.getFullYear(),
+//   currentDate.getMonth() + 1,
+//   0
+// )).format('MM/DD/YYYY');
+
+// const getuserCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
+//   let sql2 = `SELECT id FROM leads`;
+//   const queryParams = req.query;
+//   const filtersQuery = handleGlobalFilters(queryParams);
+//   sql2 += filtersQuery;
+//   let sql = `
+//     SELECT 
+//       COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
+//     FROM logins
+//     WHERE fipStatus = 'approved'
+//       AND approvalDate >= ?
+//       AND approvalDate <= ?
+//       AND leadId IN (
+//         ${sql2}
+//       )
+//   `;
+//   console.log(currentMonthStartDate);
+//   console.log(currentMonthEndDate);
+//   console.log(sql);
+//   dbConnect.query(
+//     sql,
+//     [currentMonthStartDate, currentMonthEndDate],
+//     (err, result) => {
+//       if (err) {
+//         console.error("Error:", err);
+//         res.status(500).send("Internal Server Error");
+//         return;
+//       }
+//       const totalSanctionedAmount = result[0].totalSanctionedAmount;
+//       console.log(totalSanctionedAmount);
+//       res.status(200).send(String(totalSanctionedAmount));
+//     }
+//   );
+// });
+
 module.exports = {
   getLeadCountStatus,
   getFilesCountStatus,
@@ -1124,6 +1211,9 @@ module.exports = {
   getLastBeforeMonthLeadCountStatus,
   getThisMonthLeadCountStatus,
   getTwoMonthsAgoCallBacksCount,
-  getThisMonthCallBacksCount
+  getThisMonthCallBacksCount,
+
+
+  getuserLastMonthSanctionedAmount,
+  getuserLastMonthDisbursedAmount
 };
-  
