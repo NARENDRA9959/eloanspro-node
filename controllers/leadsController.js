@@ -423,7 +423,7 @@ const searchLeads = asyncHandler(async (req, res) => {
 });
 
 const createLead = asyncHandler((req, res) => {
-  console.log(req.user.userType);
+  //console.log(req.user.userType);
   const phoneNumber = req.body.primaryPhone;
   if (req.user.userType == 1) {
     createNewLead(req, res);

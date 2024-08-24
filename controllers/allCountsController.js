@@ -1057,10 +1057,8 @@ const lastMonthEndDate = moment(new Date(
   0
 )).format('MM/DD/YYYY');
 const getuserLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
-  let sql2 = `SELECT id FROM leads`
   const queryParams = req.query;
   const filtersQuery = handleGlobalFilters(queryParams);
-  sql2 += filtersQuery;
   let sql = `
   SELECT 
     COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
@@ -1068,9 +1066,7 @@ const getuserLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
   WHERE fipStatus = 'approved'
     AND approvalDate >= ?
     AND approvalDate <= ?
-    AND leadId IN (
-      ${sql2}
-    )
+    AND leadId IN (SELECT id FROM leads${filtersQuery})
 `;
   console.log(lastMonthStartDate)
   console.log(lastMonthEndDate)
@@ -1091,10 +1087,8 @@ const getuserLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
   );
 });
 const getuserLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
-  let sql2 = `SELECT id FROM leads`
   const queryParams = req.query;
   const filtersQuery = handleGlobalFilters(queryParams);
-  sql2 += filtersQuery;
   let sql = `
   SELECT 
     COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
@@ -1103,7 +1097,7 @@ const getuserLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
   AND approvedStatus = 'disbursed'
     AND disbursalDate >= ?
     AND disbursalDate <= ?
-    AND leadId IN (${sql2})
+    AND leadId IN (SELECT id FROM leads${filtersQuery})
 `;
   console.log(lastMonthStartDate)
   console.log(lastMonthEndDate)
@@ -1136,10 +1130,8 @@ const currentMonthEndDate = moment(new Date(
 )).format('MM/DD/YYYY');
 
 const getuserCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
-  let sql2 = `SELECT id FROM leads`;
   const queryParams = req.query;
   const filtersQuery = handleGlobalFilters(queryParams);
-  sql2 += filtersQuery;
   let sql = `
     SELECT 
       COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
@@ -1147,9 +1139,7 @@ const getuserCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
     WHERE fipStatus = 'approved'
       AND approvalDate >= ?
       AND approvalDate <= ?
-      AND leadId IN (
-        ${sql2}
-      )
+      AND leadId IN (SELECT id FROM leads${filtersQuery})
   `;
   console.log(currentMonthStartDate);
   console.log(currentMonthEndDate);
@@ -1171,10 +1161,8 @@ const getuserCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
 });
 
 const getuserCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
-  let sql2 = `SELECT id FROM leads`;
   const queryParams = req.query;
   const filtersQuery = handleGlobalFilters(queryParams);
-  sql2 += filtersQuery;
   let sql = `
     SELECT 
     COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
@@ -1183,7 +1171,7 @@ const getuserCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
   AND approvedStatus = 'disbursed'
     AND disbursalDate >= ?
     AND disbursalDate <= ?
-    AND leadId IN (${sql2})
+    AND leadId IN (SELECT id FROM leads${filtersQuery})
 `;
   console.log(currentMonthStartDate);
   console.log(currentMonthEndDate);
@@ -1204,24 +1192,20 @@ const getuserCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
   );
 });
 
-
-
 const lastLastMonthStartDate = moment(new Date(
   currentDate.getFullYear(),
-  currentDate.getMonth() - 2,  // Subtract 2 months
+  currentDate.getMonth() - 2,
   1
 )).format('MM/DD/YYYY');
 const lastLastMonthEndDate = moment(new Date(
   currentDate.getFullYear(),
-  currentDate.getMonth() - 1,  // Subtract 1 month to get the end of the previous month
+  currentDate.getMonth() - 1,
   0
 )).format('MM/DD/YYYY');
 
 const getuserLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
-  let sql2 = `SELECT id FROM leads`;
   const queryParams = req.query;
   const filtersQuery = handleGlobalFilters(queryParams);
-  sql2 += filtersQuery;
   let sql = `
     SELECT 
       COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
@@ -1229,9 +1213,7 @@ const getuserLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
     WHERE fipStatus = 'approved'
       AND approvalDate >= ?
       AND approvalDate <= ?
-      AND leadId IN (
-        ${sql2}
-      )
+      AND leadId IN (SELECT id FROM leads${filtersQuery})
   `;
   console.log(lastLastMonthStartDate);
   console.log(lastLastMonthEndDate);
@@ -1253,10 +1235,8 @@ const getuserLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
 });
 
 const getuserLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
-  let sql2 = `SELECT id FROM leads`;
   const queryParams = req.query;
   const filtersQuery = handleGlobalFilters(queryParams);
-  sql2 += filtersQuery;
   let sql = `
     SELECT 
       COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
@@ -1265,7 +1245,7 @@ const getuserLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
       AND approvedStatus = 'disbursed'
       AND disbursalDate >= ?
       AND disbursalDate <= ?
-      AND leadId IN (${sql2})
+      AND leadId IN (SELECT id FROM leads${filtersQuery})
   `;
   console.log(lastLastMonthStartDate);
   console.log(lastLastMonthEndDate);
