@@ -174,10 +174,10 @@ const updateUsers = asyncHandler(async (req, res) => {
     }
     const rbacValues = {
       1: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
-      2: 'leads,callbacks,team',
+      2: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
       3: 'leads,callbacks',
-      4: 'leads,callbacks,files,partial,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess',
-      5: 'leads,callbacks,files,partial,credit'
+      4: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
+      5: 'leads,callbacks,files,partial,team'
     };
     const rbacValue = rbacValues[req.body.userType];
     if (rbacValue) {

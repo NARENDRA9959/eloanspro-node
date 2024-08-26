@@ -382,7 +382,7 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
   });
   sql += ` WHERE id IN (${updates.map(() => "?").join(", ")})`;
   params.push(...updates.map((update) => update.id));
-  console.log(params)
+  //console.log(params)
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateApprovalsDetails error in query:", err);
