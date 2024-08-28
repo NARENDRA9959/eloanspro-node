@@ -206,27 +206,27 @@ const deleteBanker = asyncHandler((req, res) => {
 });
 
 
-const getBankRevenueValue = asyncHandler(async (req, res) => {
-  if (!req.params.id) {
-    return res.status(400).send("bankid is required");
-  }
+// const getBankRevenueValue = asyncHandler(async (req, res) => {
+//   if (!req.params.id) {
+//     return res.status(400).send("bankid is required");
+//   }
 
-  const bankid = req.params.id;
-  let sql = `SELECT bankRevenueValue FROM bankers WHERE id = ${dbConnect.escape(bankid)}`;
+//   const bankid = req.params.id;
+//   let sql = `SELECT bankRevenueValue FROM bankers WHERE id = ${dbConnect.escape(bankid)}`;
 
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.log("getBankRevenueValue error:", err);
-      return res.status(500).send("An error occurred while retrieving the bank revenue value.");
-    }
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("getBankRevenueValue error:", err);
+//       return res.status(500).send("An error occurred while retrieving the bank revenue value.");
+//     }
 
-    if (result.length === 0) {
-      return res.status(404).send("Bank not found");
-    }
-    const bankRevenueValue = result[0].bankRevenueValue;
-    res.status(200).send(bankRevenueValue);
-  });
-});
+//     if (result.length === 0) {
+//       return res.status(404).send("Bank not found");
+//     }
+//     const bankRevenueValue = result[0].bankRevenueValue;
+//     res.status(200).send(bankRevenueValue);
+//   });
+// });
 
 
 module.exports = {
@@ -238,6 +238,6 @@ module.exports = {
   updateBanker,
   deleteBanker,
   changeBankersStatus,
-  getBankRevenueValue,
+  //getBankRevenueValue,
   getNewBankersCount
 };

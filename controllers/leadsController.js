@@ -434,7 +434,7 @@ const createLead = asyncHandler((req, res) => {
         console.error("Error checking phone number:", err);
         res.status(500).json({ error: "Internal server error" });
       } else {
-       // console.log(result)
+        // console.log(result)
         if (result.length > 0) {
           const lead = result[0];
           res

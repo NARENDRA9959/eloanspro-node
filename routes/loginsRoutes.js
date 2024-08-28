@@ -5,6 +5,7 @@ const {
   getDistinctLeadCount,
   getFIPDetailsById,
   updateFIPDetails,
+  updateRevenueDetails,
   getApprovalsLeads,
   getApprovalsDetailsById,
   updateApprovalsDetails,
@@ -50,6 +51,10 @@ router
   .route("/fipDetails/:leadId")
   .get(validateToken, getFIPDetailsById)
   .put(validateToken, updateFIPDetails);
+
+  router
+  .route("/revenueDetails/:leadId")
+  .put(validateToken, updateRevenueDetails);
 router
   .route("/bankRejected/:leadId")
   .get(validateToken, getBankRejectsDetailsById);

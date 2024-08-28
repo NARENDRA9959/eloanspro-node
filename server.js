@@ -15,6 +15,7 @@ app.use(
 // app.use("/leads", ipWhitelist, require("./routes/leadsRoutes"));
 app.use("/user", require("./routes/userRoutes"));
 app.use("/leads", require("./routes/leadsRoutes"));
+app.use("/loanleads", require("./routes/loanLeadsRoutes.js"));
 app.use("/callbacks", require("./routes/callbackRoutes"));
 app.use("/files", require("./routes/fileHandlerRoutes"));
 app.use("/counts", require("./routes/allCountRoutes"));

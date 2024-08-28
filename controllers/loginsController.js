@@ -247,6 +247,8 @@ const getFIPDetailsById = asyncHandler((req, res) => {
     res.status(200).json(result);
   });
 });
+
+
 const getApprovalsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
   const sql = `
@@ -267,7 +269,7 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
 const getDisbursalsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
   const sql = `
-  SELECT id, businessName, approvalDate, disbursalDate, lan, program, bankName, bankId, processCode, sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule 
+  SELECT id, businessName, approvalDate, disbursalDate, lan, program, bankName, bankId, processCode, sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule, payoutValue, revenueValue
     FROM logins
     WHERE leadId = ? AND approvedStatus = 'disbursed' AND fipStatus='approved'
   `;
@@ -306,6 +308,31 @@ const updateFIPDetails = asyncHandler((req, res) => {
   });
 });
 
+
+const updateRevenueDetails = asyncHandler((req, res) => {
+  const updates = req.body;
+  let sql = `UPDATE logins SET `;
+  let params = [];
+  updates.forEach((update, index) => {
+    const { id, payoutValue, revenueValue } = update;
+    sql += `
+      payoutValue = CASE WHEN id = ? THEN ? ELSE payoutValue END,
+      revenueValue = CASE WHEN id = ? THEN ? ELSE revenueValue END`;
+    params.push(id, payoutValue, id, revenueValue);
+    if (index !== updates.length - 1) {
+      sql += ", ";
+    }
+  });
+  sql += ` WHERE id IN (${updates.map((update) => "?").join(", ")})`;
+  params.push(...updates.map((update) => update.id));
+  dbConnect.query(sql, params, (err, result) => {
+    if (err) {
+      console.error("updateRevenueDetails error in query:", err);
+      return res.status(500).json({ error: "Error updating FIP details" });
+    }
+    res.status(200).json({ message: "Revenue details updated successfully" });
+  });
+});
 // const updateApprovalsDetails = asyncHandler((req, res) => {
 //   const updates = req.body;
 //   const fields = [
@@ -1064,6 +1091,7 @@ module.exports = {
   getFIPDetailsById,
   getDistinctLeadCount,
   updateFIPDetails,
+  updateRevenueDetails,
   getApprovalsLeads,
   getApprovalsDetailsById,
   updateApprovalsDetails,
