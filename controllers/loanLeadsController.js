@@ -74,6 +74,10 @@ const createLoanLead = asyncHandler((req, res) => {
                 req.body["lastLeadInternalStatus"] = 1;
                 req.body["createdBy"] = req.user.name;
                 const createClause = createClauseHandler(req.body);
+                console.log(createClause)
+                console.log(createClause[0])
+                console.log(createClause[1])
+
                 const sql = `INSERT INTO loanleads (${createClause[0]}) VALUES (${createClause[1]})`;
                 dbConnect.query(sql, (err, result) => {
                     if (err) {

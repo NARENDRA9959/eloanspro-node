@@ -72,7 +72,7 @@ const getBankers = asyncHandler(async (req, res) => {
 // });
 
 const getBanks = asyncHandler(async (req, res) => {
-  let sql = "SELECT id, name, bankRevenueValue, imageFiles AS imageUrl FROM bankers";
+  let sql = "SELECT id, name, imageFiles AS imageUrl FROM bankers";
   const filtersQuery = handleGlobalFilters(req.body);
   sql += filtersQuery;
   sql += " ORDER BY name ASC";
