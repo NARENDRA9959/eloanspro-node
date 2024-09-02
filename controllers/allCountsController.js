@@ -19,6 +19,8 @@ const getLeadCountStatus = asyncHandler(async (req, res) => {
     res.status(200).send(String(leadCountStatus));
   });
 });
+
+
 const getCallbackCountStatus = asyncHandler(async (req, res) => {
   let sql = "SELECT COUNT(*) AS callbackCountStatus FROM callbacks";
   const queryParams = req.query || {};
@@ -78,10 +80,12 @@ const getLoginsCountStatus = asyncHandler(async (req, res) => {
   let sql = `
     SELECT COUNT(*) AS loginsCountStatus
     FROM leads
-    WHERE leadInternalStatus IN (11)
 `;
-  const filtersQuery = handleGlobalFilters(req.query);
+  const queryParams = req.query;
+  queryParams["leadInternalStatus-eq"] = "11";
+  const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
+  console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -97,13 +101,11 @@ const getPartialCountStatus = asyncHandler(async (req, res) => {
   let sql = `
       SELECT COUNT(*) AS partialCountStatus
       FROM leads
-     
   `;
   const queryParams = req.query;
   queryParams["leadInternalStatus-eq"] = "4";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -332,8 +334,8 @@ const getLastMonthLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getMonth(),
     0
   )).format('YYYY-MM-DD');
-  console.log(lastMonthEndDate)
-  console.log(lastMonthStartDate)
+  //console.log(lastMonthEndDate)
+  //console.log(lastMonthStartDate)
   let sql = `SELECT 
   COUNT(*) AS leadCount
 FROM leads`;
@@ -354,7 +356,7 @@ FROM leads`;
         return;
       }
       const lastMonthLeadCount = result[0].leadCount;
-      console.log(lastMonthLeadCount)
+      // console.log(lastMonthLeadCount)
       res.status(200).send(String(lastMonthLeadCount));
     }
   );
@@ -377,7 +379,7 @@ const getThisMonthLeadCountStatus = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  console.log(sql)
+  //console.log(sql)
   dbConnect.query(
     sql,
     [thisMonthStartDate, thisMonthEndDate],
@@ -388,7 +390,7 @@ const getThisMonthLeadCountStatus = asyncHandler(async (req, res) => {
         return;
       }
       const thisMonthLeadCount = result[0].leadCount;
-      console.log(thisMonthLeadCount)
+      //console.log(thisMonthLeadCount)
       res.status(200).send(String(thisMonthLeadCount));
     }
   );
@@ -415,7 +417,7 @@ const getLastBeforeMonthLeadCountStatus = asyncHandler(async (req, res) => {
   sql += filtersQuery;
   let sql2 = ` AND createdOn >= ? AND createdOn <= ?`;
   sql += sql2;
-  console.log(sql);
+  //console.log(sql);
   dbConnect.query(
     sql,
     [lastBeforeMonthStartDate, lastBeforeMonthEndDate],
@@ -426,7 +428,7 @@ const getLastBeforeMonthLeadCountStatus = asyncHandler(async (req, res) => {
         return;
       }
       const lastBeforeMonthLeadCount = result[0].leadCount;
-      console.log(lastBeforeMonthLeadCount);
+      //console.log(lastBeforeMonthLeadCount);
       res.status(200).send(String(lastBeforeMonthLeadCount));
     }
   );

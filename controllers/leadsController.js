@@ -362,7 +362,7 @@ const searchLeads = asyncHandler(async (req, res) => {
   const queryParams = req.query;
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  console.log(sql);
+ // console.log(sql);
   dbConnect.query(sql, async (err, leadsResult) => {
     if (err) {
       console.log("getLeads Error in controller");
@@ -409,7 +409,7 @@ const searchLeads = asyncHandler(async (req, res) => {
             leadStatusName,
           };
         });
-        console.log(processedLeads);
+        //console.log(processedLeads);
         res.status(200).send({
           message: "Leads fetched successfully.",
           leadDetails: processedLeads,
