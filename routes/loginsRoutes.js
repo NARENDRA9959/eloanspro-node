@@ -20,7 +20,7 @@ const {
   getCNIRejectedLeadCount,
   getBankRejectsDetailsById,
   getCNIRejectsDetailsById,
- 
+  getLoginsDoneCount,
   getLoginsDoneById,
   getTotalDisbursedAmountSum,
   getTotalSanctionedAmountSum,
@@ -35,6 +35,8 @@ router
   .get(validateToken, getDistinctLeads);
 router.route("/fipDistinctLeads").get(validateToken, getFIPProcessDistinctLeads);
 router.route("/fipcount").get(validateToken, getFIPProcessDistinctLeadsCount);
+router.route("/loginsDoneCount").get(validateToken, getLoginsDoneCount);
+
 router.route("/approvals").get(validateToken, getApprovalsLeads);
 router.route("/disbursals").get(validateToken, getDisbursalLeads);
 router.route("/bankRejects").get(validateToken, getBankRejectsLeads);
@@ -52,7 +54,7 @@ router
   .get(validateToken, getFIPDetailsById)
   .put(validateToken, updateFIPDetails);
 
-  router
+router
   .route("/revenueDetails/:leadId")
   .put(validateToken, updateRevenueDetails);
 router
@@ -70,5 +72,5 @@ router
   .get(validateToken, getDisbursalsDetailsById)
   .put(validateToken, updateDisbursalDetails);
 
-router.route("/loginsDone/:leadId").get(validateToken, getLoginsDoneById);
+router.route("/loginsDone").get(validateToken, getLoginsDoneById);
 module.exports = router;

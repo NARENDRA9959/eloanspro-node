@@ -41,7 +41,9 @@ const {
   getuserCurrentMonthSanctionedAmount,
   getuserCurrentMonthDisbursedAmount,
   getuserLastLastMonthDisbursedAmount,
-  getuserLastLastMonthSanctionedAmount
+  getuserLastLastMonthSanctionedAmount,
+  getuserTwoMonthsAgoSanctionedAmount,
+  getuserTwoMonthsAgoDisbursedAmount
 } = require("../controllers/allCountsController");
 const router = express.Router();
 const validateToken = require("../middleware/validateTokenHandler");
@@ -145,4 +147,11 @@ router
 router
   .route("/lastlastmonth/disbamount")
   .get(validateToken, getuserLastLastMonthDisbursedAmount);
+
+router
+  .route("/twomonthsago/sancamount")
+  .get(validateToken, getuserTwoMonthsAgoSanctionedAmount);
+router
+  .route("/twomonthsago/disbamount")
+  .get(validateToken, getuserTwoMonthsAgoDisbursedAmount);
 module.exports = router;

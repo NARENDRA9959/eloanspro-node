@@ -118,7 +118,6 @@ const getPartialCountStatus = asyncHandler(async (req, res) => {
 });
 
 
-
 const getCreditEvaluationCountStatus = asyncHandler(async (req, res) => {
   let sql = `
       SELECT COUNT(*) AS creditEvaluationCount
@@ -1370,6 +1369,91 @@ const getuserLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+
+const twoMonthsAgoStartDate = moment(new Date(
+  currentDate.getFullYear(),
+  currentDate.getMonth() - 3,
+  1
+)).format('MM/DD/YYYY');
+const twoMonthsEgoEndDate = moment(new Date(
+  currentDate.getFullYear(),
+  currentDate.getMonth() - 2,
+  0
+)).format('MM/DD/YYYY');
+
+const getuserTwoMonthsAgoSanctionedAmount = asyncHandler(async (req, res) => {
+  try {
+    const leadIds = await fetchLeadIds(req);
+    if (leadIds.length === 0) {
+      return res.status(200).send('0');
+    }
+    const placeholders = leadIds.map(() => '?').join(',');
+    const sql = `
+       SELECT 
+      COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
+    FROM logins
+    WHERE fipStatus = 'approved'
+      AND approvalDate >= ?
+      AND approvalDate <= ?
+      AND leadId IN (${placeholders})
+  `;
+    console.log(twoMonthsAgoStartDate);
+    console.log(twoMonthsEgoEndDate);
+    dbConnect.query(
+      sql,
+      [twoMonthsAgoStartDate, twoMonthsEgoEndDate, ...leadIds],
+      (err, result) => {
+        if (err) {
+          console.error("Error:", err);
+          res.status(500).send("Internal Server Error");
+          return;
+        }
+        const totalSanctionedAmount = result[0].totalSanctionedAmount;
+        res.status(200).send(String(totalSanctionedAmount));
+      }
+    );
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+const getuserTwoMonthsAgoDisbursedAmount = asyncHandler(async (req, res) => {
+  try {
+    const leadIds = await fetchLeadIds(req);
+    if (leadIds.length === 0) {
+      return res.status(200).send('0');
+    }
+    const placeholders = leadIds.map(() => '?').join(',');
+    const sql = `
+      SELECT 
+      COALESCE(SUM(disbursedAmount), 0) AS totalDisbursedAmount
+    FROM logins
+    WHERE fipStatus = 'approved'
+      AND approvedStatus = 'disbursed'
+      AND disbursalDate >= ?
+      AND disbursalDate <= ?
+      AND leadId IN (${placeholders})
+    `;
+    dbConnect.query(
+      sql,
+      [twoMonthsAgoStartDate, twoMonthsEgoEndDate, ...leadIds],
+      (err, result) => {
+        if (err) {
+          console.error("Error:", err);
+          res.status(500).send("Internal Server Error");
+          return;
+        }
+        const totalDisbursedAmount = result[0].totalDisbursedAmount;
+        res.status(200).send(String(totalDisbursedAmount));
+      }
+    );
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 module.exports = {
   getLeadCountStatus,
   getFilesCountStatus,
@@ -1407,12 +1491,12 @@ module.exports = {
   getThisMonthLeadCountStatus,
   getTwoMonthsAgoCallBacksCount,
   getThisMonthCallBacksCount,
-
-
   getuserLastMonthSanctionedAmount,
   getuserLastMonthDisbursedAmount,
   getuserCurrentMonthSanctionedAmount,
   getuserCurrentMonthDisbursedAmount,
   getuserLastLastMonthDisbursedAmount,
-  getuserLastLastMonthSanctionedAmount
+  getuserLastLastMonthSanctionedAmount,
+  getuserTwoMonthsAgoSanctionedAmount,
+  getuserTwoMonthsAgoDisbursedAmount
 };

@@ -252,7 +252,7 @@ const getFIPDetailsById = asyncHandler((req, res) => {
 const getApprovalsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
   const sql = `
-    SELECT id, program, bankName, lan, sanctionedAmount, disbursedAmount, roi, tenure, processCode, approvalDate, disbursalDate, approvedStatus, approvedRemarks
+    SELECT id, program, bankName, lan, sanctionedAmount, disbursedAmount, roi, tenure, processCode, productType, productTypeName, approvalDate, disbursalDate, approvedStatus, approvedRemarks
     FROM logins
     WHERE leadId = ? AND fipStatus = 'approved'
   `;
@@ -269,7 +269,7 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
 const getDisbursalsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
   const sql = `
-  SELECT id, businessName, approvalDate, disbursalDate, lan, program, bankName, bankId, processCode, sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule, payoutValue, revenueValue
+  SELECT id, businessName, approvalDate, disbursalDate, lan, program, bankName, bankId, processCode, productType,productTypeName, sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule, payoutValue, revenueValue
     FROM logins
     WHERE leadId = ? AND approvedStatus = 'disbursed' AND fipStatus='approved'
   `;
@@ -388,6 +388,8 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
     "roi",
     "tenure",
     "processCode",
+    "productType",
+    "productTypeName",
     "approvalDate",
     "disbursalDate",
     "approvedStatus",
@@ -784,13 +786,37 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
 });
 
 const getLoginsDoneById = asyncHandler((req, res) => {
-  const sql = `SELECT businessName, program, bankName, fipStatus, fipRemarks FROM logins WHERE bankId = ${req.params.leadId}`;
+  // const sql = `SELECT businessName, program, bankName, fipStatus, fipRemarks FROM logins WHERE bankId = ${req.params.leadId}`;
+  let sql = `SELECT businessName, program, bankName, fipStatus, fipRemarks FROM logins`;
+  const queryParams = req.query;
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+  // console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLoginsDoneById Error in controller");
     }
     result = parseNestedJSON(result);
+    //console.log(result)
     res.status(200).send(result || {});
+  });
+});
+
+const getLoginsDoneCount = asyncHandler(async (req, res) => {
+  let sql = "SELECT count(*) as loginsDone FROM logins";
+  const queryParams = req.query;
+  const filtersQuery = handleGlobalFilters(queryParams, true);
+  sql += filtersQuery;
+  //console.log(sql)
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("Error in getUsersCount:", err);
+      res.status(500).send("Internal Server Error");
+    } else {
+      const loginsDone = result[0]["loginsDone"];
+     // console.log(loginsDone)
+      res.status(200).send(String(loginsDone));
+    }
   });
 });
 
@@ -1115,5 +1141,6 @@ module.exports = {
   fetchDistinctApprovedLeadIds,
   fetchDistinctDisbursedLeadIds,
   fetchDistinctBankRejectedLeadIds,
-  fetchDistinctCNIRejectedLeadIds
+  fetchDistinctCNIRejectedLeadIds,
+  getLoginsDoneCount
 };

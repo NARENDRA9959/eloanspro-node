@@ -9,7 +9,6 @@ app.use(
     origin: "*",
   })
 );
-
 // app.use(ipWhitelist);
 // app.use("/user", ipWhitelist, require("./routes/userRoutes"));
 // app.use("/leads", ipWhitelist, require("./routes/leadsRoutes"));

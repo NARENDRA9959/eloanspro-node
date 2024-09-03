@@ -362,7 +362,7 @@ const searchLeads = asyncHandler(async (req, res) => {
   const queryParams = req.query;
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
- // console.log(sql);
+  // console.log(sql);
   dbConnect.query(sql, async (err, leadsResult) => {
     if (err) {
       console.log("getLeads Error in controller");
@@ -391,7 +391,7 @@ const searchLeads = asyncHandler(async (req, res) => {
           let leadStatusName;
           if (lead.leadInternalStatus == 12) {
             if (approvedLeadIds.includes(lead.id.toString()) && disbursalIds.includes(lead.id.toString())) {
-              leadStatusName = "Disbursal";
+              leadStatusName = "Disbursed";
             } else if (approvedLeadIds.includes(lead.id.toString())) {
               leadStatusName = "Sanctions";
             } else if (fipLeadsIds.includes(lead.id.toString())) {
