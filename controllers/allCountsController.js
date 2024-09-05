@@ -85,7 +85,7 @@ const getLoginsCountStatus = asyncHandler(async (req, res) => {
   queryParams["leadInternalStatus-eq"] = "11";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  console.log(sql)
+  //console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
@@ -1398,8 +1398,8 @@ const getuserTwoMonthsAgoSanctionedAmount = asyncHandler(async (req, res) => {
       AND approvalDate <= ?
       AND leadId IN (${placeholders})
   `;
-    console.log(twoMonthsAgoStartDate);
-    console.log(twoMonthsEgoEndDate);
+    //console.log(twoMonthsAgoStartDate);
+    //console.log(twoMonthsEgoEndDate);
     dbConnect.query(
       sql,
       [twoMonthsAgoStartDate, twoMonthsEgoEndDate, ...leadIds],

@@ -220,9 +220,11 @@ const getUsersById = asyncHandler((req, res) => {
 const getUsers = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM users";
   const queryParams = req.query;
-  queryParams["sort"] = "addedOn";
+  // queryParams["sort"] = "addedOn";
+  queryParams["sort"] = "status,asc";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
+  console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getUsers Error in controller");

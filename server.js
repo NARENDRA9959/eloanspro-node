@@ -27,6 +27,7 @@ app.use("/bankers", require("./routes/bankersRoutes"));
 app.use("/createTable", require("./routes/createTableRoutes"));
 app.use("/ipAddress", require("./routes/ipAddressRoutes.js"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.listen(process.env.PORT, () => {
   console.log("Server Running Peacefully");
 });
