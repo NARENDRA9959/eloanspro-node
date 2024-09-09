@@ -26,6 +26,7 @@ const {
   getTotalSanctionedAmountSum,
   getFIPProcessDistinctLeads,
   getFIPProcessDistinctLeadsCount,
+  getOnlyBankRejectedLeadCount,
 } = require("../controllers/loginsController");
 const validateToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
@@ -48,6 +49,7 @@ router.route("/cniCount").get(validateToken, getCNIRejectedLeadCount);
 router.route("/disbursalCount").get(validateToken, getDisbursalLeadCount);
 router.route("/totalsancsum").get(validateToken, getTotalSanctionedAmountSum);
 router.route("/totaldisbsum").get(validateToken, getTotalDisbursedAmountSum);
+router.route("/onlyBankRejectCount").get(validateToken, getOnlyBankRejectedLeadCount);
 
 router
   .route("/fipDetails/:leadId")

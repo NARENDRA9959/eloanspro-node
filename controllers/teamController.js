@@ -224,7 +224,7 @@ const getUsers = asyncHandler(async (req, res) => {
   queryParams["sort"] = "status,asc";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  console.log(sql)
+  console.log(sql);
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getUsers Error in controller");

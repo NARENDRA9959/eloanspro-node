@@ -677,7 +677,7 @@ async function fetchDistinctCNIRejectedLeadIds() {
   const sql = `
     SELECT DISTINCT leadId 
     FROM logins
-    WHERE fipStatus = 'approved' AND approvedStatus = 'cnis'
+    WHERE (fipStatus = 'approved' AND approvedStatus = 'cnis') OR fipStatus ='hold'
   `;
   return new Promise((resolve, reject) => {
     dbConnect.query(sql, (err, result) => {
@@ -768,9 +768,9 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
 const getCNIRejectsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
   const sql = `
-  SELECT id,approvalDate, lan, program, bankName,sanctionedAmount, roi, approvedStatus, approvedRemarks
+  SELECT id,approvalDate, lan, program, bankName,sanctionedAmount, roi, fipStatus, fipRemarks, approvedStatus, approvedRemarks
     FROM logins
-    WHERE leadId = ? AND approvedStatus = 'cnis'
+    WHERE leadId = ? AND (approvedStatus = 'cnis' OR fipStatus = 'hold')
   `;
   const queryParams = [leadId];
   dbConnect.query(sql, queryParams, (err, result) => {
@@ -814,7 +814,7 @@ const getLoginsDoneCount = asyncHandler(async (req, res) => {
       res.status(500).send("Internal Server Error");
     } else {
       const loginsDone = result[0]["loginsDone"];
-     // console.log(loginsDone)
+      // console.log(loginsDone)
       res.status(200).send(String(loginsDone));
     }
   });
@@ -1042,9 +1042,9 @@ const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
 
 async function fetchFIPProcessDistinctLeadIds() {
   const sql = `
-    SELECT DISTINCT leadId
-    FROM logins
-    WHERE fipstatus != 'approved' AND fipstatus != 'rejected'
+SELECT DISTINCT leadId
+FROM logins
+WHERE fipStatus NOT IN ('approved', 'rejected', 'hold');
   `;
   return new Promise((resolve, reject) => {
     dbConnect.query(sql, (err, result) => {
@@ -1111,6 +1111,58 @@ const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
     res.status(500).json({ error: "Error in countFIPProcessDistinctLeads function" });
   }
 });
+
+const getOnlyBankRejectedLeadCount = asyncHandler(async (req, res) => {
+  try {
+    const distinctLeadIds = await fetchOnlyBankRejectedLeadIds();
+    if (distinctLeadIds.length === 0) {
+      return res.status(200).json({ count: 0 });
+    }
+    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    let countSql = `SELECT COUNT(*) AS count FROM leads`;
+    const queryParams = req.query || {};
+    queryParams["id-or"] = inClause;
+    const filtersQuery = handleGlobalFilters(queryParams, true);
+    countSql += filtersQuery;
+    console.log(countSql)
+    dbConnect.query(countSql, (err, countResult) => {
+      if (err) {
+        console.error("Error counting bank-rejected leads:", err);
+        res.status(500).json({ error: "Error counting bank-rejected leads" });
+        return;
+      }
+      const count = countResult[0].count;
+      console.log(count)
+      res.status(200).send(String(count));
+    });
+  } catch (error) {
+    console.error("Error in countBankRejectedLeads function:", error);
+    res.status(500).json({ error: "Error in countBankRejectedLeads function" });
+  }
+});
+async function fetchOnlyBankRejectedLeadIds() {
+  const sql = `
+    SELECT DISTINCT leadId
+FROM logins
+WHERE fipStatus = 'rejected'
+AND leadId NOT IN (
+    SELECT DISTINCT leadId
+    FROM logins
+    WHERE fipStatus = 'approved'
+);
+  `;
+  return new Promise((resolve, reject) => {
+    dbConnect.query(sql, (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      const leadIds = result.map((row) => row.leadId);
+      console.log(leadIds)
+      resolve(leadIds);
+    });
+  });
+}
 module.exports = {
   createLogin,
   getDistinctLeads,
@@ -1142,5 +1194,6 @@ module.exports = {
   fetchDistinctDisbursedLeadIds,
   fetchDistinctBankRejectedLeadIds,
   fetchDistinctCNIRejectedLeadIds,
-  getLoginsDoneCount
+  getLoginsDoneCount,
+  getOnlyBankRejectedLeadCount,
 };
