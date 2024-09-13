@@ -177,7 +177,7 @@ const updateUsers = asyncHandler(async (req, res) => {
       2: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
       3: 'leads,callbacks',
       4: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess',
-      5: 'leads,callbacks,files,partial,team'
+      5: 'leads,callbacks,files,partial,team,reports'
     };
     const rbacValue = rbacValues[req.body.userType];
     if (rbacValue) {
@@ -224,7 +224,7 @@ const getUsers = asyncHandler(async (req, res) => {
   queryParams["sort"] = "status,asc";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  console.log(sql);
+  //console.log(sql);
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getUsers Error in controller");

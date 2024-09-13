@@ -6,11 +6,17 @@ const {
     changeLoanLeadStatus,
     getLoanLeadById,
     updateLoanLead,
-    deleteLoanLead
+    deleteLoanLead,
+    addLoanLeadsDocumentData
 } = require("../controllers/loanLeadsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();
+
+router
+    .route("/loanleadsdocuments/:leadId")
+    .put(validateToken, addLoanLeadsDocumentData);
+
 router.route("/").get(validateToken, getloanLeads).post(validateToken, createLoanLead);
 router.route("/total").get(validateToken, getloanLeadsCount);
 router

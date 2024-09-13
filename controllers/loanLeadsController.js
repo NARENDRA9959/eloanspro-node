@@ -10,9 +10,6 @@ const {
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
 
-
-
-
 const getloanLeadsCount = asyncHandler(async (req, res) => {
     let sql = "SELECT count(*) as leadsCount FROM loanleads";
     const filtersQuery = handleGlobalFilters(req.query, true);
@@ -68,15 +65,12 @@ const createLoanLead = asyncHandler((req, res) => {
                         `Lead already exists with phone number ${phoneNumber}, created by ${lead.createdBy}`
                     );
             } else {
-                let leadId = generateRandomNumber(9);
+                let leadId = generateRandomNumber(5);
                 req.body["leadId"] = leadId;
                 req.body["leadInternalStatus"] = 1;
                 req.body["lastLeadInternalStatus"] = 1;
                 req.body["createdBy"] = req.user.name;
                 const createClause = createClauseHandler(req.body);
-                // console.log(createClause)
-                // console.log(createClause[0])
-                // console.log(createClause[1])
                 const sql = `INSERT INTO loanleads (${createClause[0]}) VALUES (${createClause[1]})`;
                 dbConnect.query(sql, (err, result) => {
                     if (err) {
@@ -88,8 +82,6 @@ const createLoanLead = asyncHandler((req, res) => {
         }
     });
 });
-
-
 
 const updateLoanLead = asyncHandler((req, res) => {
     const id = req.params.id;
@@ -105,7 +97,6 @@ const updateLoanLead = asyncHandler((req, res) => {
             return res.status(500).json({ error: "Internal server error" });
         }
         if (result.length > 0) {
-            //console.log(result)
             const lead = result[0];
             return res
                 .status(409)
@@ -161,6 +152,19 @@ const changeLoanLeadStatus = asyncHandler((req, res) => {
         }
     });
 });
+
+const addLoanLeadsDocumentData = asyncHandler((req, res) => {
+    const id = req.params.leadId;
+    console.log(id)
+    const updateClause = updateClauseHandler(req.body);
+    const sql = `UPDATE loanleads SET ${updateClause} WHERE leadId = ${id}`;
+    dbConnect.query(sql, (err, result) => {
+        if (err) {
+            console.log("addLoanLeadsDocumentData error in controller");
+        }
+        res.status(200).send({ success: "Documents Saved Successfully" });
+    });
+});
 module.exports = {
     getloanLeads,
     getloanLeadsCount,
@@ -169,4 +173,5 @@ module.exports = {
     updateLoanLead,
     deleteLoanLead,
     changeLoanLeadStatus,
+    addLoanLeadsDocumentData
 };

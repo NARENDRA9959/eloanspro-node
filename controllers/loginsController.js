@@ -236,7 +236,7 @@ const getDisbursalLeadCount = asyncHandler(async (req, res) => {
   }
 });
 const getFIPDetailsById = asyncHandler((req, res) => {
-  const sql = `SELECT id, program, bankName, fipStatus, fipRemarks FROM logins WHERE leadId = ${req.params.leadId}`;
+  const sql = `SELECT id, program, bankName, loginDate, fipStatus, fipRemarks FROM logins WHERE leadId = ${req.params.leadId}`;
   const queryParams = [req.params.leadId];
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
@@ -283,31 +283,77 @@ const getDisbursalsDetailsById = asyncHandler((req, res) => {
     res.status(200).json(result);
   });
 });
+// const updateFIPDetails = asyncHandler((req, res) => {
+//   const updates = req.body;
+//   let sql = `UPDATE logins SET `;
+//   let params = [];
+//   updates.forEach((update, index) => {
+//     const { id, fipStatus, loginDate, fipRemarks } = update;
+//     sql += `
+//       fipStatus = CASE WHEN id = ? THEN ? ELSE fipStatus END,
+//       loginDate = CASE WHEN id = ? THEN ? ELSE loginDate END,
+//       fipRemarks = CASE WHEN id = ? THEN ? ELSE fipRemarks END`;
+//     params.push(id, fipStatus, id, loginDate, id, fipRemarks);
+//     if (index !== updates.length - 1) {
+//       sql += ", ";
+//     }
+//   });
+//   sql += ` WHERE id IN (${updates.map((update) => "?").join(", ")})`;
+//   params.push(...updates.map((update) => update.id));
+//   dbConnect.query(sql, params, (err, result) => {
+//     if (err) {
+//       console.error("updateFIPDetails error in query:", err);
+//       return res.status(500).json({ error: "Error updating FIP details" });
+//     }
+//     res.status(200).json({ message: "FIP details updated successfully" });
+//   });
+// });
+
+
 const updateFIPDetails = asyncHandler((req, res) => {
   const updates = req.body;
+  const { leadId } = req.params;
   let sql = `UPDATE logins SET `;
   let params = [];
   updates.forEach((update, index) => {
-    const { id, fipStatus, fipRemarks } = update;
+    const { id, fipStatus, loginDate, fipRemarks } = update;
     sql += `
       fipStatus = CASE WHEN id = ? THEN ? ELSE fipStatus END,
+      loginDate = CASE WHEN id = ? THEN ? ELSE loginDate END,
       fipRemarks = CASE WHEN id = ? THEN ? ELSE fipRemarks END`;
-    params.push(id, fipStatus, id, fipRemarks);
+    params.push(id, fipStatus, id, loginDate, id, fipRemarks);
     if (index !== updates.length - 1) {
       sql += ", ";
     }
   });
   sql += ` WHERE id IN (${updates.map((update) => "?").join(", ")})`;
   params.push(...updates.map((update) => update.id));
+
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
-      console.error("updateFIPDetails error in query:", err);
-      return res.status(500).json({ error: "Error updating FIP details" });
+      console.error("updateApprovalsDetails error in query:", err);
+      return res.status(500).json({ error: "Error updating approval details" });
     }
-    res.status(200).json({ message: "FIP details updated successfully" });
+    const leadSumSql = `
+      UPDATE leads
+      SET 
+          loginDate = (
+          SELECT MAX(loginDate)
+          FROM logins
+          WHERE leadId = ?
+        ) 
+      WHERE id = ?
+    `;
+    dbConnect.query(leadSumSql, [leadId, leadId], (sumErr, sumResult) => {
+      if (sumErr) {
+        console.error("Error updating sanctionedAmount and disbursedAmount in leads table:", sumErr);
+        return res.status(500).json({ error: "Error updating leads table" });
+      }
+      res.status(200).json({ message: "FIP details updated successfully" });
+
+    });
   });
 });
-
 
 const updateRevenueDetails = asyncHandler((req, res) => {
   const updates = req.body;
@@ -1112,57 +1158,57 @@ const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
   }
 });
 
-const getOnlyBankRejectedLeadCount = asyncHandler(async (req, res) => {
-  try {
-    const distinctLeadIds = await fetchOnlyBankRejectedLeadIds();
-    if (distinctLeadIds.length === 0) {
-      return res.status(200).json({ count: 0 });
-    }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
-    let countSql = `SELECT COUNT(*) AS count FROM leads`;
-    const queryParams = req.query || {};
-    queryParams["id-or"] = inClause;
-    const filtersQuery = handleGlobalFilters(queryParams, true);
-    countSql += filtersQuery;
-    console.log(countSql)
-    dbConnect.query(countSql, (err, countResult) => {
-      if (err) {
-        console.error("Error counting bank-rejected leads:", err);
-        res.status(500).json({ error: "Error counting bank-rejected leads" });
-        return;
-      }
-      const count = countResult[0].count;
-      console.log(count)
-      res.status(200).send(String(count));
-    });
-  } catch (error) {
-    console.error("Error in countBankRejectedLeads function:", error);
-    res.status(500).json({ error: "Error in countBankRejectedLeads function" });
-  }
-});
-async function fetchOnlyBankRejectedLeadIds() {
-  const sql = `
-    SELECT DISTINCT leadId
-FROM logins
-WHERE fipStatus = 'rejected'
-AND leadId NOT IN (
-    SELECT DISTINCT leadId
-    FROM logins
-    WHERE fipStatus = 'approved'
-);
-  `;
-  return new Promise((resolve, reject) => {
-    dbConnect.query(sql, (err, result) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      const leadIds = result.map((row) => row.leadId);
-      console.log(leadIds)
-      resolve(leadIds);
-    });
-  });
-}
+// const getOnlyBankRejectedLeadCount = asyncHandler(async (req, res) => {
+//   try {
+//     const distinctLeadIds = await fetchOnlyBankRejectedLeadIds();
+//     if (distinctLeadIds.length === 0) {
+//       return res.status(200).json({ count: 0 });
+//     }
+//     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+//     let countSql = `SELECT COUNT(*) AS count FROM leads`;
+//     const queryParams = req.query || {};
+//     queryParams["id-or"] = inClause;
+//     const filtersQuery = handleGlobalFilters(queryParams, true);
+//     countSql += filtersQuery;
+//     console.log(countSql)
+//     dbConnect.query(countSql, (err, countResult) => {
+//       if (err) {
+//         console.error("Error counting bank-rejected leads:", err);
+//         res.status(500).json({ error: "Error counting bank-rejected leads" });
+//         return;
+//       }
+//       const count = countResult[0].count;
+//       console.log(count)
+//       res.status(200).send(String(count));
+//     });
+//   } catch (error) {
+//     console.error("Error in countBankRejectedLeads function:", error);
+//     res.status(500).json({ error: "Error in countBankRejectedLeads function" });
+//   }
+// });
+// async function fetchOnlyBankRejectedLeadIds() {
+//   const sql = `
+//     SELECT DISTINCT leadId
+// FROM logins
+// WHERE fipStatus = 'rejected'
+// AND leadId NOT IN (
+//     SELECT DISTINCT leadId
+//     FROM logins
+//     WHERE fipStatus = 'approved'
+// );
+//   `;
+//   return new Promise((resolve, reject) => {
+//     dbConnect.query(sql, (err, result) => {
+//       if (err) {
+//         reject(err);
+//         return;
+//       }
+//       const leadIds = result.map((row) => row.leadId);
+//       console.log(leadIds)
+//       resolve(leadIds);
+//     });
+//   });
+// }
 module.exports = {
   createLogin,
   getDistinctLeads,
@@ -1195,5 +1241,5 @@ module.exports = {
   fetchDistinctBankRejectedLeadIds,
   fetchDistinctCNIRejectedLeadIds,
   getLoginsDoneCount,
-  getOnlyBankRejectedLeadCount,
+  // getOnlyBankRejectedLeadCount,
 };
