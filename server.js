@@ -3,6 +3,7 @@ const cors = require("cors");
 const path = require("path");
 const app = express();
 app.use(express.json());
+// const { scheduleCronJobs } = require('./controllers/nodemail.js');
 //const ipWhitelist = require('./middleware/ipAddress');
 app.use(
   cors({
@@ -28,6 +29,8 @@ app.use("/createTable", require("./routes/createTableRoutes"));
 app.use("/ipAddress", require("./routes/ipAddressRoutes.js"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// scheduleCronJobs();
+//console.log(process.env.PORT)
 app.listen(process.env.PORT, () => {
   console.log("Server Running Peacefully");
 });

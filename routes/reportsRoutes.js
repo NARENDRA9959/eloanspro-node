@@ -6,6 +6,7 @@ const {
     exportDisbursalLeads,
     exportBankRejectedLeads,
     exportCNILeads,
+    exportCNILeadDetails,
     exportSanctionDetails,
     exportloginsDoneDetails,
     exportDisbursalDetails,
@@ -21,6 +22,7 @@ router.route("/exportApprovals").get(validateToken, exportApprovalLeads);
 router.route("/exportDisbursals").get(validateToken, exportDisbursalLeads);
 router.route("/exportBankRejects").get(validateToken, exportBankRejectedLeads);
 router.route("/exportCNIS").get(validateToken, exportCNILeads);
+router.route("/exportCNIdetails").get(validateToken, exportCNILeadDetails);
 router.route("/exportSanctionDetails").get(validateToken, exportSanctionDetails);
 router.route("/exportDisbursalDetails").get(validateToken, exportDisbursalDetails);
 router.route("/exportloginsDoneDetails").get(validateToken, exportloginsDoneDetails);

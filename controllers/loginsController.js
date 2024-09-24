@@ -51,7 +51,7 @@ const {
 // });
 
 const createLogin = asyncHandler((req, res) => {
-  console.log("Request body:", req.body);
+  //console.log("Request body:", req.body);
   const leadId = req.body.leadId;
   const businessName = req.body.businessName;
   const bankIds = req.body.bankId;
@@ -78,7 +78,7 @@ const createLogin = asyncHandler((req, res) => {
       WHERE leadId = ?
       AND bankId IN (${bankIds.map(() => '?').join(', ')})
   `;
-  console.log(checkExistingQuery)
+  // console.log(checkExistingQuery)
   dbConnect.query(checkExistingQuery, [leadId, ...bankIds], (err, results) => {
     if (err) {
       console.error("Error checking existing logins:", err);
@@ -135,7 +135,7 @@ const getDistinctLeads = asyncHandler(async (req, res) => {
         return;
       }
       result = parseNestedJSON(result);
-      console.log(result);
+      //console.log(result);
       res.status(200).json(result);
     });
   } catch (error) {
@@ -1042,7 +1042,6 @@ const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
       console.log("getTotalSanctionedAmountSum error:", err);
       return res.status(500).send("Error retrieving sanctioned amount sum");
     }
-
     const totalDisbursedAmount = result[0].total_disbursed_amount;
     res.status(200).json({ totalDisbursedAmount });
   });

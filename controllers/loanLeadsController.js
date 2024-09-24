@@ -155,7 +155,7 @@ const changeLoanLeadStatus = asyncHandler((req, res) => {
 
 const addLoanLeadsDocumentData = asyncHandler((req, res) => {
     const id = req.params.leadId;
-    console.log(id)
+    //console.log(id)
     const updateClause = updateClauseHandler(req.body);
     const sql = `UPDATE loanleads SET ${updateClause} WHERE leadId = ${id}`;
     dbConnect.query(sql, (err, result) => {

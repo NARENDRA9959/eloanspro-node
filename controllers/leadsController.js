@@ -36,7 +36,7 @@ const getLeads = asyncHandler(async (req, res) => {
   queryParams["sort"] = "lastUpdatedOn";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  // console.log(sql)
+  //console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLeads Error in controller");
@@ -425,6 +425,7 @@ const searchLeads = asyncHandler(async (req, res) => {
 const createLead = asyncHandler((req, res) => {
   //console.log(req.user.userType);
   const phoneNumber = req.body.primaryPhone;
+  // console.log(phoneNumber)
   if (req.user.userType == 1) {
     createNewLead(req, res);
   } else {
@@ -468,6 +469,57 @@ function createNewLead(req, res) {
       return;
     }
     res.status(200).send(true);
+  });
+}
+
+
+const createLeadFromCallback = asyncHandler((req, res) => {
+  const phoneNumber = req.body.primaryPhone;
+  console.log(phoneNumber);
+
+  if (req.user.userType == 1) {
+    createNewLeadFromCallback(req, res);
+  } else {
+    const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
+    dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
+      if (err) {
+        console.error("Error checking phone number:", err);
+        res.status(500).json({ error: "Internal server error" });
+      } else {
+        if (result.length > 0) {
+          const lead = result[0];
+          res.status(500).send(
+            `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}, Business Name - ${lead.businessName}`
+          );
+        } else {
+          createNewLeadFromCallback(req, res);
+        }
+      }
+    });
+  }
+});
+
+function createNewLeadFromCallback(req, res) {
+  let leadId = "L-" + generateRandomNumber(6);
+  let id = generateRandomNumber(9);
+  req.body["id"] = id;
+  req.body["leadId"] = leadId;
+  req.body["leadInternalStatus"] = 1;
+  req.body["lastLeadInternalStatus"] = 1;
+  req.body["createdBy"] = req.user.name;
+  req.body["lastUpdatedBy"] = req.user.name;
+
+  const createClause = createClauseHandler(req.body);
+  const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
+
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error inserting data into leads table:", err);
+      res.status(500).send("Internal server error");
+      return;
+    }
+console.log(id)
+    res.status(200).json({ id: id });
   });
 }
 
@@ -596,5 +648,6 @@ module.exports = {
   calculateBalanceSheet,
   calculateDscrRatio,
   calculateBTOProgram,
-  searchLeads
+  searchLeads,
+  createLeadFromCallback
 };

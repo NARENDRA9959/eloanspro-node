@@ -116,6 +116,7 @@ const exportLeads = asyncHandler(async (req, res) => {
                 { header: 'Had Own House', key: 'hadOwnHouse' },
                 { header: 'Loan Requirement', key: 'loanRequirement' },
                 { header: 'OD Requirement', key: 'odRequirement' },
+                { header: 'called From', key: 'calledFrom' },
                 { header: 'Remarks', key: 'remarks' },
                 { header: 'Sourced By', key: 'sourcedBy' },
                 { header: 'Created By', key: 'createdBy' },
@@ -348,6 +349,7 @@ const exportFilesInProcess = asyncHandler(async (req, res) => {
                 { header: 'Had Own House', key: 'hadOwnHouse' },
                 { header: 'Loan Requirement', key: 'loanRequirement' },
                 { header: 'OD Requirement', key: 'odRequirement' },
+                { header: 'called From', key: 'calledFrom' },
                 { header: 'Remarks', key: 'remarks' },
                 { header: 'Sourced By', key: 'sourcedBy' },
                 { header: 'Created By', key: 'createdBy' },
@@ -461,6 +463,7 @@ const exportApprovalLeads = asyncHandler(async (req, res) => {
                 { header: 'Had Own House', key: 'hadOwnHouse' },
                 { header: 'Loan Requirement', key: 'loanRequirement' },
                 { header: 'OD Requirement', key: 'odRequirement' },
+                { header: 'called From', key: 'calledFrom' },
                 { header: 'Remarks', key: 'remarks' },
                 { header: 'Sourced By', key: 'sourcedBy' },
                 { header: 'Created By', key: 'createdBy' },
@@ -573,6 +576,7 @@ const exportDisbursalLeads = asyncHandler(async (req, res) => {
                 { header: 'Had Own House', key: 'hadOwnHouse' },
                 { header: 'Loan Requirement', key: 'loanRequirement' },
                 { header: 'OD Requirement', key: 'odRequirement' },
+                { header: 'called From', key: 'calledFrom' },
                 { header: 'Remarks', key: 'remarks' },
                 { header: 'Sourced By', key: 'sourcedBy' },
                 { header: 'Created By', key: 'createdBy' },
@@ -684,6 +688,7 @@ const exportBankRejectedLeads = asyncHandler(async (req, res) => {
                 { header: 'Had Own House', key: 'hadOwnHouse' },
                 { header: 'Loan Requirement', key: 'loanRequirement' },
                 { header: 'OD Requirement', key: 'odRequirement' },
+                { header: 'called From', key: 'calledFrom' },
                 { header: 'Remarks', key: 'remarks' },
                 { header: 'Sourced By', key: 'sourcedBy' },
                 { header: 'Created By', key: 'createdBy' },
@@ -794,6 +799,7 @@ const exportCNILeads = asyncHandler(async (req, res) => {
                 { header: 'Had Own House', key: 'hadOwnHouse' },
                 { header: 'Loan Requirement', key: 'loanRequirement' },
                 { header: 'OD Requirement', key: 'odRequirement' },
+                { header: 'called From', key: 'calledFrom' },
                 { header: 'Remarks', key: 'remarks' },
                 { header: 'Sourced By', key: 'sourcedBy' },
                 { header: 'Created By', key: 'createdBy' },
@@ -1205,6 +1211,140 @@ const exportloginsDoneDetails = asyncHandler(async (req, res) => {
     });
 });
 
+const exportCNILeadDetails = asyncHandler(async (req, res) => {
+    let reportId = "R-" + generateRandomNumber(6);
+    const distinctLeadIds = await fetchDistinctCNIRejectedLeadIds();
+    if (distinctLeadIds.length === 0) {
+        return res.status(200).json([]);
+    }
+    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    let sqlLogins = `SELECT * FROM logins WHERE (leadId IN (${inClause})) AND (fipStatus = 'approved' AND approvedStatus = 'cnis') OR fipStatus ='hold'`;
+    const uploadDirectory = path.join(__dirname, '../excelFiles');
+    const excelFileName = 'CNIDetails1.xlsx';
+    const excelFilePath = path.join(uploadDirectory, excelFileName);
+
+    dbConnect.query(sqlLogins, async (err, loginsResult) => {
+        if (err) {
+            console.error("Error exporting leads from logins: ", err);
+            res.status(500).json({ error: "Internal server error" });
+            return;
+        }
+        let sqlLeads = `SELECT id, contactPerson, primaryPhone, city, sourcedBy, businessEntity, 
+                businessTurnover, natureOfBusiness, product, businessOperatingSince, createdOn
+                FROM leads `;
+        const queryParams = req.query || {};
+        queryParams["id-or"] = inClause;
+        queryParams["sort"] = "createdOn";
+        const filtersQuery = handleGlobalFilters(queryParams);
+        sqlLeads += filtersQuery;
+        dbConnect.query(sqlLeads, async (leadsErr, leadsResult) => {
+            if (leadsErr) {
+                console.error("Error exporting leads from leads table: ", leadsErr);
+                res.status(500).json({ error: "Internal server error" });
+                return;
+            }
+            try {
+                const mergedResults = loginsResult.map((login) => {
+                    const matchingLead = leadsResult.find((lead) => lead.id == login.leadId);
+                    return {
+                        ...login,
+                        businessEntity: matchingLead ? matchingLead.businessEntity : null,
+                        businessTurnover: matchingLead ? matchingLead.businessTurnover : null,
+                        natureOfBusiness: matchingLead ? matchingLead.natureOfBusiness : null,
+                        product: matchingLead ? matchingLead.product : null,
+                        contactPerson: matchingLead ? matchingLead.contactPerson : null,
+                        primaryPhone: matchingLead ? matchingLead.primaryPhone : null,
+                        city: matchingLead ? matchingLead.city : null,
+                        sourcedBy: matchingLead ? matchingLead.sourcedBy : null,
+                        createdOn: matchingLead ? matchingLead.createdOn : null,
+                    };
+                });
+                for (let i = 0; i < mergedResults.length; i++) {
+                    mergedResults[i].sourcedBy = await getSourceName(mergedResults[i].sourcedBy);
+                    mergedResults[i].createdOn = moment(mergedResults[i].createdOn).format('YYYY-MM-DD');
+                }
+                const parsedResults = parseNestedJSON(mergedResults);
+                if (!fs.existsSync(uploadDirectory)) {
+                    fs.mkdirSync(uploadDirectory, { recursive: true });
+                }
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('CNIDetails');
+                worksheet.columns = [
+                    { header: 'Lead Id', key: 'leadId' },
+                    { header: 'Business Name', key: 'businessName' },
+                    { header: 'Business Entity', key: 'businessEntity' },
+                    { header: 'Business Turnover', key: 'businessTurnover' },
+                    { header: 'Nature Of Business', key: 'natureOfBusiness' },
+                    { header: 'Product', key: 'product' },
+                    { header: 'Sourced By', key: 'sourcedBy' },
+                    { header: 'Contact Person', key: 'contactPerson' },
+                    { header: 'Primary Phone', key: 'primaryPhone' },
+                    { header: 'Created On', key: 'createdOn' },
+                    { header: 'Program', key: 'program' },
+                    { header: 'Lender', key: 'bankName' },
+                    { header: 'Login Date', key: 'loginDate' },
+                    { header: 'Login Status', key: 'fipStatus' },
+                    { header: 'Login Remarks', key: 'fipRemarks' },
+                    { header: 'Sanctioned Amount', key: 'sanctionedAmount' },
+                    { header: 'Rate Of Interest', key: 'roi' },
+                    { header: 'Tenure', key: 'tenure' },
+                    { header: 'Approval Date', key: 'approvalDate' },
+                    { header: 'Approved Status', key: 'approvedStatus' },
+                    { header: 'Approved Remarks', key: 'approvedRemarks' },
+                ];
+                worksheet.addRows(parsedResults);
+                await workbook.xlsx.writeFile(excelFilePath);
+                console.log("Excel file created successfully at", excelFilePath);
+                const fileContent = fs.readFileSync(excelFilePath);
+                const FormData = require('form-data');
+                const formData = new FormData();
+                formData.append('files', fileContent, {
+                    filename: excelFileName,
+                    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                });
+                const type = 'CNIDETAILS';
+                const leadId = 'REPORTS';
+                const url = `https://files.thefintalk.in/files?type=${type}&leadId=${leadId}`;
+                const response = await axios.post(url, formData, {
+                    headers: formData.getHeaders(),
+                });
+                if (response.status === 200) {
+                    if (response.data && response.data.links && response.data.links.length > 0) {
+                        const fileUrl = response.data.links[0];
+                        const fileUrlArray = JSON.stringify([fileUrl]);
+                        const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
+                        const values = [reportId, type, fileUrlArray];
+                        dbConnect.query(insertSql, values, (insertErr, insertResult) => {
+                            if (insertErr) {
+                                console.error("Error inserting report URL into the database:", insertErr);
+                                res.status(500).json({ error: "Internal server error" });
+                                return;
+                            }
+                            console.log("Report URL inserted successfully into the database");
+                            res.status(200).json({
+                                success: true,
+                                message: 'File uploaded successfully',
+                                fileUrl: fileUrl,
+                            });
+                        });
+                    } else {
+                        console.warn("Server returned 200 status but no file URL in response.");
+                        res.status(500).json({ error: "Upload succeeded but no file URL returned" });
+                    }
+                } else {
+                    console.error("Error uploading file:", response.data);
+                    res.status(500).json({ error: "Error uploading file" });
+                }
+            } catch (error) {
+                console.error("Error processing leads:", error);
+                res.status(500).json({ error: "Internal server error" });
+            } finally {
+                cleanup(uploadDirectory, excelFilePath);
+            }
+        });
+    });
+});
+
 
 const getReports = asyncHandler(async (req, res) => {
     let sql = "SELECT * FROM reports";
@@ -1247,4 +1387,5 @@ module.exports = {
     exportCallbacks,
     getReports,
     getReportsCount,
+    exportCNILeadDetails
 };

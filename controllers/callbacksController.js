@@ -65,7 +65,9 @@ const createCallBack = asyncHandler((req, res) => {
         res
           .status(500)
           .send(
-            `Callback already exists with phone number ${phoneNumber}, created by ${lead.createdBy}`
+          `Callback already exists with phone number ${phone}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
+
+            // `Callback already exists with phone number ${phoneNumber}, created by ${lead.createdBy}`
           );
       } else {
         let callBackId = "C-" + generateRandomNumber(6);
@@ -141,7 +143,8 @@ const updateCallBack = asyncHandler((req, res) => {
       return res
         .status(409)
         .send(
-          `Callback already exists with phone number ${phone}, created by - ${callback.createdBy}, Callback ID - ${callback.id}`
+          `Callback already exists with phone number ${phone}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
+          // `Callback already exists with phone number ${phone}, created by - ${callback.createdBy}, Callback ID - ${callback.id}`
         );
     }
     const updateClause = updateClauseHandler(req.body);

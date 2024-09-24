@@ -19,12 +19,16 @@ const {
   calculateBTOProgram,
   getCreditSummary,
   calculateDscrRatio,
+  createLeadFromCallback
 } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();
 
 router.route("/").get(validateToken, getLeads).post(validateToken, createLead);
+
+
+router.route("/callbacktolead").post(validateToken, createLeadFromCallback);
 
 router.route("/search").get(validateToken, searchLeads);
 router.route("/total").get(validateToken, getLeadsCount);

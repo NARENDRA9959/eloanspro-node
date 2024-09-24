@@ -141,6 +141,7 @@ const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
   let sql = `
     SELECT 
       DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month,
+      YEAR(DATE_SUB(CURDATE(), INTERVAL seq MONTH)) AS year,
       COALESCE(
         (
           SELECT COUNT(leads.id)
@@ -162,14 +163,13 @@ const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
       res.status(500).send("Internal Server Error");
       return;
     }
-    const months = result.map(item => item.month);
+    const months = result.map(item => `${item.month} ${item.year}`);
+    //console.log(months)
     const leadCounts = result.map(item => item.leadCount);
     res.status(200).json({ months, leadCounts });
   });
 });
-
 const getMonthWiseCallBacksCount = asyncHandler(async (req, res) => {
-
   let sql = `SELECT 
 DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL seq MONTH)), '%b') AS month,
 COALESCE(
