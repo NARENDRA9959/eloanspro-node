@@ -61,11 +61,11 @@ const createCallBack = asyncHandler((req, res) => {
       res.status(500).json({ error: "Internal server error" });
     } else {
       if (result.length > 0) {
-        const lead = result[0];
+        const callback = result[0];
         res
           .status(500)
           .send(
-          `Callback already exists with phone number ${phone}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
+          `Callback already exists with phone number ${phoneNumber}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
 
             // `Callback already exists with phone number ${phoneNumber}, created by ${lead.createdBy}`
           );
