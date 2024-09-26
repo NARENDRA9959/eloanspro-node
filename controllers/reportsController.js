@@ -19,6 +19,10 @@ const { fetchDistinctDisbursedLeadIds } = require('../controllers/loginsControll
 const { fetchDistinctBankRejectedLeadIds } = require('../controllers/loginsController');
 const { fetchDistinctCNIRejectedLeadIds } = require('../controllers/loginsController');
 const { getSourceName } = require('../controllers/teamController');
+const {
+    projectConstantsLocal
+} = require("../constants/project-constants");
+
 
 
 const cleanup = (directory, filePath) => {
@@ -57,30 +61,6 @@ const exportLeads = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'leads1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-
-    // const cleanup = (directory, filePath) => {
-    //   fs.unlink(filePath, (unlinkErr) => {
-    //     if (unlinkErr) {
-    //       console.error("Error deleting the file:", unlinkErr);
-    //     } else {
-    //       console.log("File deleted successfully");
-    //       fs.readdir(directory, (err, files) => {
-    //         if (err) {
-    //           console.error("Error reading directory:", err);
-    //         } else if (files.length === 0) {
-    //           fs.rmdir(directory, (rmdirErr) => {
-    //             if (rmdirErr) {
-    //               console.error("Error deleting the directory:", rmdirErr);
-    //             } else {
-    //               console.log("Directory deleted successfully");
-    //             }
-    //           });
-    //         }
-    //       });
-    //     }
-    //   });
-    // };
-
     dbConnect.query(sql, async (err, result) => {
         if (err) {
             console.error("Error exporting leads: ", err);
@@ -99,29 +79,7 @@ const exportLeads = asyncHandler(async (req, res) => {
             }
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Leads');
-            worksheet.columns = [
-                { header: 'Lead Id', key: 'id' },
-                { header: 'Business Name', key: 'businessName' },
-                { header: 'Business Email', key: 'businessEmail' },
-                { header: 'Contact Person', key: 'contactPerson' },
-                { header: 'Primary Phone', key: 'primaryPhone' },
-                { header: 'Secondary Phone', key: 'secondaryPhone' },
-                { header: 'City', key: 'city' },
-                { header: 'State', key: 'state' },
-                { header: 'Business Entity', key: 'businessEntity' },
-                { header: 'Business Turnover', key: 'businessTurnover' },
-                { header: 'Nature Of Business', key: 'natureOfBusiness' },
-                { header: 'Product', key: 'product' },
-                { header: 'Business Vintage', key: 'businessOperatingSince' },
-                { header: 'Had Own House', key: 'hadOwnHouse' },
-                { header: 'Loan Requirement', key: 'loanRequirement' },
-                { header: 'OD Requirement', key: 'odRequirement' },
-                { header: 'called From', key: 'calledFrom' },
-                { header: 'Remarks', key: 'remarks' },
-                { header: 'Sourced By', key: 'sourcedBy' },
-                { header: 'Created By', key: 'createdBy' },
-                { header: 'Created On', key: 'createdOn' },
-            ];
+            worksheet.columns = projectConstantsLocal.LEAD_WORKSHEET_COLUMNS;
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
             console.log("Excel file created successfully at", excelFilePath);
@@ -140,8 +98,6 @@ const exportLeads = asyncHandler(async (req, res) => {
                     ...formData.getHeaders(),
                 },
             });
-            // console.log('Response Status:', response.status);
-            // console.log('Response Data:', response.data);
             if (response.status === 200) {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
@@ -190,28 +146,6 @@ const exportCallbacks = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'callbacks1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-    // const cleanup = (directory, filePath) => {
-    //   fs.unlink(filePath, (unlinkErr) => {
-    //     if (unlinkErr) {
-    //       console.error("Error deleting the file:", unlinkErr);
-    //     } else {
-    //       console.log("File deleted successfully");
-    //       fs.readdir(directory, (err, files) => {
-    //         if (err) {
-    //           console.error("Error reading directory:", err);
-    //         } else if (files.length === 0) {
-    //           fs.rmdir(directory, (rmdirErr) => {
-    //             if (rmdirErr) {
-    //               console.error("Error deleting the directory:", rmdirErr);
-    //             } else {
-    //               console.log("Directory deleted successfully");
-    //             }
-    //           });
-    //         }
-    //       });
-    //     }
-    //   });
-    // };
     dbConnect.query(sql, async (err, result) => {
         if (err) {
             console.error("Error exporting leads: ", err);
@@ -231,16 +165,7 @@ const exportCallbacks = asyncHandler(async (req, res) => {
             }
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Callbacks');
-            worksheet.columns = [
-
-                { header: 'CallBack Id', key: 'callBackId' },
-                { header: 'Business Name', key: 'businessName' },
-                { header: 'Phone', key: 'phone' },
-                { header: 'Callback Date', key: 'date' },
-                { header: 'Remarks', key: 'remarks' },
-                { header: 'Sourced By', key: 'sourcedBy' },
-                { header: 'Created On', key: 'createdOn' },
-            ];
+            worksheet.columns = projectConstantsLocal.CALLBACKS_WORKSHEET_COLUMNS;
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
             console.log("Excel file created successfully at", excelFilePath);
@@ -259,8 +184,6 @@ const exportCallbacks = asyncHandler(async (req, res) => {
                     ...formData.getHeaders(),
                 },
             });
-            // console.log('Response Status:', response.status);
-            // console.log('Response Data:', response.data);
             if (response.status === 200) {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
@@ -312,8 +235,6 @@ const exportFilesInProcess = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'FilesInProcess1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-
-
     dbConnect.query(sql, async (err, result) => {
         if (err) {
             console.error("Error exporting leads: ", err);
@@ -332,29 +253,7 @@ const exportFilesInProcess = asyncHandler(async (req, res) => {
             }
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('FilesInProcess');
-            worksheet.columns = [
-                { header: 'Lead Id', key: 'id' },
-                { header: 'Business Name', key: 'businessName' },
-                { header: 'Business Email', key: 'businessEmail' },
-                { header: 'Contact Person', key: 'contactPerson' },
-                { header: 'Primary Phone', key: 'primaryPhone' },
-                { header: 'Secondary Phone', key: 'secondaryPhone' },
-                { header: 'City', key: 'city' },
-                { header: 'State', key: 'state' },
-                { header: 'Business Entity', key: 'businessEntity' },
-                { header: 'Business Turnover', key: 'businessTurnover' },
-                { header: 'Nature Of Business', key: 'natureOfBusiness' },
-                { header: 'Product', key: 'product' },
-                { header: 'Business Vintage', key: 'businessOperatingSince' },
-                { header: 'Had Own House', key: 'hadOwnHouse' },
-                { header: 'Loan Requirement', key: 'loanRequirement' },
-                { header: 'OD Requirement', key: 'odRequirement' },
-                { header: 'called From', key: 'calledFrom' },
-                { header: 'Remarks', key: 'remarks' },
-                { header: 'Sourced By', key: 'sourcedBy' },
-                { header: 'Created By', key: 'createdBy' },
-                { header: 'Created On', key: 'createdOn' },
-            ];
+            worksheet.columns = projectConstantsLocal.LEAD_WORKSHEET_COLUMNS;
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
             console.log("Excel file created successfully at", excelFilePath);
@@ -408,10 +307,6 @@ const exportFilesInProcess = asyncHandler(async (req, res) => {
         }
     });
 });
-
-
-
-
 const exportApprovalLeads = asyncHandler(async (req, res) => {
     let reportId = "R-" + generateRandomNumber(6);
     const distinctLeadIds = await fetchDistinctApprovedLeadIds();
@@ -428,7 +323,6 @@ const exportApprovalLeads = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'ApprovalFiles1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-
     dbConnect.query(sql, async (err, result) => {
         if (err) {
             console.error("Error exporting leads: ", err);
@@ -446,29 +340,7 @@ const exportApprovalLeads = asyncHandler(async (req, res) => {
             }
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('ApprovalFiles');
-            worksheet.columns = [
-                { header: 'Lead Id', key: 'id' },
-                { header: 'Business Name', key: 'businessName' },
-                { header: 'Business Email', key: 'businessEmail' },
-                { header: 'Contact Person', key: 'contactPerson' },
-                { header: 'Primary Phone', key: 'primaryPhone' },
-                { header: 'Secondary Phone', key: 'secondaryPhone' },
-                { header: 'City', key: 'city' },
-                { header: 'State', key: 'state' },
-                { header: 'Business Entity', key: 'businessEntity' },
-                { header: 'Business Turnover', key: 'businessTurnover' },
-                { header: 'Nature Of Business', key: 'natureOfBusiness' },
-                { header: 'Product', key: 'product' },
-                { header: 'Business Vintage', key: 'businessOperatingSince' },
-                { header: 'Had Own House', key: 'hadOwnHouse' },
-                { header: 'Loan Requirement', key: 'loanRequirement' },
-                { header: 'OD Requirement', key: 'odRequirement' },
-                { header: 'called From', key: 'calledFrom' },
-                { header: 'Remarks', key: 'remarks' },
-                { header: 'Sourced By', key: 'sourcedBy' },
-                { header: 'Created By', key: 'createdBy' },
-                { header: 'Created On', key: 'createdOn' },
-            ];
+            worksheet.columns = projectConstantsLocal.LEAD_WORKSHEET_COLUMNS;
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
             console.log("Excel file created successfully at", excelFilePath);
@@ -523,8 +395,6 @@ const exportApprovalLeads = asyncHandler(async (req, res) => {
     });
 });
 
-
-
 const exportDisbursalLeads = asyncHandler(async (req, res) => {
     let reportId = "R-" + generateRandomNumber(6);
     const distinctLeadIds = await fetchDistinctDisbursedLeadIds();
@@ -541,7 +411,6 @@ const exportDisbursalLeads = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'DisbursalFiles1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-
     dbConnect.query(sql, async (err, result) => {
         if (err) {
             console.error("Error exporting leads: ", err);
@@ -559,29 +428,7 @@ const exportDisbursalLeads = asyncHandler(async (req, res) => {
             }
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('DisbursalFiles');
-            worksheet.columns = [
-                { header: 'Lead Id', key: 'id' },
-                { header: 'Business Name', key: 'businessName' },
-                { header: 'Business Email', key: 'businessEmail' },
-                { header: 'Contact Person', key: 'contactPerson' },
-                { header: 'Primary Phone', key: 'primaryPhone' },
-                { header: 'Secondary Phone', key: 'secondaryPhone' },
-                { header: 'City', key: 'city' },
-                { header: 'State', key: 'state' },
-                { header: 'Business Entity', key: 'businessEntity' },
-                { header: 'Business Turnover', key: 'businessTurnover' },
-                { header: 'Nature Of Business', key: 'natureOfBusiness' },
-                { header: 'Product', key: 'product' },
-                { header: 'Business Vintage', key: 'businessOperatingSince' },
-                { header: 'Had Own House', key: 'hadOwnHouse' },
-                { header: 'Loan Requirement', key: 'loanRequirement' },
-                { header: 'OD Requirement', key: 'odRequirement' },
-                { header: 'called From', key: 'calledFrom' },
-                { header: 'Remarks', key: 'remarks' },
-                { header: 'Sourced By', key: 'sourcedBy' },
-                { header: 'Created By', key: 'createdBy' },
-                { header: 'Created On', key: 'createdOn' },
-            ];
+            worksheet.columns = projectConstantsLocal.LEAD_WORKSHEET_COLUMNS;
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
             console.log("Excel file created successfully at", excelFilePath);
@@ -653,7 +500,6 @@ const exportBankRejectedLeads = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'BankRejectedFiles1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-
     dbConnect.query(sql, async (err, result) => {
         if (err) {
             console.error("Error exporting leads: ", err);
@@ -671,29 +517,7 @@ const exportBankRejectedLeads = asyncHandler(async (req, res) => {
             }
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('BankRejectedFiles');
-            worksheet.columns = [
-                { header: 'Lead Id', key: 'id' },
-                { header: 'Business Name', key: 'businessName' },
-                { header: 'Business Email', key: 'businessEmail' },
-                { header: 'Contact Person', key: 'contactPerson' },
-                { header: 'Primary Phone', key: 'primaryPhone' },
-                { header: 'Secondary Phone', key: 'secondaryPhone' },
-                { header: 'City', key: 'city' },
-                { header: 'State', key: 'state' },
-                { header: 'Business Entity', key: 'businessEntity' },
-                { header: 'Business Turnover', key: 'businessTurnover' },
-                { header: 'Nature Of Business', key: 'natureOfBusiness' },
-                { header: 'Product', key: 'product' },
-                { header: 'Business Vintage', key: 'businessOperatingSince' },
-                { header: 'Had Own House', key: 'hadOwnHouse' },
-                { header: 'Loan Requirement', key: 'loanRequirement' },
-                { header: 'OD Requirement', key: 'odRequirement' },
-                { header: 'called From', key: 'calledFrom' },
-                { header: 'Remarks', key: 'remarks' },
-                { header: 'Sourced By', key: 'sourcedBy' },
-                { header: 'Created By', key: 'createdBy' },
-                { header: 'Created On', key: 'createdOn' },
-            ];
+            worksheet.columns = projectConstantsLocal.LEAD_WORKSHEET_COLUMNS;
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
             console.log("Excel file created successfully at", excelFilePath);
@@ -782,29 +606,7 @@ const exportCNILeads = asyncHandler(async (req, res) => {
             }
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('CNIFiles');
-            worksheet.columns = [
-                { header: 'Lead Id', key: 'id' },
-                { header: 'Business Name', key: 'businessName' },
-                { header: 'Business Email', key: 'businessEmail' },
-                { header: 'Contact Person', key: 'contactPerson' },
-                { header: 'Primary Phone', key: 'primaryPhone' },
-                { header: 'Secondary Phone', key: 'secondaryPhone' },
-                { header: 'City', key: 'city' },
-                { header: 'State', key: 'state' },
-                { header: 'Business Entity', key: 'businessEntity' },
-                { header: 'Business Turnover', key: 'businessTurnover' },
-                { header: 'Nature Of Business', key: 'natureOfBusiness' },
-                { header: 'Product', key: 'product' },
-                { header: 'Business Vintage', key: 'businessOperatingSince' },
-                { header: 'Had Own House', key: 'hadOwnHouse' },
-                { header: 'Loan Requirement', key: 'loanRequirement' },
-                { header: 'OD Requirement', key: 'odRequirement' },
-                { header: 'called From', key: 'calledFrom' },
-                { header: 'Remarks', key: 'remarks' },
-                { header: 'Sourced By', key: 'sourcedBy' },
-                { header: 'Created By', key: 'createdBy' },
-                { header: 'Created On', key: 'createdOn' },
-            ];
+            worksheet.columns = projectConstantsLocal.LEAD_WORKSHEET_COLUMNS;
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
             console.log("Excel file created successfully at", excelFilePath);
@@ -879,30 +681,6 @@ const exportSanctionDetails = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'sanctionDetails1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-    // const cleanup = (directory, filePath) => {
-    //     fs.unlink(filePath, (unlinkErr) => {
-    //         if (unlinkErr) {
-    //             console.error("Error deleting the file:", unlinkErr);
-    //         } else {
-    //             console.log("File deleted successfully");
-    //             fs.readdir(directory, (err, files) => {
-    //                 if (err) {
-    //                     console.error("Error reading directory:", err);
-    //                 } else if (files.length === 0) {
-    //                     fs.rmdir(directory, (rmdirErr) => {
-    //                         if (rmdirErr) {
-    //                             console.error("Error deleting the directory:", rmdirErr);
-    //                         } else {
-    //                             console.log("Directory deleted successfully");
-    //                         }
-    //                     });
-    //                 }
-    //             });
-    //         }
-    //     });
-    // };
-
-
     dbConnect.query(sql, async (err, result) => {
         if (err) {
             console.error("Error exporting leads: ", err);
@@ -919,11 +697,7 @@ const exportSanctionDetails = asyncHandler(async (req, res) => {
             }
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('sanctionDetails');
-            worksheet.columns = [
-                { header: 'Lead Id', key: 'leadId' },
-                { header: 'Business Name', key: 'businessName' },
-                { header: 'Sanctioned Amount', key: 'totalSanctionedAmount' },
-            ];
+            worksheet.columns = projectConstantsLocal.SANCTIONED_DETAILS_COLUMNS;
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
             console.log("Excel file created successfully at", excelFilePath);
@@ -999,30 +773,6 @@ const exportDisbursalDetails = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'disbursalDetails1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-    // const cleanup = (directory, filePath) => {
-    //     fs.unlink(filePath, (unlinkErr) => {
-    //         if (unlinkErr) {
-    //             console.error("Error deleting the file:", unlinkErr);
-    //         } else {
-    //             console.log("File deleted successfully");
-    //             fs.readdir(directory, (err, files) => {
-    //                 if (err) {
-    //                     console.error("Error reading directory:", err);
-    //                 } else if (files.length === 0) {
-    //                     fs.rmdir(directory, (rmdirErr) => {
-    //                         if (rmdirErr) {
-    //                             console.error("Error deleting the directory:", rmdirErr);
-    //                         } else {
-    //                             console.log("Directory deleted successfully");
-    //                         }
-    //                     });
-    //                 }
-    //             });
-    //         }
-    //     });
-    // };
-
-
     dbConnect.query(sql, async (err, result) => {
         if (err) {
             console.error("Error exporting leads: ", err);
@@ -1039,11 +789,7 @@ const exportDisbursalDetails = asyncHandler(async (req, res) => {
             }
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('disbursalDetails');
-            worksheet.columns = [
-                { header: 'Lead Id', key: 'leadId' },
-                { header: 'Business Name', key: 'businessName' },
-                { header: 'Disbursed Amount', key: 'totalDisbursedAmount' },
-            ];
+            worksheet.columns = projectConstantsLocal.DISBURSED_DETAILS_COLUMNS;
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
             console.log("Excel file created successfully at", excelFilePath);
@@ -1109,30 +855,6 @@ const exportloginsDoneDetails = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'loginsDoneDetails1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-    // const cleanup = (directory, filePath) => {
-    //     fs.unlink(filePath, (unlinkErr) => {
-    //         if (unlinkErr) {
-    //             console.error("Error deleting the file:", unlinkErr);
-    //         } else {
-    //             console.log("File deleted successfully");
-    //             fs.readdir(directory, (err, files) => {
-    //                 if (err) {
-    //                     console.error("Error reading directory:", err);
-    //                 } else if (files.length === 0) {
-    //                     fs.rmdir(directory, (rmdirErr) => {
-    //                         if (rmdirErr) {
-    //                             console.error("Error deleting the directory:", rmdirErr);
-    //                         } else {
-    //                             console.log("Directory deleted successfully");
-    //                         }
-    //                     });
-    //                 }
-    //             });
-    //         }
-    //     });
-    // };
-
-
     dbConnect.query(sql, async (err, result) => {
         if (err) {
             console.error("Error exporting leads: ", err);
@@ -1149,14 +871,7 @@ const exportloginsDoneDetails = asyncHandler(async (req, res) => {
             }
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('loginsDoneDetails');
-            worksheet.columns = [
-                { header: 'Lead Id', key: 'leadId' },
-                { header: 'Business Name', key: 'businessName' },
-                { header: 'Bank Name', key: 'bankName' },
-                { header: 'Program', key: 'program' },
-                { header: 'Status', key: 'fipStatus' },
-                { header: 'Remarks', key: 'fipRemarks' },
-            ];
+            worksheet.columns = projectConstantsLocal.LOGIN_DETAILS_COLUMNS;
             worksheet.addRows(result);
             await workbook.xlsx.writeFile(excelFilePath);
             console.log("Excel file created successfully at", excelFilePath);
@@ -1222,7 +937,6 @@ const exportCNILeadDetails = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'CNIDetails1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-
     dbConnect.query(sqlLogins, async (err, loginsResult) => {
         if (err) {
             console.error("Error exporting leads from logins: ", err);
@@ -1269,29 +983,7 @@ const exportCNILeadDetails = asyncHandler(async (req, res) => {
                 }
                 const workbook = new ExcelJS.Workbook();
                 const worksheet = workbook.addWorksheet('CNIDetails');
-                worksheet.columns = [
-                    { header: 'Lead Id', key: 'leadId' },
-                    { header: 'Business Name', key: 'businessName' },
-                    { header: 'Business Entity', key: 'businessEntity' },
-                    { header: 'Business Turnover', key: 'businessTurnover' },
-                    { header: 'Nature Of Business', key: 'natureOfBusiness' },
-                    { header: 'Product', key: 'product' },
-                    { header: 'Sourced By', key: 'sourcedBy' },
-                    { header: 'Contact Person', key: 'contactPerson' },
-                    { header: 'Primary Phone', key: 'primaryPhone' },
-                    { header: 'Created On', key: 'createdOn' },
-                    { header: 'Program', key: 'program' },
-                    { header: 'Lender', key: 'bankName' },
-                    { header: 'Login Date', key: 'loginDate' },
-                    { header: 'Login Status', key: 'fipStatus' },
-                    { header: 'Login Remarks', key: 'fipRemarks' },
-                    { header: 'Sanctioned Amount', key: 'sanctionedAmount' },
-                    { header: 'Rate Of Interest', key: 'roi' },
-                    { header: 'Tenure', key: 'tenure' },
-                    { header: 'Approval Date', key: 'approvalDate' },
-                    { header: 'Approved Status', key: 'approvedStatus' },
-                    { header: 'Approved Remarks', key: 'approvedRemarks' },
-                ];
+                worksheet.columns = projectConstantsLocal.CNI_DETAILS_COLUMNS;
                 worksheet.addRows(parsedResults);
                 await workbook.xlsx.writeFile(excelFilePath);
                 console.log("Excel file created successfully at", excelFilePath);

@@ -65,7 +65,7 @@ const createCallBack = asyncHandler((req, res) => {
         res
           .status(500)
           .send(
-          `Callback already exists with phone number ${phoneNumber}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
+            `Callback already exists with phone number ${phoneNumber}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
 
             // `Callback already exists with phone number ${phoneNumber}, created by ${lead.createdBy}`
           );

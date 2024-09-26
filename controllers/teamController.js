@@ -118,10 +118,10 @@ const createUsers = asyncHandler(async (req, res) => {
         return;
       }
       const rbacValues = {
-        1: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
-        2: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+        1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+        2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
         3: 'leads,callbacks',
-        4: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+        4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
         5: 'leads,callbacks,files,partial,team,reports,followups'
       };
       const rbacValue = rbacValues[req.body.userType];
@@ -173,10 +173,10 @@ const updateUsers = asyncHandler(async (req, res) => {
       return;
     }
     const rbacValues = {
-      1: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
-      2: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+      1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+      2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
       3: 'leads,callbacks',
-      4: 'leads,callbacks,files,partial,team,credit,lenders,bankers,bankdocuments,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+      4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
       5: 'leads,callbacks,files,partial,team,reports,followups'
     };
     const rbacValue = rbacValues[req.body.userType];

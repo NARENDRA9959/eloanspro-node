@@ -475,8 +475,7 @@ function createNewLead(req, res) {
 
 const createLeadFromCallback = asyncHandler((req, res) => {
   const phoneNumber = req.body.primaryPhone;
-  console.log(phoneNumber);
-
+  //console.log(phoneNumber);
   if (req.user.userType == 1) {
     createNewLeadFromCallback(req, res);
   } else {
@@ -518,7 +517,7 @@ function createNewLeadFromCallback(req, res) {
       res.status(500).send("Internal server error");
       return;
     }
-console.log(id)
+    console.log(id)
     res.status(200).json({ id: id });
   });
 }
