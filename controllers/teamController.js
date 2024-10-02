@@ -220,25 +220,20 @@ const getUsersById = asyncHandler((req, res) => {
 const getUsers = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM users";
   const queryParams = req.query;
-  // queryParams["sort"] = "addedOn";
   queryParams["sort"] = "status,asc";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  //console.log(sql);
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getUsers Error in controller");
     }
     leadUsersData = parseNestedJSON(result);
-    // console.log(leadUsersData)
     res.status(200).send(leadUsersData);
   });
 });
 const getSourceName = async (userId) => {
   try {
-    //console.log("leadUsersData:", leadUsersData)
     const leadUser = leadUsersData.find((user) => user.id == userId);
-    //console.log(leadUser)
     return leadUser ? leadUser.name : "";
   } catch (error) {
     console.error("Error getting sourcedBy names:", error);
@@ -337,106 +332,6 @@ const updateUserStatus = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "User status updated successfully" });
   });
 });
-// const exportLeads = asyncHandler(async (req, res) => {
-//   let sql = "SELECT * FROM leads";
-//   const queryParams = req.query;
-//   queryParams["sort"] = "createdOn";
-//   const filtersQuery = handleGlobalFilters(queryParams);
-//   sql += filtersQuery;
-
-//   dbConnect.query(sql, async (err, result) => {
-//     if (err) {
-//       console.error("Error exporting leads: ", err);
-//       res.status(500).json({ error: "Internal server error" });
-//       return;
-//     }
-//     try {
-//       for (let i = 0; i < result.length; i++) {
-//         result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
-//       }
-//       result = parseNestedJSON(result);
-
-//       const uploadDirectory = path.join(__dirname, '../csvFiles');
-//       if (!fs.existsSync(uploadDirectory)) {
-//         fs.mkdirSync(uploadDirectory, { recursive: true });
-//       }
-
-//       const csvFilePath = path.join(uploadDirectory, 'leads1.csv');
-//       const csvWriter = createObjectCsvWriter({
-//         path: csvFilePath,
-//         header: [
-//           { id: "id", title: "ID" },
-//           { id: "leadId", title: "Lead Id" },
-//           { id: "businessName", title: "Business Name" },
-//           { id: "businessEmail", title: "Business Email" },
-//           { id: "contactPerson", title: "Contact Person" },
-//           { id: "primaryPhone", title: "Primary Phone" },
-//           { id: "secondaryPhone", title: "Secondary Phone" },
-//           { id: "city", title: "City" },
-//           { id: "state", title: "State" },
-//           { id: "businessEntity", title: "Business Entity" },
-//           { id: "businessTurnover", title: "Business Turnover" },
-//           { id: "natureOfBusiness", title: "Nature Of Business" },
-//           { id: "product", title: "Product" },
-//           { id: "businessOperatingSince", title: "Business Vintage" },
-//           { id: "loanRequirement", title: "Loan Requirement" },
-//           { id: "odRequirement", title: "OD Requirement" },
-//           { id: "sourcedBy", title: "Sourced By" },
-//           { id: "createdOn", title: "Created On" },
-//         ],
-//       });
-
-//       await csvWriter.writeRecords(result);
-//       console.log("CSV file created successfully at", csvFilePath);
-
-//       if (!fs.existsSync(csvFilePath)) {
-//         console.error('File does not exist:', csvFilePath);
-//         res.status(500).json({ error: "File not found" });
-//         return;
-//       }
-
-//       const formData = {
-//         file: {
-//           value: fs.createReadStream(csvFilePath),
-//           options: {
-//             filename: 'leads1.csv',
-//             contentType: 'text/csv'
-//           }
-//         }
-//       };
-//       const options = {
-//         url: 'https://files.thefintalk.in/files?type=LEADS&leadId=REPORTS',
-//         formData: formData
-//       };
-//       console.log("options", options)
-//       request.post(options, (err, httpResponse, body) => {
-//         if (err) {
-//           console.error('Error uploading file:', err);
-//           res.status(500).json({ error: "Error uploading file" });
-//         } else {
-//           try {
-//             let response = body;
-//             if (typeof body === 'string') {
-//               response = JSON.parse(body);
-//             }
-//             console.log(response)
-//             const fileUrl = response.fileUrl || response.url || response.link;
-//             console.log('File uploaded successfully', fileUrl);
-//             res.status(200).json({ success: true, fileUrl });
-//           } catch (error) {
-//             console.error('Error parsing response:', error);
-//             res.status(500).json({ error: "Error parsing server response" });
-//           }
-//         }
-//       });
-
-//     } catch (error) {
-//       console.error("Error processing leads:", error);
-//       res.status(500).json({ error: "Internal server error" });
-//     }
-//   });
-// });
-
 
 
 module.exports = {

@@ -51,8 +51,16 @@ const getLoanLeadById = asyncHandler((req, res) => {
 
 const createLoanLead = asyncHandler((req, res) => {
     const phoneNumber = req.body.primaryPhone;
-    const checkPhoneQuery = `SELECT * FROM loanleads WHERE primaryPhone = ?`;
-    dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
+    console.log(req.body)
+    let checkPhoneQuery = `SELECT * FROM loanleads`;
+    const queryParams = req.query;
+    queryParams["primaryPhone-eq"] = phoneNumber;
+    queryParams["loanType-eq"] = req.body.loanType;
+    queryParams["employmentStatus-eq"] = req.body.employmentStatus;
+    const filtersQuery = handleGlobalFilters(queryParams);
+    checkPhoneQuery += filtersQuery;
+    console.log(checkPhoneQuery)
+    dbConnect.query(checkPhoneQuery, (err, result) => {
         if (err) {
             console.error("Error checking phone number:", err);
             res.status(500).json({ error: "Internal server error" });
@@ -62,7 +70,7 @@ const createLoanLead = asyncHandler((req, res) => {
                 res
                     .status(500)
                     .send(
-                        `Lead already exists with phone number ${phoneNumber}, created by ${lead.createdBy}`
+                        `Lead already exists with phone number ${phoneNumber}, created by ${lead.sourcedByName}, Lead ID - ${lead.leadId}`
                     );
             } else {
                 let leadId = generateRandomNumber(5);
@@ -90,7 +98,16 @@ const updateLoanLead = asyncHandler((req, res) => {
     if (!checkRequiredFields) {
         return res.status(422).send("Please fill all required fields");
     }
-    const checkPhoneQuery = `SELECT * FROM loanleads WHERE primaryPhone = ? AND leadId != ?`;
+    let checkPhoneQuery = `SELECT * FROM loanleads`;
+    const queryParams = req.query;
+    queryParams["primaryPhone-eq"] = primaryPhone;
+    queryParams["loanType-eq"] = req.body.loanType;
+    queryParams["employmentStatus-eq"] = req.body.employmentStatus;
+    const filtersQuery = handleGlobalFilters(queryParams);
+    checkPhoneQuery += filtersQuery;
+    let sql = ` AND leadId != ${id}`
+    checkPhoneQuery += sql;
+    console.log(checkPhoneQuery)
     dbConnect.query(checkPhoneQuery, [primaryPhone, id], (err, result) => {
         if (err) {
             console.error("Error checking phone number:", err);
@@ -101,7 +118,7 @@ const updateLoanLead = asyncHandler((req, res) => {
             return res
                 .status(409)
                 .send(
-                    `Lead already exists with phone number ${primaryPhone}, created by - ${lead.createdBy}, Lead ID - ${lead.leadId}, Business Name - ${lead.businessName}`
+                    `Lead already exists with phone number ${primaryPhone}, created by - ${lead.sourcedByName}, Lead ID - ${lead.leadId}`
                 );
         }
         const updateClause = updateClauseHandler(req.body);
@@ -155,7 +172,6 @@ const changeLoanLeadStatus = asyncHandler((req, res) => {
 
 const addLoanLeadsDocumentData = asyncHandler((req, res) => {
     const id = req.params.leadId;
-    //console.log(id)
     const updateClause = updateClauseHandler(req.body);
     const sql = `UPDATE loanleads SET ${updateClause} WHERE leadId = ${id}`;
     dbConnect.query(sql, (err, result) => {

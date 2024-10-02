@@ -36,7 +36,6 @@ const getLeads = asyncHandler(async (req, res) => {
   queryParams["sort"] = "lastUpdatedOn";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  //console.log(sql)
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLeads Error in controller");
@@ -96,8 +95,6 @@ const getLeadDocumentsById = asyncHandler((req, res) => {
 const addDocumentData = asyncHandler((req, res) => {
   const id = req.params.leadId;
   const updateClause = updateClauseHandler(req.body);
-  // console.log(updateClause);
-  // console.log(id);
   const sql = `UPDATE leaddocuments SET ${updateClause} WHERE leadId = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
@@ -110,8 +107,6 @@ const addDocumentData = asyncHandler((req, res) => {
 const addDscrValuesData = asyncHandler((req, res) => {
   const id = req.params.leadId;
   const updateClause = updateClauseHandler(req.body);
-  // console.log(updateClause);
-  // console.log(id);
   const sql = `UPDATE dscr_values SET ${updateClause} WHERE leadId = ${id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
@@ -271,98 +266,11 @@ const calculateBTOProgram = asyncHandler((req, res) => {
   });
 });
 
-
-// IMPORTANT CODE
-
-// const createLead = asyncHandler((req, res) => {
-//   const phoneNumber = req.body.primaryPhone;
-//   const checkPhoneQuery = `SELECT leads.*, leadstatus.displayName 
-//     FROM leads 
-//     LEFT JOIN leadstatus ON leads.leadInternalStatus = leadstatus.id 
-//     WHERE leads.primaryPhone = ?`;
-//   dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
-//     if (err) {
-//       console.error("Error checking phone number:", err);
-//       res.status(500).json({ error: "Internal server error" });
-//     } else {
-//       if (result.length > 0) {
-//         const lead = result[0];
-//         res
-//           .status(500)
-//           .send(
-//             `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}, lead Status - ${lead.displayName}`
-//           );
-//       } else {
-//         let leadId = "L-" + generateRandomNumber(6);
-//         let id = generateRandomNumber(9);
-//         req.body["id"] = id;
-//         req.body["leadId"] = leadId;
-//         req.body["leadInternalStatus"] = 1;
-//         req.body["lastLeadInternalStatus"] = 1;
-//         req.body["createdBy"] = req.user.name;
-//         req.body["lastUpdatedBy"] = req.user.name;
-//         const createClause = createClauseHandler(req.body);
-//         const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-//         dbConnect.query(sql, (err, result) => {
-//           if (err) {
-//             console.error("Error inserting data into leads table:", err);
-//             res.status(500).send("Internal server error");
-//             return;
-//           }
-//           res.status(200).send(true);
-//         });
-//       }
-//     }
-//   });
-// });
-//another imp
-// const createLead = asyncHandler((req, res) => {
-//   console.log(req.user.userType);
-//   const phoneNumber = req.body.primaryPhone;
-//   //console.log(phoneNumber);
-//   const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
-//   dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
-//     if (err) {
-//       console.error("Error checking phone number:", err);
-//       res.status(500).json({ error: "Internal server error" });
-//     } else {
-//       if (result.length > 0) {
-//         const lead = result[0];
-//         res
-//           .status(500)
-//           .send(
-//             `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}`
-//           );
-//       } else {
-//         let leadId = "L-" + generateRandomNumber(6);
-//         let id = generateRandomNumber(9);
-//         req.body["id"] = id;
-//         req.body["leadId"] = leadId;
-//         req.body["leadInternalStatus"] = 1;
-//         req.body["lastLeadInternalStatus"] = 1;
-//         req.body["createdBy"] = req.user.name;
-//         req.body["lastUpdatedBy"] = req.user.name;
-//         // console.log(req.user.name)
-//         const createClause = createClauseHandler(req.body);
-//         const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-//         dbConnect.query(sql, (err, result) => {
-//           if (err) {
-//             console.error("Error inserting data into leads table:", err);
-//             res.status(500).send("Internal server error");
-//             return;
-//           }
-//           res.status(200).send(true);
-//         });
-//       }
-//     }
-//   });
-// });
 const searchLeads = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM leads";
   const queryParams = req.query;
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  // console.log(sql);
   dbConnect.query(sql, async (err, leadsResult) => {
     if (err) {
       console.log("getLeads Error in controller");
@@ -409,7 +317,6 @@ const searchLeads = asyncHandler(async (req, res) => {
             leadStatusName,
           };
         });
-        //console.log(processedLeads);
         res.status(200).send({
           message: "Leads fetched successfully.",
           leadDetails: processedLeads,
@@ -423,9 +330,7 @@ const searchLeads = asyncHandler(async (req, res) => {
 });
 
 const createLead = asyncHandler((req, res) => {
-  //console.log(req.user.userType);
   const phoneNumber = req.body.primaryPhone;
-  // console.log(phoneNumber)
   if (req.user.userType == 1) {
     createNewLead(req, res);
   } else {
@@ -435,7 +340,6 @@ const createLead = asyncHandler((req, res) => {
         console.error("Error checking phone number:", err);
         res.status(500).json({ error: "Internal server error" });
       } else {
-        // console.log(result)
         if (result.length > 0) {
           const lead = result[0];
           res
@@ -475,7 +379,6 @@ function createNewLead(req, res) {
 
 const createLeadFromCallback = asyncHandler((req, res) => {
   const phoneNumber = req.body.primaryPhone;
-  //console.log(phoneNumber);
   if (req.user.userType == 1) {
     createNewLeadFromCallback(req, res);
   } else {
@@ -507,10 +410,8 @@ function createNewLeadFromCallback(req, res) {
   req.body["lastLeadInternalStatus"] = 1;
   req.body["createdBy"] = req.user.name;
   req.body["lastUpdatedBy"] = req.user.name;
-
   const createClause = createClauseHandler(req.body);
   const sql = `INSERT INTO leads (${createClause[0]}) VALUES (${createClause[1]})`;
-
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error inserting data into leads table:", err);
@@ -521,26 +422,6 @@ function createNewLeadFromCallback(req, res) {
     res.status(200).json({ id: id });
   });
 }
-
-// const updateLead = asyncHandler((req, res) => {
-//   const id = req.params.id;
-//   console.log(req.body)
-//   const checkRequiredFields = handleRequiredFields("leads", req.body);
-//   if (!checkRequiredFields) {
-//     res.status(422).send("Please Fill all required fields");
-//     return;
-//   }
-//   const updateClause = updateClauseHandler(req.body);
-//   const sql = `UPDATE leads SET ${updateClause} WHERE id = ${id}`;
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.log("updateLead error in controller");
-//     }
-//     res.status(200).send(result);
-//   });
-// });
-
-
 const updateLead = asyncHandler((req, res) => {
   const id = req.params.id;
   const { primaryPhone } = req.body;
@@ -555,7 +436,6 @@ const updateLead = asyncHandler((req, res) => {
       return res.status(500).json({ error: "Internal server error" });
     }
     if (result.length > 0) {
-      //console.log(result)
       const lead = result[0];
       return res
         .status(409)

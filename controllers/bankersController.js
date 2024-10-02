@@ -52,25 +52,6 @@ const getBankers = asyncHandler(async (req, res) => {
   });
 });
 
-// const getBanks = asyncHandler(async (req, res) => {
-//   let sql = "SELECT id, name, imageFiles AS imageUrl FROM bankers";
-//   const filtersQuery = handleGlobalFilters(req.body); // Assuming handleGlobalFilters is defined elsewhere
-//   sql += filtersQuery;
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.log("getBankers error:", err);
-//       return res.status(500).send("Error retrieving bankers");
-//     }
-//     const transformedResult = result.map((bank) => ({
-//       ...bank,
-//       imageUrl: JSON.parse(bank.imageUrl),
-//       selected: false,
-
-//     }));
-//     res.status(200).send(transformedResult);
-//   });
-// });
-
 const getBanks = asyncHandler(async (req, res) => {
   let sql = "SELECT id, name, imageFiles AS imageUrl FROM bankers";
   const filtersQuery = handleGlobalFilters(req.body);
@@ -99,23 +80,6 @@ const getBankersById = asyncHandler((req, res) => {
     res.status(200).send(result[0]);
   });
 });
-// const createBanker = asyncHandler((req, res) => {
-//   let bankerId = "B-" + generateRandomNumber(6);
-//   req.body["bankerId"] = bankerId;
-//   req.body["bankerInternalStatus"] = 1;
-//   req.body["lastBankerInternalStatus"] = 1;
-//   console.log(req)
-// console.log(req.body)
-//   const createClause = createClauseHandler(req.body);
-//   console.log(createClause)
-//   const sql = `INSERT INTO bankers (${createClause[0]}) VALUES (${createClause[1]})`;
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.log("createBanker error:");
-//     }
-//     res.status(200).send(true);
-//   });
-// });
 
 const createBanker = asyncHandler((req, res) => {
   try {
@@ -124,14 +88,12 @@ const createBanker = asyncHandler((req, res) => {
     req.body["bankerInternalStatus"] = 1;
     req.body["lastBankerInternalStatus"] = 1;
     req.body["lastUpdatedBy"] = req.user.name;
-
     const checkSql = `SELECT * FROM bankers WHERE name = ?`;
     dbConnect.query(checkSql, [req.body.name], (checkErr, checkResult) => {
       if (checkErr) {
         console.error("createBanker check error:", checkErr);
         return res.status(500).send({ error: "Database check error" });
       }
-
       if (checkResult.length > 0) {
         return res.status(400).send("Bank name already exists!!!");
       }
@@ -205,30 +167,6 @@ const deleteBanker = asyncHandler((req, res) => {
   });
 });
 
-
-// const getBankRevenueValue = asyncHandler(async (req, res) => {
-//   if (!req.params.id) {
-//     return res.status(400).send("bankid is required");
-//   }
-
-//   const bankid = req.params.id;
-//   let sql = `SELECT bankRevenueValue FROM bankers WHERE id = ${dbConnect.escape(bankid)}`;
-
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.log("getBankRevenueValue error:", err);
-//       return res.status(500).send("An error occurred while retrieving the bank revenue value.");
-//     }
-
-//     if (result.length === 0) {
-//       return res.status(404).send("Bank not found");
-//     }
-//     const bankRevenueValue = result[0].bankRevenueValue;
-//     res.status(200).send(bankRevenueValue);
-//   });
-// });
-
-
 module.exports = {
   getBankers,
   getBankersCount,
@@ -238,6 +176,5 @@ module.exports = {
   updateBanker,
   deleteBanker,
   changeBankersStatus,
-  //getBankRevenueValue,
   getNewBankersCount
 };
