@@ -137,8 +137,6 @@ const getCreditEvaluationCountStatus = asyncHandler(async (req, res) => {
   });
 });
 
-
-//leads
 const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
   let sql = `
     SELECT 
@@ -589,7 +587,6 @@ const getDisbursedAmount = asyncHandler(async (req, res) => {
   queryParams["approvedStatus-eq"] = "disbursed";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
-  // console.log(sql)
   dbConnect.query(
     sql,
     (err, result) => {

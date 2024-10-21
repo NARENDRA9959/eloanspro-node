@@ -21,77 +21,6 @@ const path = require('path');
 
 let leadUsersData = [];
 
-// const createUsers = asyncHandler((req, res) => {
-//   let userId = "U-" + generateRandomNumber(6);
-//   req.body["userId"] = userId;
-//   req.body["userInternalStatus"] = 1;
-//   req.body["lastUserInternalStatus"] = 1;
-
-//   const createClause = createClauseHandler(req.body);
-//   const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
-
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.error("Error creating users :", err);
-//       res.status(500).send("Internal Server Error");
-//       return;
-//     }
-//     res.status(200).send(true);
-//   });
-// });
-
-// const createUsers = asyncHandler(async (req, res) => {
-//   let phoneNumber = req.body.phone;
-//   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
-//   req.body["userInternalStatus"] = 1;
-//   req.body["lastUserInternalStatus"] = 1;
-//   req.body["password"] = encryptedPassword;
-//   const createClause = createClauseHandler(req.body);
-//   const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
-
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.error("Error creating users:", err);
-//       res.status(500).send("Internal Server Error");
-//       return;
-//     }
-//     res.status(200).send(true);
-//   });
-// });
-
-// const createUsers = asyncHandler(async (req, res) => {
-//   let phoneNumber = req.body.phone;
-//   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
-//   req.body["userInternalStatus"] = 1;
-//   req.body["lastUserInternalStatus"] = 1;
-//   req.body["password"] = encryptedPassword;
-//   console.log(req)
-//   const checkIfExistsQuery = `SELECT * FROM users WHERE name = ?`;
-//   dbConnect.query(checkIfExistsQuery, [req.body.name], (err, results) => {
-//     if (err) {
-//       console.error("Error checking if user exists:", err);
-//       res.status(500).send("Internal Server Error");
-//       return;
-//     }
-//     if (results.length > 0) {
-//       res.status(400).send("User with this username already exists");
-//       return;
-//     }
-//     const createClause = createClauseHandler(req.body);
-//     const sql = `INSERT INTO users (${createClause[0]}) VALUES (${createClause[1]})`;
-//     dbConnect.query(sql, (err, result) => {
-//       if (err) {
-//         console.error("Error creating user:", err);
-//         res.status(500).send("Internal Server Error");
-//         return;
-//       }
-//       res.status(200).send(true);
-//     });
-//   });
-// });
-
-
-
 const createUsers = asyncHandler(async (req, res) => {
   let phoneNumber = req.body.phone;
   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
@@ -141,22 +70,6 @@ const createUsers = asyncHandler(async (req, res) => {
     });
   });
 });
-
-
-// const updateUsers = asyncHandler(async (req, res) => {
-//   const id = req.params.id;
-//   let phoneNumber = req.body.phone.toString();
-//   let encryptedPassword = await bcrypt.hash(phoneNumber, 12);
-//   req.body["password"] = encryptedPassword;
-//   const updateClause = updateClauseHandler(req.body);
-//   const sql = `UPDATE users SET ${updateClause} WHERE id = ${id}`;
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.log("updateUsers error in controller");
-//     }
-//     res.status(200).send(result);
-//   });
-// });
 
 
 const updateUsers = asyncHandler(async (req, res) => {
@@ -220,7 +133,7 @@ const getUsersById = asyncHandler((req, res) => {
 const getUsers = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM users";
   const queryParams = req.query;
-  queryParams["sort"] = "status,asc";
+  // queryParams["sort"] = "status,asc";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
