@@ -21,7 +21,6 @@ const options = {
   ca: fs.readFileSync('./ssl/chain.pem')
 };
 
-const port = process.env.PORT || 443;
 
 // app.use(ipWhitelist);
 // app.use("/user", ipWhitelist, require("./routes/userRoutes"));
@@ -47,6 +46,6 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // });
 
 
-https.createServer(options, app).listen(port, () => {
-  console.log(`HTTPS Server running on port ${port}`);
+https.createServer(options, app).listen(process.env.PORT, () => {
+  console.log(`HTTPS Server running on port ${process.env.PORT}`);
 });
