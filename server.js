@@ -1,8 +1,12 @@
 const express = require("express");
+const https = require('https');
 const cors = require("cors");
 const path = require("path");
 const app = express();
+const fs = require('fs');
+
 app.use(express.json());
+
 // const { scheduleCronJobs } = require('./controllers/nodemail.js');
 //const ipWhitelist = require('./middleware/ipAddress');
 app.use(
@@ -10,6 +14,15 @@ app.use(
     origin: "*",
   })
 );
+
+const options = {
+  key: fs.readFileSync('./ssl/privkey.pem'),
+  cert: fs.readFileSync('./ssl/cert.pem'),
+  ca: fs.readFileSync('./ssl/chain.pem')
+};
+
+const port = process.env.PORT || 443;
+
 // app.use(ipWhitelist);
 // app.use("/user", ipWhitelist, require("./routes/userRoutes"));
 // app.use("/leads", ipWhitelist, require("./routes/leadsRoutes"));
@@ -29,6 +42,11 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // scheduleCronJobs();
 //console.log(process.env.PORT)
-app.listen(process.env.PORT, () => {
-  console.log("Server Running Peacefully");
+// app.listen(process.env.PORT, () => {
+//   console.log("Server Running Peacefully");
+// });
+
+
+https.createServer(options, app).listen(port, () => {
+  console.log(`HTTPS Server running on port ${port}`);
 });
