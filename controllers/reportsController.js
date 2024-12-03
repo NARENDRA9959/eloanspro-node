@@ -9,10 +9,10 @@ const path = require('path');
 const handleGlobalFilters = require("../middleware/filtersHandler");
 const parseNestedJSON = require("../middleware/parseHandler");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
-const {
-    createClauseHandler,
-    updateClauseHandler,
-} = require("../middleware/clauseHandler");
+// const {
+//     createClauseHandler,
+//     updateClauseHandler,
+// } = require("../middleware/clauseHandler");
 const { fetchFIPProcessDistinctLeadIds } = require('../controllers/loginsController');
 const { fetchDistinctApprovedLeadIds } = require('../controllers/loginsController');
 const { fetchDistinctDisbursedLeadIds } = require('../controllers/loginsController');

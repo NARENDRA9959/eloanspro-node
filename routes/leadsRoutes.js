@@ -8,7 +8,7 @@ const {
   updateLead,
   deleteLead,
   getLeadSources,
-  getLeadUsers,
+  // getLeadUsers,
   changeLeadStatus,
   getLeadDocumentsById,
   addDocumentData,
@@ -39,7 +39,7 @@ router
   .route("/:leadId/changestatus/:statusId")
   .put(validateToken, changeLeadStatus);
 
-router.route("/users").get(validateToken, getLeadUsers);
+// router.route("/users").get(validateToken, getLeadUsers);
 
 router
   .route("/documents/:leadId")

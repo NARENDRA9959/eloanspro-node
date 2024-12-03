@@ -12,8 +12,9 @@ const getLeadCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
-      return;
+      // res.status(500).send("Internal Server Error");
+      // return;
+      return res.status(500).send("Error in Fetching the Lead Count");
     }
     const leadCountStatus = result[0].leadCountStatus;
     res.status(200).send(String(leadCountStatus));
@@ -30,8 +31,9 @@ const getCallbackCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
-      return;
+      // res.status(500).send("Internal Server Error");
+      // return;
+      return res.status(500).send("Error in Fetching the Callback Count");
     }
     const callbackCountStatus = result[0].callbackCountStatus;
     res.status(200).send(String(callbackCountStatus));
@@ -50,7 +52,7 @@ const getFilesCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching the Files Count");
       return;
     }
     const filesCountStatus = result[0].filesCountStatus;
@@ -70,7 +72,7 @@ const getRejectedCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching Rejected Count");
       return;
     }
     const rejectsCountStatus = result[0].rejectsCountStatus;
@@ -89,7 +91,7 @@ const getLoginsCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching Logins Count");
       return;
     }
     const loginsCountStatus = result[0].loginsCountStatus;
@@ -109,7 +111,7 @@ const getPartialCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching the Partials Count");
       return;
     }
     const partialCountStatus = result[0].partialCountStatus;
@@ -129,7 +131,7 @@ const getCreditEvaluationCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching Credit Evaluation Count");
       return;
     }
     const creditEvaluationCount = result[0].creditEvaluationCount;
@@ -160,7 +162,7 @@ const getMonthWiseLeadCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching the Month wise Leads Count");
       return;
     }
     const months = result.map(item => `${item.month} ${item.year}`);
@@ -187,7 +189,7 @@ seq DESC; `
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching Monthwise Callback Count");
       return;
     }
     const callbackCounts = result.map(item => item.callbackCount);
@@ -208,7 +210,7 @@ const getPast7DaysLeadCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching past 7 days Lead Count");
       return;
     }
     const past7DaysLeadCount = result[0].leadCount;
@@ -229,7 +231,7 @@ FROM callbacks`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching Past 7 days Callback Count");
       return;
     }
     const past7DaysCallBacksCount = result[0].count;
@@ -263,7 +265,7 @@ FROM leads`;
     (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Error in Fetching Last month Leads Count");
         return;
       }
       const lastMonthLeadCount = result[0].leadCount;
@@ -295,7 +297,7 @@ const getThisMonthLeadCountStatus = asyncHandler(async (req, res) => {
     (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Error in Fetching This month Leads Count");
         return;
       }
       const thisMonthLeadCount = result[0].leadCount;
@@ -331,7 +333,7 @@ const getLastBeforeMonthLeadCountStatus = asyncHandler(async (req, res) => {
     (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Error in Fetching Leads Count");
         return;
       }
       const lastBeforeMonthLeadCount = result[0].leadCount;
@@ -367,7 +369,7 @@ FROM callbacks`;
     (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Error in Fetching last month Callbacks Count");
         return;
       }
       const lastMonthCallBacksCount = result[0].count;
@@ -400,7 +402,7 @@ const getThisMonthCallBacksCount = asyncHandler(async (req, res) => {
     (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Error in Fetching This Month Callbacks Count");
         return;
       }
       const thisMonthCallBacksCount = result[0].count;
@@ -436,7 +438,8 @@ const getTwoMonthsAgoCallBacksCount = asyncHandler(async (req, res) => {
     (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        // res.status(500).send("Internal Server Error");
+        res.status(500).send("Error in Fetching  Callbacks Count");
         return;
       }
       const twoMonthsAgoCallBacksCount = result[0].count;
@@ -475,7 +478,7 @@ const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
     (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Error in Fetching last 6 months Leads Count");
         return;
       }
       const last6MonthsLeadCountList = result[0].leadCount
@@ -512,7 +515,7 @@ const getLast6MonthsCallBacksCount = asyncHandler(async (req, res) => {
     (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Error in Fetching last 6 months Callback Count");
         return;
       }
       const last6MonthsCallBacksCount = result[0].count;
@@ -542,7 +545,7 @@ const getLastYearLeadCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, [lastYearStartDate, lastYearEndDate], (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching last year Leads Count");
       return;
     }
     const lastYearLeadCount = result[0].leadCount;
@@ -571,7 +574,7 @@ const getLastYearCallBacksCount = asyncHandler(async (req, res) => {
   dbConnect.query(sql, [lastYearStartDate, lastYearEndDate], (err, result) => {
     if (err) {
       console.error("Error:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching last year Callbacks Count");
       return;
     }
     const lastYearCallBacksCount = result[0].count;
@@ -614,7 +617,7 @@ const getSanctionedAmount = asyncHandler(async (req, res) => {
     (err, result) => {
       if (err) {
         console.error("Error:", err);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Error in Fetching Month Wise Sanctioned Amount");
         return;
       }
       const totalSanctionedAmount = result[0].totalSanctionedAmount;
@@ -639,16 +642,27 @@ async function fetchLeadIds(req) {
   });
 }
 const currentDate = new Date();
+// const lastMonthStartDate = moment(new Date(
+//   currentDate.getFullYear(),
+//   currentDate.getMonth() - 1,
+//   1
+// )).format('MM/DD/YYYY');
+// const lastMonthEndDate = moment(new Date(
+//   currentDate.getFullYear(),
+//   currentDate.getMonth(),
+//   0
+// )).format('MM/DD/YYYY');
+
 const lastMonthStartDate = moment(new Date(
   currentDate.getFullYear(),
   currentDate.getMonth() - 1,
   1
-)).format('MM/DD/YYYY');
+)).format('YYYY-MM-DD');
 const lastMonthEndDate = moment(new Date(
   currentDate.getFullYear(),
   currentDate.getMonth(),
   0
-)).format('MM/DD/YYYY');
+)).format('YYYY-MM-DD');
 
 const getuserLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
   try {
@@ -672,7 +686,7 @@ const getuserLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
       (err, result) => {
         if (err) {
           console.error("Error:", err);
-          res.status(500).send("Internal Server Error");
+          res.status(500).send("Error in Fetching Sanctioned Amount");
           return;
         }
         const totalSanctionedAmount = result[0].totalSanctionedAmount;
@@ -681,7 +695,7 @@ const getuserLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
     );
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("Error In Fetching the Sanctioned Amount");
   }
 });
 
@@ -708,7 +722,7 @@ const getuserLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
       (err, result) => {
         if (err) {
           console.error("Error:", err);
-          res.status(500).send("Internal Server Error");
+          res.status(500).send("Error in Fetching Disbursed Amount");
           return;
         }
         const totalDisbursedAmount = result[0].totalDisbursedAmount;
@@ -717,19 +731,30 @@ const getuserLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
     );
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send(" Error in Fetching Disbursed Amount");
   }
 });
+// const currentMonthStartDate = moment(new Date(
+//   currentDate.getFullYear(),
+//   currentDate.getMonth(),
+//   1
+// )).format('MM/DD/YYYY');
+// const currentMonthEndDate = moment(new Date(
+//   currentDate.getFullYear(),
+//   currentDate.getMonth() + 1,
+//   0
+// )).format('MM/DD/YYYY');
+
 const currentMonthStartDate = moment(new Date(
   currentDate.getFullYear(),
   currentDate.getMonth(),
   1
-)).format('MM/DD/YYYY');
+)).format('YYYY-MM-DD');
 const currentMonthEndDate = moment(new Date(
   currentDate.getFullYear(),
   currentDate.getMonth() + 1,
   0
-)).format('MM/DD/YYYY');
+)).format('YYYY-MM-DD');
 
 const getuserCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
   try {
@@ -753,7 +778,7 @@ const getuserCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
       (err, result) => {
         if (err) {
           console.error("Error:", err);
-          res.status(500).send("Internal Server Error");
+          res.status(500).send("Error in Fetching Sanctioned Amount");
           return;
         }
         const totalSanctionedAmount = result[0].totalSanctionedAmount;
@@ -762,7 +787,7 @@ const getuserCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
     );
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("Error in Fetching Sanctioned Amount");
   }
 });
 
@@ -789,7 +814,7 @@ const getuserCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
       (err, result) => {
         if (err) {
           console.error("Error:", err);
-          res.status(500).send("Internal Server Error");
+          res.status(500).send("Error in Fetching Disbursed Amount");
           return;
         }
         const totalDisbursedAmount = result[0].totalDisbursedAmount;
@@ -798,20 +823,31 @@ const getuserCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
     );
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("Error in Fetching Disbursed Amount");
   }
 });
+
+// const lastLastMonthStartDate = moment(new Date(
+//   currentDate.getFullYear(),
+//   currentDate.getMonth() - 2,
+//   1
+// )).format('MM/DD/YYYY');
+// const lastLastMonthEndDate = moment(new Date(
+//   currentDate.getFullYear(),
+//   currentDate.getMonth() - 1,
+//   0
+// )).format('MM/DD/YYYY');
 
 const lastLastMonthStartDate = moment(new Date(
   currentDate.getFullYear(),
   currentDate.getMonth() - 2,
   1
-)).format('MM/DD/YYYY');
+)).format('YYYY-MM-DD');
 const lastLastMonthEndDate = moment(new Date(
   currentDate.getFullYear(),
   currentDate.getMonth() - 1,
   0
-)).format('MM/DD/YYYY');
+)).format('YYYY-MM-DD');
 
 const getuserLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
   try {
@@ -835,7 +871,7 @@ const getuserLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
       (err, result) => {
         if (err) {
           console.error("Error:", err);
-          res.status(500).send("Internal Server Error");
+          res.status(500).send("Error in Fetching  Sanctioned Amount");
           return;
         }
         const totalSanctionedAmount = result[0].totalSanctionedAmount;
@@ -844,7 +880,7 @@ const getuserLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
     );
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("Error in Fetching Sanctioned Amount");
   }
 });
 
@@ -871,7 +907,7 @@ const getuserLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
       (err, result) => {
         if (err) {
           console.error("Error:", err);
-          res.status(500).send("Internal Server Error");
+          res.status(500).send("Error in Fetching Disbursed Amount");
           return;
         }
         const totalDisbursedAmount = result[0].totalDisbursedAmount;
@@ -880,21 +916,32 @@ const getuserLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
     );
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("Error in Fetching Disbursed Amount");
   }
 });
 
+
+// const twoMonthsAgoStartDate = moment(new Date(
+//   currentDate.getFullYear(),
+//   currentDate.getMonth() - 3,
+//   1
+// )).format('MM/DD/YYYY');
+// const twoMonthsEgoEndDate = moment(new Date(
+//   currentDate.getFullYear(),
+//   currentDate.getMonth() - 2,
+//   0
+// )).format('MM/DD/YYYY');
 
 const twoMonthsAgoStartDate = moment(new Date(
   currentDate.getFullYear(),
   currentDate.getMonth() - 3,
   1
-)).format('MM/DD/YYYY');
+)).format('YYYY-MM-DD');
 const twoMonthsEgoEndDate = moment(new Date(
   currentDate.getFullYear(),
   currentDate.getMonth() - 2,
   0
-)).format('MM/DD/YYYY');
+)).format('YYYY-MM-DD');
 
 const getuserTwoMonthsAgoSanctionedAmount = asyncHandler(async (req, res) => {
   try {
@@ -918,7 +965,7 @@ const getuserTwoMonthsAgoSanctionedAmount = asyncHandler(async (req, res) => {
       (err, result) => {
         if (err) {
           console.error("Error:", err);
-          res.status(500).send("Internal Server Error");
+          res.status(500).send("Error in Fetching Sanctioned Amount");
           return;
         }
         const totalSanctionedAmount = result[0].totalSanctionedAmount;
@@ -927,7 +974,7 @@ const getuserTwoMonthsAgoSanctionedAmount = asyncHandler(async (req, res) => {
     );
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("Error in Fetching Sanctioned Amount");
   }
 });
 
@@ -954,7 +1001,7 @@ const getuserTwoMonthsAgoDisbursedAmount = asyncHandler(async (req, res) => {
       (err, result) => {
         if (err) {
           console.error("Error:", err);
-          res.status(500).send("Internal Server Error");
+          res.status(500).send("Error in Fetching Disbursed Amount");
           return;
         }
         const totalDisbursedAmount = result[0].totalDisbursedAmount;
@@ -963,7 +1010,7 @@ const getuserTwoMonthsAgoDisbursedAmount = asyncHandler(async (req, res) => {
     );
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("Error in Fetching Disbursed Amount");
   }
 });
 module.exports = {

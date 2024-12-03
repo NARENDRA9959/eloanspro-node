@@ -85,7 +85,7 @@ const getDistinctLeads = asyncHandler(async (req, res) => {
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error fetching leads:", err);
-        res.status(500).json({ error: "Error fetching leads" });
+        res.status(500).send("Error In Fetching Leads");
         return;
       }
       result = parseNestedJSON(result);
@@ -93,7 +93,7 @@ const getDistinctLeads = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Error in getDistinctLeads function:", error);
-    res.status(500).json({ error: "Error in getDistinctLeads function" });
+    res.status(500).send("Error in Fetching Distinct Leads");
   }
 });
 async function fetchDistinctLeadIds() {
@@ -124,7 +124,7 @@ const getDistinctLeadCount = asyncHandler(async (req, res) => {
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
         console.error("Error counting leads:", err);
-        res.status(500).json({ error: "Error counting leads" });
+        res.status(500).send("Error in Fetching the Distinct Lead Counts");
         return;
       }
       const count = countResult[0].count;
@@ -132,7 +132,7 @@ const getDistinctLeadCount = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Error in countDistinctLeads function:", error);
-    res.status(500).json({ error: "Error in countDistinctLeads function" });
+    res.status(500).send("Error in Fetching Distinct Leads");
   }
 });
 
@@ -151,7 +151,8 @@ const getApprovedLeadCount = asyncHandler(async (req, res) => {
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
         console.error("Error counting approved leads:", err);
-        res.status(500).json({ error: "Error counting approved leads" });
+        res.status(500).send("Error in Fetching the Approved Lead Counts");
+        // res.status(500).json({ error: "Error counting approved leads" });
         return;
       }
       const count = countResult[0].count;
@@ -159,7 +160,7 @@ const getApprovedLeadCount = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Error in countApprovedLeads function:", error);
-    res.status(500).json({ error: "Error in countApprovedLeads function" });
+    res.status(500).send("Error in Fetching Approval Leads");
   }
 });
 const getDisbursalLeadCount = asyncHandler(async (req, res) => {
@@ -177,7 +178,8 @@ const getDisbursalLeadCount = asyncHandler(async (req, res) => {
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
         console.error("Error counting disbursal leads:", err);
-        res.status(500).json({ error: "Error counting disbursal leads" });
+        res.status(500).send("Error in Fetching the Disbursal Lead Counts");
+        // res.status(500).json({ error: "Error counting disbursal leads" });
         return;
       }
       const count = countResult[0].count;
@@ -185,7 +187,7 @@ const getDisbursalLeadCount = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Error in countDisbursalLeads function:", error);
-    res.status(500).json({ error: "Error in countDisbursalLeads function" });
+    res.status(500).send("Error in Fetching Disbursal Leads");
   }
 });
 const getFIPDetailsById = asyncHandler((req, res) => {
@@ -194,7 +196,8 @@ const getFIPDetailsById = asyncHandler((req, res) => {
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getLoginDetailsById error in controller:", err);
-      return res.status(500).json({ error: "Error fetching login details" });
+      return res.status(500).send("Error in Fetching Details");
+      // return res.status(500).json({ error: "Error fetching login details" });
     }
     result = result.map(parseNestedJSON);
     res.status(200).json(result);
@@ -213,7 +216,8 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getApprovalsDetailsById error in controller:", err);
-      return res.status(500).json({ error: "Error fetching login details" });
+      return res.status(500).send("Error in Fetching Approval Details");
+      // return res.status(500).json({ error: "Error fetching login details" });
     }
     result = result.map(parseNestedJSON);
     res.status(200).json(result);
@@ -230,7 +234,8 @@ const getDisbursalsDetailsById = asyncHandler((req, res) => {
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getDisbursalsDetailsById error in controller:", err);
-      return res.status(500).json({ error: "Error fetching login details" });
+      return res.status(500).send("Error in Fetching Disbursal Details");
+      // return res.status(500).json({ error: "Error fetching login details" });
     }
     result = result.map(parseNestedJSON);
     res.status(200).json(result);
@@ -259,7 +264,7 @@ const updateFIPDetails = asyncHandler((req, res) => {
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateApprovalsDetails error in query:", err);
-      return res.status(500).json({ error: "Error updating approval details" });
+      return res.status(500).send("Error in updating File in Process details");
     }
     const leadSumSql = `
       UPDATE leads
@@ -274,7 +279,8 @@ const updateFIPDetails = asyncHandler((req, res) => {
     dbConnect.query(leadSumSql, [leadId, leadId], (sumErr, sumResult) => {
       if (sumErr) {
         console.error("Error updating sanctionedAmount and disbursedAmount in leads table:", sumErr);
-        return res.status(500).json({ error: "Error updating leads table" });
+        return res.status(500).send("Error in updating loginDate in leads");
+        // return res.status(500).json({ error: "Error updating leads table" });
       }
       res.status(200).json({ message: "FIP details updated successfully" });
     });
@@ -300,7 +306,8 @@ const updateRevenueDetails = asyncHandler((req, res) => {
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateRevenueDetails error in query:", err);
-      return res.status(500).json({ error: "Error updating FIP details" });
+      return res.status(500).send("Error in updating Revenue details");
+      // return res.status(500).json({ error: "Error updating FIP details" });
     }
     res.status(200).json({ message: "Revenue details updated successfully" });
   });
@@ -344,7 +351,8 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateApprovalsDetails error in query:", err);
-      return res.status(500).json({ error: "Error updating approval details" });
+      return res.status(500).send("Error in updating Approval details");
+      // return res.status(500).json({ error: "Error updating approval details" });
     }
     const leadSumSql = `
       UPDATE leads
@@ -374,7 +382,8 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
     dbConnect.query(leadSumSql, [leadId, leadId, leadId, leadId, leadId], (sumErr, sumResult) => {
       if (sumErr) {
         console.error("Error updating sanctionedAmount and disbursedAmount in leads table:", sumErr);
-        return res.status(500).json({ error: "Error updating leads table" });
+        return res.status(500).send("Error in updating details in Lead table");
+        // return res.status(500).json({ error: "Error updating leads table" });
       }
       res.status(200).json({ message: "Approval details and leads table updated successfully" });
     });
@@ -397,15 +406,16 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error fetching approval details:", err);
-        res.status(500).json({ error: "Error fetching approval details" });
-        return;
+        return res.status(500).send("Error in Fetching Approvals");
+        // res.status(500).json({ error: "Error fetching approval details" });
+        // return;
       }
       result = parseNestedJSON(result);
       res.status(200).json(result);
     });
   } catch (error) {
     console.error("Error in getApprovalDetails function:", error);
-    res.status(500).json({ error: "Error in getApprovalDetails function" });
+    res.status(500).send("Error in Fetching Approval Leads");
   }
 });
 async function fetchDistinctApprovedLeadIds() {
@@ -442,15 +452,16 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching disbursal details:", err);
-        res.status(500).json({ error: "Error fetching disbursal details" });
-        return;
+        return res.status(500).send("Error in Fetching Disbursal Leads");
+        // res.status(500).json({ error: "Error fetching disbursal details" });
+        // return;
       }
       result = parseNestedJSON(result);
       res.status(200).json(result);
     });
   } catch (error) {
     console.error("Error in getDisbursalLeads function:", error);
-    res.status(500).json({ error: "Error in getDisbursalLeads function" });
+    res.status(500).send("Error in Fetching Disbursal Leads");
   }
 });
 async function fetchDistinctDisbursedLeadIds() {
@@ -496,7 +507,7 @@ const updateDisbursalDetails = asyncHandler((req, res) => {
       console.error("updateDisbursalDetails error in query:", err);
       return res
         .status(500)
-        .json({ error: "Error updating disbursal details" });
+        .send("Error in updating Disbursal Details");
     }
     res.status(200).json({ message: "Disbursal details updated successfully" });
   });
@@ -518,15 +529,16 @@ const getBankRejectsLeads = asyncHandler(async (req, res) => {
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching approval details:", err);
-        res.status(500).json({ error: "Error fetching approval details" });
-        return;
+        return res.status(500).send("Error in Fetching Bank Rejected Leads");
+        // res.status(500).json({ error: "Error fetching approval details" });
+        // return;
       }
       result = parseNestedJSON(result);
       res.status(200).json(result);
     });
   } catch (error) {
     console.error("Error in getApprovalDetails function:", error);
-    res.status(500).json({ error: "Error in getApprovalDetails function" });
+    res.status(500).send("Error in Fetching Leads");
   }
 });
 
@@ -563,15 +575,18 @@ const getBankRejectedLeadCount = asyncHandler(async (req, res) => {
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
         console.error("Error counting bank-rejected leads:", err);
-        res.status(500).json({ error: "Error counting bank-rejected leads" });
-        return;
+        return res.status(500).send("Error in Fetching Bank Rejected Leads Count");
+        // res.status(500).json({ error: "Error counting bank-rejected leads" });
+        // return;
       }
       const count = countResult[0].count;
       res.status(200).send(String(count));
     });
   } catch (error) {
     console.error("Error in countBankRejectedLeads function:", error);
-    res.status(500).json({ error: "Error in countBankRejectedLeads function" });
+    return res.status(500).send("Error in Fetching Leads");
+
+    // res.status(500).json({ error: "Error in countBankRejectedLeads function" });
   }
 });
 const getCNIRejectsLeads = asyncHandler(async (req, res) => {
@@ -590,15 +605,17 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
     dbConnect.query(sql, queryParams, (err, result) => {
       if (err) {
         console.error("Error fetching cni rejected details:", err);
-        res.status(500).json({ error: "Error  getCNIRejectsLeads details" });
-        return;
+        return res.status(500).send("Error in Fetching CNI Rejected Leads");
+        // res.status(500).json({ error: "Error  getCNIRejectsLeads details" });
+        // return;
       }
       result = parseNestedJSON(result);
       res.status(200).json(result);
     });
   } catch (error) {
     console.error("Error in getCNIRejectsLeads function:", error);
-    res.status(500).json({ error: "Error in getCNIRejectsLeads function" });
+    return res.status(500).send("Error in Fetching Leads ");
+    // res.status(500).json({ error: "Error in getCNIRejectsLeads function" });
   }
 });
 
@@ -635,15 +652,18 @@ const getCNIRejectedLeadCount = asyncHandler(async (req, res) => {
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
         console.error("Error counting CNI-rejected leads:", err);
-        res.status(500).json({ error: "Error counting CNI-rejected leads" });
-        return;
+        return res.status(500).send("Error in Fetching CNI Rejected Leads Count");
+        // res.status(500).json({ error: "Error counting CNI-rejected leads" });
+        // return;
       }
       const count = countResult[0].count;
       res.status(200).send(String(count));
     });
   } catch (error) {
     console.error("Error in countCNIRejectedLeads function:", error);
-    res.status(500).json({ error: "Error in countCNIRejectedLeads function" });
+    return res.status(500).send("Error in Fetching Leads");
+
+    // res.status(500).json({ error: "Error in countCNIRejectedLeads function" });
   }
 });
 
@@ -658,9 +678,10 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getBankRejectsDetailsById error in controller:", err);
-      return res
-        .status(500)
-        .json({ error: "Error fetching getBankRejectsDetailsById details" });
+      return res.status(500).send("Error in Fetching Bank Rejects Details");
+      // return res
+      //   .status(500)
+      //   .json({ error: "Error fetching getBankRejectsDetailsById details" });
     }
     result = result.map(parseNestedJSON);
     res.status(200).json(result);
@@ -678,9 +699,10 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
       console.error("getCNIRejectsDetailsById error in controller:", err);
-      return res
-        .status(500)
-        .json({ error: "Error fetching getCNIRejectsDetailsById details" });
+      return res.status(500).send("Error in Fetching CNI Details");
+      // return res
+      //   .status(500)
+      //   .json({ error: "Error fetching getCNIRejectsDetailsById details" });
     }
     result = result.map(parseNestedJSON);
     res.status(200).json(result);
@@ -695,6 +717,7 @@ const getLoginsDoneById = asyncHandler((req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLoginsDoneById Error in controller");
+      return res.status(500).send("Error in Fetching Logins Done Details");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result || {});
@@ -709,7 +732,7 @@ const getLoginsDoneCount = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("Error in getUsersCount:", err);
-      res.status(500).send("Internal Server Error");
+      res.status(500).send("Error in Fetching Logins Done Count");
     } else {
       const loginsDone = result[0]["loginsDone"];
       res.status(200).send(String(loginsDone));
@@ -726,9 +749,8 @@ const getTotalSanctionedAmountSum = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getTotalSanctionedAmountSum error:", err);
-      return res.status(500).send("Error retrieving sanctioned amount sum");
+      return res.status(500).send("Error in Fetching Sanctioned Amount ");
     }
-
     const totalSanctionedAmount = result[0].total_sanctioned_amount;
     res.status(200).json({ totalSanctionedAmount });
   });
@@ -742,7 +764,7 @@ const getTotalDisbursedAmountSum = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getTotalSanctionedAmountSum error:", err);
-      return res.status(500).send("Error retrieving sanctioned amount sum");
+      return res.status(500).send("Error in Fetching Disbursed Amount");
     }
     const totalDisbursedAmount = result[0].total_disbursed_amount;
     res.status(200).json({ totalDisbursedAmount });
@@ -783,7 +805,7 @@ const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error fetching leads:", err);
-        res.status(500).json({ error: "Error fetching leads" });
+        res.status(500).send("Error in Fetching Files in Process leads");
         return;
       }
       result = parseNestedJSON(result);
@@ -791,7 +813,8 @@ const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Error in getFIPProcessDistinctLeads function:", error);
-    res.status(500).json({ error: "Error in getFIPProcessDistinctLeads function" });
+    return res.status(500).send("Error in Fetching Leads ");
+    // res.status(500).json({ error: "Error in getFIPProcessDistinctLeads function" });
   }
 });
 const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
@@ -809,14 +832,16 @@ const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
     dbConnect.query(sql, (err, result) => {
       if (err) {
         console.error("Error counting leads:", err);
-        res.status(500).json({ error: "Error counting leads" });
-        return;
+        return res.status(500).send("Error in Fetching Files in Process Count");
+        // res.status(500).json({ error: "Error counting leads" });
+        // return;
       }
       res.status(200).send(String(result[0].count));
     });
   } catch (error) {
     console.error("Error in countFIPProcessDistinctLeads function:", error);
-    res.status(500).json({ error: "Error in countFIPProcessDistinctLeads function" });
+    return res.status(500).send("Error in Fetching Leads Count");
+    // res.status(500).json({ error: "Error in countFIPProcessDistinctLeads function" });
   }
 });
 

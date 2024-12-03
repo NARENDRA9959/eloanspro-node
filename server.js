@@ -40,7 +40,7 @@ app.use("/ipAddress", require("./routes/ipAddressRoutes.js"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // scheduleCronJobs();
-//console.log(process.env.PORT)
+// console.log(process.env.PORT)
 // app.listen(process.env.PORT, () => {
 //   console.log("Server Running Peacefully");
 // });

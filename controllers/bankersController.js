@@ -16,6 +16,7 @@ const getBankersCount = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getBankersCount error");
+      return res.status(500).send("Error in Fetching the Lenders Count");
     }
     const bankersCount = result[0]["bankersCount"];
     res.status(200).send(String(bankersCount));
@@ -32,6 +33,7 @@ const getNewBankersCount = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getBankersCount error");
+      return res.status(500).send("Error in Fetching the New Lenders Count");
     }
     const bankersCount = result[0]["bankersCount"];
     res.status(200).send(String(bankersCount));
@@ -46,6 +48,7 @@ const getBankers = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getBankers error:");
+      return res.status(500).send("Error in Fetching the Lenders");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
@@ -75,6 +78,7 @@ const getBankersById = asyncHandler((req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getBankersById error:");
+      return res.status(500).send("Error in Fetching the Lender Details");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result[0]);
@@ -92,7 +96,7 @@ const createBanker = asyncHandler((req, res) => {
     dbConnect.query(checkSql, [req.body.name], (checkErr, checkResult) => {
       if (checkErr) {
         console.error("createBanker check error:", checkErr);
-        return res.status(500).send({ error: "Database check error" });
+        return res.status(500).send("Error in Checking the Lender");
       }
       if (checkResult.length > 0) {
         return res.status(400).send("Bank name already exists!!!");
@@ -102,14 +106,14 @@ const createBanker = asyncHandler((req, res) => {
       dbConnect.query(insertSql, (err, result) => {
         if (err) {
           console.error("createBanker insertion error:", err);
-          return res.status(500).send({ error: "Database insertion error" });
+          return res.status(500).send("Error in Creating the Lender");
         }
         res.status(200).send(true);
       });
     });
   } catch (error) {
     console.error("createBanker unexpected error:", error);
-    res.status(500).send({ error: "Unexpected server error" });
+    res.status(500).send("Error in Creating the Lender");
   }
 });
 
@@ -125,6 +129,7 @@ const updateBanker = asyncHandler((req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("updateBanker error:");
+      return res.status(500).send("Error in Updating the Lender");
     }
     res.status(200).send(result);
   });
@@ -137,6 +142,7 @@ const changeBankersStatus = asyncHandler((req, res) => {
   dbConnect.query(createSql, (err, result) => {
     if (err) {
       console.log("changeBankersStatus error:");
+      return res.status(500).send("Error in Updating the Lender");
     }
     if (result && result[0] && statusId) {
       let statusData = {
@@ -148,6 +154,7 @@ const changeBankersStatus = asyncHandler((req, res) => {
       dbConnect.query(sql, (err, result) => {
         if (err) {
           console.log("changeBankersStatus and updatecalss error:");
+          return res.status(500).send("Error in Updating the Lender Status");
         }
         res.status(200).send(true);
       });

@@ -8,7 +8,7 @@ const {
 } = require("../middleware/clauseHandler");
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
-
+const { getSourceName } = require('../controllers/leadsController');
 const getCallBacksCount = asyncHandler(async (req, res) => {
   let sql = "SELECT count(*) as callBacksCount FROM callbacks";
   const filtersQuery = handleGlobalFilters(req.query, true);
@@ -16,6 +16,7 @@ const getCallBacksCount = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getCallBacksCount error");
+      return res.status(500).send("Error in Fetching the Callbacks Count");
     }
     const callBacksCount = result[0]["callBacksCount"];
     res.status(200).send(String(callBacksCount));
@@ -31,6 +32,7 @@ const getCallBacks = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getCallBacks error:");
+      return res.status(500).send("Error in Fetching the Callbacks");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
@@ -42,6 +44,7 @@ const getCallBackById = asyncHandler((req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getCallBackById error:");
+      return res.status(500).send("Error in Fetching the Callback Details");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result[0]);
@@ -49,21 +52,33 @@ const getCallBackById = asyncHandler((req, res) => {
 });
 
 
-const createCallBack = asyncHandler((req, res) => {
+const createCallBack = asyncHandler(async (req, res) => {
   const phoneNumber = req.body.phone;
   const checkPhoneQuery = `SELECT * FROM callbacks WHERE phone = ?`;
-  dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
+  dbConnect.query(checkPhoneQuery, [phoneNumber], async (err, result) => {
     if (err) {
       console.error("Error checking phone number:", err);
-      res.status(500).json({ error: "Internal server error" });
+      return res.status(500).send("Error in Checking Phone Number");
+      // res.status(500).json({ error: "Internal server error" });
     } else {
       if (result.length > 0) {
         const callback = result[0];
-        res
-          .status(500)
-          .send(
-            `Callback already exists with phone number ${phoneNumber}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
+        // res
+        //   .status(500)
+        //   .send(
+        //     `Callback already exists with phone number ${phoneNumber}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
+        //   );
+        try {
+          const sourcedByName = await getSourceName(callback.sourcedBy);
+          return res.status(400).send(
+            `Callback already exists with phone number ${phoneNumber}, 
+           Callback ID - ${callback.callBackId}, Business Name - ${callback.businessName}, 
+           Created By - ${callback.createdBy},  Sourced By - ${sourcedByName}`
           );
+        } catch (error) {
+          console.error("Error fetching sourcedBy name:", error);
+          return res.status(500).send("Error fetching sourcedBy name");
+        }
       } else {
         let callBackId = "C-" + generateRandomNumber(6);
         req.body["callBackId"] = callBackId;
@@ -76,6 +91,7 @@ const createCallBack = asyncHandler((req, res) => {
         dbConnect.query(sql, (err, result) => {
           if (err) {
             console.log("createCallBack error:");
+            return res.status(500).send("Error in Creating the Callback");
           }
           res.status(200).send(true);
         });
@@ -84,7 +100,7 @@ const createCallBack = asyncHandler((req, res) => {
   });
 });
 
-const updateCallBack = asyncHandler((req, res) => {
+const updateCallBack = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const { phone } = req.body;
   const checkRequiredFields = handleRequiredFields("callbacks", req.body);
@@ -92,25 +108,38 @@ const updateCallBack = asyncHandler((req, res) => {
     return res.status(422).send("Please fill all required fields");
   }
   const checkPhoneQuery = `SELECT * FROM callbacks WHERE phone = ? AND id != ?`;
-  dbConnect.query(checkPhoneQuery, [phone, id], (err, result) => {
+  dbConnect.query(checkPhoneQuery, [phone, id], async (err, result) => {
     if (err) {
       console.error("Error checking phone number:", err);
-      return res.status(500).json({ error: "Internal server error" });
+      return res.status(500).send("Error in Checking Phone Number");
+      // return res.status(500).json({ error: "Internal server error" });
     }
     if (result.length > 0) {
       const callback = result[0];
-      return res
-        .status(409)
-        .send(
-          `Callback already exists with phone number ${phone}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
+      // return res
+      //   .status(409)
+      //   .send(
+      //     `Callback already exists with phone number ${phone}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
+      //   );
+      try {
+        const sourcedByName = await getSourceName(callback.sourcedBy);
+        return res.status(400).send(
+          `Callback already exists with phone number ${phone}, 
+         Callback ID - ${callback.callBackId}, Business Name - ${callback.businessName}, 
+         Created By - ${callback.createdBy},  Sourced By - ${sourcedByName}`
         );
+      } catch (error) {
+        console.error("Error fetching sourcedBy name:", error);
+        return res.status(500).send("Error fetching sourcedBy name");
+      }
     }
     const updateClause = updateClauseHandler(req.body);
     const updateSql = `UPDATE callbacks SET ${updateClause} WHERE id = ?`;
     dbConnect.query(updateSql, [id], (updateErr, updateResult) => {
       if (updateErr) {
         console.error("updateCallBack error:", updateErr);
-        return res.status(500).send("Internal server error");
+        return res.status(500).send("Error in Updating the Callback");
+        // return res.status(500).send("Internal server error");
       }
       return res.status(200).send(updateResult);
     });
@@ -125,6 +154,7 @@ const changeCallbackStatus = asyncHandler((req, res) => {
   dbConnect.query(createSql, (err, result) => {
     if (err) {
       console.log("changeCallbackStatus error:");
+      return res.status(500).send("Error in Updating the Callback");
     }
     if (result && result[0] && statusId) {
       let statusData = {
@@ -136,6 +166,7 @@ const changeCallbackStatus = asyncHandler((req, res) => {
       dbConnect.query(sql, (err, result) => {
         if (err) {
           console.log("changeCallbackStatus and updatecalss error:");
+          return res.status(500).send("Error in Updating the Callback Status");
         }
         res.status(200).send(true);
       });

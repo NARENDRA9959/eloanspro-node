@@ -24,6 +24,7 @@ const getLeadsCount = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLeadsCount error in controller");
+      return res.status(500).send("Error in Fetching the Leads Count");
     }
     const leadsCount = result[0]["leadsCount"];
     res.status(200).send(String(leadsCount));
@@ -39,6 +40,7 @@ const getLeads = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLeads Error in controller");
+      return res.status(500).send("Error in Fetching the Leads");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
@@ -52,29 +54,31 @@ const getLeadSources = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLeadUSoucres error in controller");
+      return res.status(500).send("Error in Fetching the Lead Sources");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
   });
 });
 
-const getLeadUsers = asyncHandler(async (req, res) => {
-  let sql = "SELECT * FROM users";
-  const filtersQuery = handleGlobalFilters(req.query);
-  sql += filtersQuery;
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.log("getLeadUsers error in controller");
-    }
-    result = parseNestedJSON(result);
-    res.status(200).send(result);
-  });
-});
+// const getLeadUsers = asyncHandler(async (req, res) => {
+//   let sql = "SELECT * FROM user";
+//   const filtersQuery = handleGlobalFilters(req.query);
+//   sql += filtersQuery;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("getLeadUsers error in controller");
+//     }
+//     result = parseNestedJSON(result);
+//     res.status(200).send(result);
+//   });
+// });
 const getLeadById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM leads WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLeadById error in controller");
+      return res.status(500).send("Error in Fetching the Lead Details");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
@@ -86,6 +90,7 @@ const getLeadDocumentsById = asyncHandler((req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("getLeadDocumentsById Error in controller");
+      return res.status(500).send("Error in Fetching the Lead Documents");
     }
     result = parseNestedJSON(result);
     res.status(200).send(result[0] || {});
@@ -99,6 +104,7 @@ const addDocumentData = asyncHandler((req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.log("addDocumentData error in controller");
+      return res.status(500).send("Error in Adding the Documents");
     }
     res.status(200).send({ success: "Documents Saved Successfully" });
   });
@@ -329,30 +335,93 @@ const searchLeads = asyncHandler(async (req, res) => {
   });
 });
 
-const createLead = asyncHandler((req, res) => {
+
+async function fetchTeamData() {
+  const sql = `
+    SELECT *
+    FROM users;
+  `;
+  return new Promise((resolve, reject) => {
+    dbConnect.query(sql, (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    });
+  });
+}
+
+const getSourceName = async (userId) => {
+  try {
+    const teamData = await fetchTeamData();
+    const teamMember = teamData.find((member) => member.id == userId);
+    console.log(teamMember)
+    return teamMember ? teamMember.name : "";
+  } catch (error) {
+    console.error("Error getting sourcedBy names:", error);
+    throw error;
+  }
+};
+// const createLead = asyncHandler(async (req, res) => {
+//   const phoneNumber = req.body.primaryPhone;
+//   if (req.user.userType == 1) {
+//     createNewLead(req, res);
+//   } else {
+//     const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
+//     dbConnect.query(checkPhoneQuery, [phoneNumber], async (err, result) => {
+//       if (err) {
+//         console.error("Error checking phone number:", err);
+//         return res.status(500).send("Error in Checking Phone Number");
+//       } else {
+//         if (result.length > 0) {
+//           const lead = result[0];
+//           try {
+//             const sourcedByName = await getSourceName(lead.sourcedBy);
+//             res.status(500).send(
+//               `Lead already exists with phone number ${phoneNumber}, 
+//               Lead id - ${lead.id}, Business Name - ${lead.businessName}, 
+//               created by - ${lead.createdBy}, sourced By - ${sourcedByName}`
+//             );
+//           } catch (error) {
+//             console.error("Error fetching sourcedBy name:", error);
+//             res.status(500).send("Error fetching sourcedBy name");
+//           }
+//         } else {
+//           createNewLead(req, res);
+//         }
+//       }
+//     });
+//   }
+// });
+
+const createLead = asyncHandler(async (req, res) => {
   const phoneNumber = req.body.primaryPhone;
   if (req.user.userType == 1) {
-    createNewLead(req, res);
-  } else {
-    const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
-    dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
-      if (err) {
-        console.error("Error checking phone number:", err);
-        res.status(500).json({ error: "Internal server error" });
-      } else {
-        if (result.length > 0) {
-          const lead = result[0];
-          res
-            .status(500)
-            .send(
-              `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}, Buisness Name - ${lead.businessName}`
-            );
-        } else {
-          createNewLead(req, res);
-        }
-      }
-    });
+    return createNewLead(req, res);
   }
+  const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
+  dbConnect.query(checkPhoneQuery, [phoneNumber], async (err, result) => {
+    if (err) {
+      console.error("Error checking phone number:", err);
+      return res.status(500).send("Error in checking phone number");
+    }
+    if (result.length > 0) {
+      const lead = result[0];
+      try {
+        const sourcedByName = await getSourceName(lead.sourcedBy);
+        return res.status(400).send(
+          `Lead already exists with phone number ${phoneNumber}, 
+          Lead ID - ${lead.id}, Business Name - ${lead.businessName}, 
+          Created By - ${lead.createdBy}, Sourced By - ${sourcedByName}`
+        );
+      } catch (error) {
+        console.error("Error fetching sourcedBy name:", error);
+        return res.status(500).send("Error fetching sourcedBy name");
+      }
+    }
+    createNewLead(req, res);
+  });
 });
 
 function createNewLead(req, res) {
@@ -377,28 +446,58 @@ function createNewLead(req, res) {
 }
 
 
-const createLeadFromCallback = asyncHandler((req, res) => {
+// const createLeadFromCallback = asyncHandler((req, res) => {
+//   const phoneNumber = req.body.primaryPhone;
+//   if (req.user.userType == 1) {
+//     createNewLeadFromCallback(req, res);
+//   } else {
+//     const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
+//     dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
+//       if (err) {
+//         console.error("Error checking phone number:", err);
+//         res.status(500).json({ error: "Internal server error" });
+//       } else {
+//         if (result.length > 0) {
+//           const lead = result[0];
+//           res.status(500).send(
+//             `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}, Business Name - ${lead.businessName}`
+//           );
+//         } else {
+//           createNewLeadFromCallback(req, res);
+//         }
+//       }
+//     });
+//   }
+// });
+
+
+const createLeadFromCallback = asyncHandler(async (req, res) => {
   const phoneNumber = req.body.primaryPhone;
   if (req.user.userType == 1) {
-    createNewLeadFromCallback(req, res);
-  } else {
-    const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
-    dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
-      if (err) {
-        console.error("Error checking phone number:", err);
-        res.status(500).json({ error: "Internal server error" });
-      } else {
-        if (result.length > 0) {
-          const lead = result[0];
-          res.status(500).send(
-            `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}, Business Name - ${lead.businessName}`
-          );
-        } else {
-          createNewLeadFromCallback(req, res);
-        }
-      }
-    });
+    return createNewLeadFromCallback(req, res);
   }
+  const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
+  dbConnect.query(checkPhoneQuery, [phoneNumber], async (err, result) => {
+    if (err) {
+      console.error("Error checking phone number:", err);
+      return res.status(500).send("Error in Checking the Phone Number");
+    }
+    if (result.length > 0) {
+      const lead = result[0];
+      try {
+        const sourcedByName = await getSourceName(lead.sourcedBy);
+        return res.status(400).send(
+          `Lead already exists with phone number ${phoneNumber}, 
+         Lead ID - ${lead.id}, Business Name - ${lead.businessName}, 
+         Created By - ${lead.createdBy},  Sourced By - ${sourcedByName}`
+        );
+      } catch (error) {
+        console.error("Error fetching sourcedBy name:", error);
+        return res.status(500).send("Error fetching sourcedBy name");
+      }
+    }
+    createNewLeadFromCallback(req, res);
+  });
 });
 
 function createNewLeadFromCallback(req, res) {
@@ -422,36 +521,115 @@ function createNewLeadFromCallback(req, res) {
     res.status(200).json({ id: id });
   });
 }
-const updateLead = asyncHandler((req, res) => {
+// const updateLead = asyncHandler((req, res) => {
+//   const id = req.params.id;
+//   const { primaryPhone } = req.body;
+//   const checkRequiredFields = handleRequiredFields("leads", req.body);
+//   if (!checkRequiredFields) {
+//     return res.status(422).send("Please fill all required fields");
+//   }
+//   const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ? AND id != ?`;
+//   dbConnect.query(checkPhoneQuery, [primaryPhone, id], (err, result) => {
+//     if (err) {
+//       console.error("Error checking phone number:", err);
+//       return res.status(500).json({ error: "Internal server error" });
+//     }
+//     if (result.length > 0) {
+//       const lead = result[0];
+//       return res
+//         .status(409)
+//         .send(
+//           `Lead already exists with phone number ${primaryPhone}, created by - ${lead.createdBy}, Lead ID - ${lead.id}, Business Name - ${lead.businessName}`
+//         );
+//     }
+//     const updateClause = updateClauseHandler(req.body);
+//     const updateSql = `UPDATE leads SET ${updateClause} WHERE id = ?`;
+//     dbConnect.query(updateSql, [id], (updateErr, updateResult) => {
+//       if (updateErr) {
+//         console.error("updateLead error in controller:", updateErr);
+//         return res.status(500).send("Internal server error");
+//       }
+//       return res.status(200).send(updateResult);
+//     });
+//   });
+// });
+
+
+function updateNewLead(req, res) {
   const id = req.params.id;
-  const { primaryPhone } = req.body;
+  const updateClause = updateClauseHandler(req.body);
+  const updateSql = `UPDATE leads SET ${updateClause} WHERE id = ?`;
+  dbConnect.query(updateSql, [id], (updateErr, updateResult) => {
+    if (updateErr) {
+      console.error("updateLead error in controller:", updateErr);
+      return res.status(500).send("Error in Updating the Lead");
+    }
+    return res.status(200).send(updateResult);
+  });
+}
+// const updateLead = asyncHandler((req, res) => {
+//   const checkRequiredFields = handleRequiredFields("leads", req.body);
+//   if (!checkRequiredFields) {
+//     return res.status(422).send("Please fill all required fields");
+//   }
+//   if (req.user.userType == 1) {
+//     updateNewLead(req, res);
+//   } else {
+//     const { primaryPhone } = req.body;
+//     const id = req.params.id;
+//     const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ? AND id != ?`;
+//     dbConnect.query(checkPhoneQuery, [primaryPhone, id], (err, result) => {
+//       if (err) {
+//         console.error("Error checking phone number:", err);
+//         return res.status(500).send("Error in Checking The Phone Number");
+//       }
+//       if (result.length > 0) {
+//         const lead = result[0];
+//         res
+//           .status(409)
+//           .send(
+//             `Lead already exists with phone number ${primaryPhone}, created by - ${lead.createdBy}, Lead ID - ${lead.id}, Business Name - ${lead.businessName}`
+//           );
+//       } else {
+//         updateNewLead(req, res);
+//       }
+//     });
+//   }
+// });
+
+
+
+const updateLead = asyncHandler(async (req, res) => {
   const checkRequiredFields = handleRequiredFields("leads", req.body);
   if (!checkRequiredFields) {
     return res.status(422).send("Please fill all required fields");
   }
+  if (req.user.userType == 1) {
+    return updateNewLead(req, res);
+  }
+  const { primaryPhone } = req.body;
+  const id = req.params.id;
   const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ? AND id != ?`;
-  dbConnect.query(checkPhoneQuery, [primaryPhone, id], (err, result) => {
+  dbConnect.query(checkPhoneQuery, [primaryPhone, id], async (err, result) => {
     if (err) {
       console.error("Error checking phone number:", err);
-      return res.status(500).json({ error: "Internal server error" });
+      return res.status(500).send("Error in checking the phone number");
     }
     if (result.length > 0) {
       const lead = result[0];
-      return res
-        .status(409)
-        .send(
-          `Lead already exists with phone number ${primaryPhone}, created by - ${lead.createdBy}, Lead ID - ${lead.id}, Business Name - ${lead.businessName}`
+      try {
+        const sourcedByName = await getSourceName(lead.sourcedBy);
+        return res.status(400).send(
+          `Lead already exists with phone number ${primaryPhone}, 
+         Lead ID - ${lead.id}, Business Name - ${lead.businessName}, 
+         Created By - ${lead.createdBy},  Sourced By - ${sourcedByName}`
         );
-    }
-    const updateClause = updateClauseHandler(req.body);
-    const updateSql = `UPDATE leads SET ${updateClause} WHERE id = ?`;
-    dbConnect.query(updateSql, [id], (updateErr, updateResult) => {
-      if (updateErr) {
-        console.error("updateLead error in controller:", updateErr);
-        return res.status(500).send("Internal server error");
+      } catch (error) {
+        console.error("Error fetching sourcedBy name:", error);
+        return res.status(500).send("Error fetching sourcedBy name");
       }
-      return res.status(200).send(updateResult);
-    });
+    }
+    updateNewLead(req, res);
   });
 });
 
@@ -472,6 +650,7 @@ const changeLeadStatus = asyncHandler((req, res) => {
   dbConnect.query(createSql, (err, result) => {
     if (err) {
       console.log("changeLeadStatus error in controller");
+      return res.status(500).send("Error in Checking The Lead");
     }
     if (result && result[0] && statusId) {
       let statusData = {
@@ -483,6 +662,7 @@ const changeLeadStatus = asyncHandler((req, res) => {
       dbConnect.query(sql, (err, result) => {
         if (err) {
           console.log("changeLeadStatus error in controller");
+          return res.status(500).send("Error in Updating The Lead Status");
         }
         res.status(200).send(true);
       });
@@ -511,7 +691,7 @@ const getCreditSummary = asyncHandler(async (req, res) => {
 module.exports = {
   getLeads,
   getLeadSources,
-  getLeadUsers,
+  // getLeadUsers,
   getCreditSummary,
   getLeadsCount,
   getLeadById,
@@ -528,5 +708,6 @@ module.exports = {
   calculateDscrRatio,
   calculateBTOProgram,
   searchLeads,
-  createLeadFromCallback
+  createLeadFromCallback,
+  getSourceName
 };

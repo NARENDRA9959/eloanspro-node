@@ -17,6 +17,7 @@ const getloanLeadsCount = asyncHandler(async (req, res) => {
     dbConnect.query(sql, (err, result) => {
         if (err) {
             console.log("getloanLeadsCount error in controller");
+            return res.status(500).send("Error in fetching the Loan Leads Count");
         }
         const leadsCount = result[0]["leadsCount"];
         res.status(200).send(String(leadsCount));
@@ -32,6 +33,7 @@ const getloanLeads = asyncHandler(async (req, res) => {
     dbConnect.query(sql, (err, result) => {
         if (err) {
             console.log("getloanLeads Error in controller");
+            return res.status(500).send("Error in fetching the Loan Leads");
         }
         result = parseNestedJSON(result);
         res.status(200).send(result);
@@ -43,6 +45,7 @@ const getLoanLeadById = asyncHandler((req, res) => {
     dbConnect.query(sql, (err, result) => {
         if (err) {
             console.log("getLoanLeadById error in controller");
+            return res.status(500).send("Error in fetching the Loan Lead Details");
         }
         result = parseNestedJSON(result);
         res.status(200).send(result);
@@ -63,7 +66,8 @@ const createLoanLead = asyncHandler((req, res) => {
     dbConnect.query(checkPhoneQuery, (err, result) => {
         if (err) {
             console.error("Error checking phone number:", err);
-            res.status(500).json({ error: "Internal server error" });
+            return res.status(500).send("Error in checking phone number");
+            // res.status(500).json({ error: "Internal server error" });
         } else {
             if (result.length > 0) {
                 const lead = result[0];
@@ -83,6 +87,7 @@ const createLoanLead = asyncHandler((req, res) => {
                 dbConnect.query(sql, (err, result) => {
                     if (err) {
                         console.log("createLoanLead error:");
+                        return res.status(500).send("Error in creating the Loan Lead");
                     }
                     res.status(200).send(true);
                 });
@@ -111,7 +116,7 @@ const updateLoanLead = asyncHandler((req, res) => {
     dbConnect.query(checkPhoneQuery, [primaryPhone, id], (err, result) => {
         if (err) {
             console.error("Error checking phone number:", err);
-            return res.status(500).json({ error: "Internal server error" });
+            return res.status(500).send("Error in Checking the Phone Number");
         }
         if (result.length > 0) {
             const lead = result[0];
@@ -126,7 +131,8 @@ const updateLoanLead = asyncHandler((req, res) => {
         dbConnect.query(updateSql, [id], (updateErr, updateResult) => {
             if (updateErr) {
                 console.error("updateLoanLead error in controller:", updateErr);
-                return res.status(500).send("Internal server error");
+                return res.status(500).send("Error in updating the Loan Lead");
+                // return res.status(500).send("Internal server error");
             }
             return res.status(200).send(updateResult);
         });
@@ -150,6 +156,7 @@ const changeLoanLeadStatus = asyncHandler((req, res) => {
     dbConnect.query(createSql, (err, result) => {
         if (err) {
             console.log("changeLeadStatus error in controller");
+            return res.status(500).send("Error in Finding the Lead Id");
         }
         if (result && result[0] && statusId) {
             let statusData = {
@@ -161,6 +168,7 @@ const changeLoanLeadStatus = asyncHandler((req, res) => {
             dbConnect.query(sql, (err, result) => {
                 if (err) {
                     console.log("changeLoanLeadStatus error in controller");
+                    return res.status(500).send("Error in updating the Loan Lead Status");
                 }
                 res.status(200).send(true);
             });
@@ -177,6 +185,7 @@ const addLoanLeadsDocumentData = asyncHandler((req, res) => {
     dbConnect.query(sql, (err, result) => {
         if (err) {
             console.log("addLoanLeadsDocumentData error in controller");
+            return res.status(500).send("Error in updating the Loan Leads Document  Details");
         }
         res.status(200).send({ success: "Documents Saved Successfully" });
     });

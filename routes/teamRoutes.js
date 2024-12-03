@@ -6,7 +6,7 @@ const {
   updateUsers,
   getUsersById,
   getUsers,
-  changeUsersStatus,
+  // changeUsersStatus,
   getUsersCount,
   getUserRoles,
   updateUserStatus,
@@ -21,9 +21,9 @@ router.route("/").get(validateToken, getUsers).post(validateToken, createUsers);
 router.route("/total").get(validateToken, getUsersCount);
 router.route("/activeCount").get(validateToken, getActiveUsersCount);
 
-router
-  .route("/:userId/changestatus/:statusId")
-  .put(validateToken, changeUsersStatus);
+// router
+//   .route("/:userId/changestatus/:statusId")
+//   .put(validateToken, changeUsersStatus);
 
 router.route("/userroles").get(validateToken, getUserRoles);
 router.route("/active").get(validateToken, getActiveUsers);
