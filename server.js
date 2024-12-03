@@ -44,8 +44,6 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // app.listen(process.env.PORT, () => {
 //   console.log("Server Running Peacefully");
 // });
-
-
 https.createServer(options, app).listen(process.env.PORT, () => {
   console.log(`HTTPS Server running on port ${process.env.PORT}`);
 });
