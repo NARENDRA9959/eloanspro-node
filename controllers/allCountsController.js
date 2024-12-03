@@ -676,8 +676,8 @@ const getuserLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
     COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
   FROM logins
   WHERE fipStatus = 'approved'
-    AND approvalDate >= '?'
-    AND approvalDate <= '?'
+    AND approvalDate >= ?
+    AND approvalDate <= ?
     AND leadId IN (${placeholders})
     `;
     dbConnect.query(
@@ -712,8 +712,8 @@ const getuserLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
       FROM logins
       WHERE fipStatus = 'approved'
         AND approvedStatus = 'disbursed'
-        AND disbursalDate >= '?'
-        AND disbursalDate <= '?'
+        AND disbursalDate >= ?
+        AND disbursalDate <= ?
         AND leadId IN (${placeholders})
     `;
     dbConnect.query(
@@ -768,8 +768,8 @@ const getuserCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
       COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
     FROM logins
     WHERE fipStatus = 'approved'
-      AND approvalDate >= '?'
-      AND approvalDate <= '?'
+      AND approvalDate >= ?
+      AND approvalDate <= ?
       AND leadId IN (${placeholders})
   `;
     console.log(currentMonthStartDate)
@@ -807,8 +807,8 @@ const getuserCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
   FROM logins
   WHERE fipStatus = 'approved'
         AND approvedStatus = 'disbursed'
-        AND disbursalDate >= '?'
-        AND disbursalDate <= '?'
+        AND disbursalDate >= ?
+        AND disbursalDate <= ?
         AND leadId IN (${placeholders})
     `;
     dbConnect.query(
@@ -863,8 +863,8 @@ const getuserLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
       COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
     FROM logins
     WHERE fipStatus = 'approved'
-      AND approvalDate >= '?'
-      AND approvalDate <= '?'
+      AND approvalDate >= ?
+      AND approvalDate <= ?
       AND leadId IN (${placeholders})
   `;
     // console.log(sql)
@@ -900,8 +900,8 @@ const getuserLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
     FROM logins
     WHERE fipStatus = 'approved'
       AND approvedStatus = 'disbursed'
-      AND disbursalDate >= '?'
-      AND disbursalDate <= '?'
+      AND disbursalDate >= ?
+      AND disbursalDate <= ?
       AND leadId IN (${placeholders})
     `;
     dbConnect.query(
@@ -958,8 +958,8 @@ const getuserTwoMonthsAgoSanctionedAmount = asyncHandler(async (req, res) => {
       COALESCE(SUM(sanctionedAmount), 0) AS totalSanctionedAmount
     FROM logins
     WHERE fipStatus = 'approved'
-      AND approvalDate >= '?'
-      AND approvalDate <= '?'
+      AND approvalDate >= ?
+      AND approvalDate <= ?
       AND leadId IN (${placeholders})
   `;
     dbConnect.query(
@@ -994,8 +994,8 @@ const getuserTwoMonthsAgoDisbursedAmount = asyncHandler(async (req, res) => {
     FROM logins
     WHERE fipStatus = 'approved'
       AND approvedStatus = 'disbursed'
-      AND disbursalDate >= '?'
-      AND disbursalDate <= '?'
+      AND disbursalDate >= ?
+      AND disbursalDate <= ?
       AND leadId IN (${placeholders})
     `;
     dbConnect.query(
