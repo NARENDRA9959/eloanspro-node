@@ -14,6 +14,7 @@ const {
     exportCallbacks,
     getReports,
     getReportsCount,
+    exportloginFiles
 } = require("../controllers/reportsController");
 const validateToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
@@ -26,6 +27,7 @@ router.route("/exportCNIdetails").get(validateToken, exportCNILeadDetails);
 router.route("/exportSanctionDetails").get(validateToken, exportSanctionDetails);
 router.route("/exportDisbursalDetails").get(validateToken, exportDisbursalDetails);
 router.route("/exportloginsDoneDetails").get(validateToken, exportloginsDoneDetails);
+router.route("/exportloginfiles").get(validateToken, exportloginFiles);
 router.route("/exportLeads").get(validateToken, exportLeads);
 router.route("/exportCallbacks").get(validateToken, exportCallbacks);
 router.route("/reportsdata").get(validateToken, getReports);

@@ -587,7 +587,6 @@ const exportCNILeads = asyncHandler(async (req, res) => {
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'CNIFiles1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
-
     dbConnect.query(sql, async (err, result) => {
         if (err) {
             console.error("Error exporting leads: ", err);
@@ -864,6 +863,7 @@ const exportloginsDoneDetails = asyncHandler(async (req, res) => {
         try {
             for (let i = 0; i < result.length; i++) {
                 result[i].createdOn = moment(result[i].createdOn).format('YYYY-MM-DD');
+                result[i].loginDate = moment(result[i].loginDate).format('YYYY-MM-DD');
             }
             result = parseNestedJSON(result);
             if (!fs.existsSync(uploadDirectory)) {
@@ -1066,6 +1066,217 @@ const getReportsCount = asyncHandler(async (req, res) => {
         }
     });
 });
+
+// const exportloginFiles = asyncHandler(async (req, res) => {
+//     let reportId = "R-" + generateRandomNumber(6);
+//     let sql = `SELECT * FROM logins
+//   `;
+//     const queryParams = req.query;
+//     queryParams["sort"] = "leadId";
+//     const filtersQuery = handleGlobalFilters(queryParams);
+//     sql += filtersQuery;
+//     console.log(sql);
+//     const uploadDirectory = path.join(__dirname, '../excelFiles');
+//     const excelFileName = 'loginFiles1.xlsx';
+//     const excelFilePath = path.join(uploadDirectory, excelFileName);
+//     dbConnect.query(sql, async (err, result) => {
+//         if (err) {
+//             console.error("Error exporting leads: ", err);
+//             res.status(500).json({ error: "Internal server error" });
+//             return;
+//         }
+//         try {
+//             // for (let i = 0; i < result.length; i++) {
+//             //     result[i].approvalDate = moment(result[i].approvalDate).format('YYYY-MM-DD');
+//             //     result[i].disbursalDate = moment(result[i].disbursalDate).format('YYYY-MM-DD');
+//             //     result[i].loginDate = moment(result[i].loginDate).format('YYYY-MM-DD');
+//             // }
+//             for (let i = 0; i < result.length; i++) {
+//                 result[i].approvalDate = result[i].approvalDate ? moment(result[i].approvalDate).format('YYYY-MM-DD') : result[i].approvalDate;
+//                 result[i].disbursalDate = result[i].disbursalDate ? moment(result[i].disbursalDate).format('YYYY-MM-DD') : result[i].disbursalDate;
+//                 result[i].loginDate = result[i].loginDate ? moment(result[i].loginDate).format('YYYY-MM-DD') : result[i].loginDate;
+//             }
+//             result = parseNestedJSON(result);
+//             if (!fs.existsSync(uploadDirectory)) {
+//                 fs.mkdirSync(uploadDirectory, { recursive: true });
+//             }
+//             const workbook = new ExcelJS.Workbook();
+//             const worksheet = workbook.addWorksheet('loginFiles');
+//             worksheet.columns = projectConstantsLocal.LOGIN_FILES_COLUMNS;
+//             worksheet.addRows(result);
+//             await workbook.xlsx.writeFile(excelFilePath);
+//             console.log("Excel file created successfully at", excelFilePath);
+//             const fileContent = fs.readFileSync(excelFilePath);
+//             const FormData = require('form-data');
+//             const formData = new FormData();
+//             formData.append('files', fileContent, {
+//                 filename: excelFileName,
+//                 contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+//             });
+//             const type = 'LOGINFILES';
+//             const leadId = 'REPORTS';
+//             const url = `https://files.thefintalk.in/files?type=${type}&leadId=${leadId}`;
+//             const response = await axios.post(url, formData, {
+//                 headers: {
+//                     ...formData.getHeaders(),
+//                 },
+//             });
+//             if (response.status === 200) {
+//                 if (response.data && response.data.links && response.data.links.length > 0) {
+//                     const fileUrl = response.data.links[0];
+//                     const fileUrlArray = JSON.stringify([fileUrl]);
+//                     const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
+//                     const values = [reportId, type, fileUrlArray];
+//                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
+//                         if (insertErr) {
+//                             console.error("Error inserting report URL into the database:", insertErr);
+//                             res.status(500).json({ error: "Internal server error" });
+//                             return;
+//                         }
+//                         console.log("Report URL inserted successfully into the database");
+//                         res.status(200).json({
+//                             success: true,
+//                             message: 'File uploaded successfully',
+//                             fileUrl: fileUrl,
+//                         });
+//                     });
+//                 } else {
+//                     console.warn("Server returned 200 status but no file URL in response.");
+//                     res.status(500).json({ error: "Upload succeeded but no file URL returned" });
+//                 }
+//             } else {
+//                 console.error("Error uploading file:", response.data);
+//                 res.status(500).json({ error: "Error uploading file" });
+//             }
+//         } catch (error) {
+//             console.error("Error processing leads:", error);
+//             res.status(500).json({ error: "Internal server error" });
+//         } finally {
+//             cleanup(uploadDirectory, excelFilePath);
+//         }
+//     });
+// });
+
+const exportloginFiles = asyncHandler(async (req, res) => {
+    let reportId = "R-" + generateRandomNumber(6);
+    const queryParams = req.query;
+    // queryParams["sort"] = "leadId";
+    const sourcedByFilter = queryParams["sourcedBy-eq"];
+    let leadIds = [];
+    if (sourcedByFilter) {
+        const leadsSql = `SELECT id FROM leads WHERE sourcedBy = ${dbConnect.escape(sourcedByFilter)}`;
+        console.log(leadsSql);
+        const [leadsErr, leadsResult] = await new Promise((resolve) => {
+            dbConnect.query(leadsSql, (err, result) => resolve([err, result]));
+        });
+        if (leadsErr) {
+            console.error("Error fetching leads:", leadsErr);
+            res.status(500).json({ error: "Internal server error" });
+            return;
+        }
+        leadIds = leadsResult.map((lead) => lead.id);
+        if (leadIds.length === 0) {
+            res.status(200).send(
+                "No leads found for the given filter");
+            return;
+        }
+    }
+    const filteredQueryParams = { ...queryParams };
+    delete filteredQueryParams["sourcedBy-eq"];
+    let sql = `SELECT * FROM logins`;
+    const filtersQuery = handleGlobalFilters(filteredQueryParams);
+    sql += filtersQuery;
+    if (leadIds.length > 0) {
+        if (!filtersQuery.includes('WHERE')) {
+            sql += ' WHERE';
+        } else {
+            sql += ' AND';
+        }
+        sql += ` leadId IN (${leadIds.map((id) => dbConnect.escape(id)).join(',')})`;
+    }
+    sql += ` ORDER BY leadId DESC`;
+    console.log("Final SQL Query:", sql);
+    const uploadDirectory = path.join(__dirname, '../excelFiles');
+    const excelFileName = 'loginFiles1.xlsx';
+    const excelFilePath = path.join(uploadDirectory, excelFileName);
+    dbConnect.query(sql, async (err, result) => {
+        if (err) {
+            console.error("Error exporting leads:", err);
+            res.status(500).json({ error: "Internal server error" });
+            return;
+        }
+        try {
+            for (let i = 0; i < result.length; i++) {
+                result[i].approvalDate = result[i].approvalDate
+                    ? moment(result[i].approvalDate).format('YYYY-MM-DD')
+                    : result[i].approvalDate;
+                result[i].disbursalDate = result[i].disbursalDate
+                    ? moment(result[i].disbursalDate).format('YYYY-MM-DD')
+                    : result[i].disbursalDate;
+                result[i].loginDate = result[i].loginDate
+                    ? moment(result[i].loginDate).format('YYYY-MM-DD')
+                    : result[i].loginDate;
+            }
+            result = parseNestedJSON(result);
+            if (!fs.existsSync(uploadDirectory)) {
+                fs.mkdirSync(uploadDirectory, { recursive: true });
+            }
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('loginFiles');
+            worksheet.columns = projectConstantsLocal.LOGIN_FILES_COLUMNS;
+            worksheet.addRows(result);
+            await workbook.xlsx.writeFile(excelFilePath);
+            console.log("Excel file created successfully at", excelFilePath);
+            const fileContent = fs.readFileSync(excelFilePath);
+            const FormData = require('form-data');
+            const formData = new FormData();
+            formData.append('files', fileContent, {
+                filename: excelFileName,
+                contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            });
+            const type = 'LOGINFILES';
+            const leadId = 'REPORTS';
+            const url = `https://files.thefintalk.in/files?type=${type}&leadId=${leadId}`;
+            const response = await axios.post(url, formData, {
+                headers: {
+                    ...formData.getHeaders(),
+                },
+            });
+            if (response.status === 200) {
+                if (response.data && response.data.links && response.data.links.length > 0) {
+                    const fileUrl = response.data.links[0];
+                    const fileUrlArray = JSON.stringify([fileUrl]);
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
+                    const values = [reportId, type, fileUrlArray];
+                    dbConnect.query(insertSql, values, (insertErr, insertResult) => {
+                        if (insertErr) {
+                            console.error("Error inserting report URL into the database:", insertErr);
+                            res.status(500).json({ error: "Internal server error" });
+                            return;
+                        }
+                        console.log("Report URL inserted successfully into the database");
+                        res.status(200).json({
+                            success: true,
+                            message: 'File uploaded successfully',
+                            fileUrl: fileUrl,
+                        });
+                    });
+                } else {
+                    console.warn("Server returned 200 status but no file URL in response.");
+                    res.status(500).json({ error: "Upload succeeded but no file URL returned" });
+                }
+            } else {
+                console.error("Error uploading file:", response.data);
+                res.status(500).json({ error: "Error uploading file" });
+            }
+        } catch (error) {
+            console.error("Error processing leads:", error);
+            res.status(500).json({ error: "Internal server error" });
+        } finally {
+            cleanup(uploadDirectory, excelFilePath);
+        }
+    });
+});
 module.exports = {
     exportFilesInProcess,
     exportApprovalLeads,
@@ -1079,5 +1290,6 @@ module.exports = {
     exportCallbacks,
     getReports,
     getReportsCount,
-    exportCNILeadDetails
+    exportCNILeadDetails,
+    exportloginFiles
 };

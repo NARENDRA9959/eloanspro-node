@@ -670,7 +670,7 @@ const getCNIRejectedLeadCount = asyncHandler(async (req, res) => {
 const getBankRejectsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
   const sql = `
-  SELECT id, program, bankName, fipStatus, fipRemarks 
+  SELECT id, program, bankName, loginDate, fipStatus, fipRemarks 
     FROM logins
     WHERE leadId = ? AND fipStatus = 'rejected'
   `;
@@ -691,7 +691,7 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
 const getCNIRejectsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
   const sql = `
-  SELECT id,approvalDate, lan, program, bankName,sanctionedAmount, roi, fipStatus, fipRemarks, approvedStatus, approvedRemarks
+  SELECT id,approvalDate, lan, program, bankName, loginDate, sanctionedAmount, roi, fipStatus, fipRemarks, approvedStatus, approvedRemarks
     FROM logins
     WHERE leadId = ? AND (approvedStatus = 'cnis' OR fipStatus = 'hold')
   `;
