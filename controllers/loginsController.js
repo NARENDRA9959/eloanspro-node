@@ -225,6 +225,11 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
 });
 const getDisbursalsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
+  // const sql = `
+  // SELECT id, businessName, approvalDate, disbursalDate, lan, program, bankName, bankId, processCode, productType,productTypeName, sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule, payoutValue, revenueValue
+  //   FROM logins
+  //   WHERE leadId = ? AND approvedStatus = 'disbursed' AND fipStatus='approved'
+  // `;
   const sql = `
   SELECT id, businessName, approvalDate, disbursalDate, lan, program, bankName, bankId, processCode, productType,productTypeName, sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule, payoutValue, revenueValue
     FROM logins

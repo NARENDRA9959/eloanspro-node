@@ -7,7 +7,9 @@ const userLogin = asyncHandler(async (req, res) => {
   if (!username || !password) {
     res.status(400).send("Please Enter Username and Password");
   }
-  const sql = `SELECT * FROM users WHERE email = "${username}" OR name = "${username}"`;
+  //const sql = `SELECT * FROM users WHERE email = "${username}" OR name = "${username}"`;
+  const sql = `SELECT * FROM users WHERE (email = "${username}" OR name = "${username}") AND status = "Active"`;
+  console.log(sql)
   dbConnect.query(sql, async (err, result) => {
     if (err) {
       console.log("adminlogin error in controller");
