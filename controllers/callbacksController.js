@@ -59,15 +59,9 @@ const createCallBack = asyncHandler(async (req, res) => {
     if (err) {
       console.error("Error checking phone number:", err);
       return res.status(500).send("Error in Checking Phone Number");
-      // res.status(500).json({ error: "Internal server error" });
     } else {
       if (result.length > 0) {
         const callback = result[0];
-        // res
-        //   .status(500)
-        //   .send(
-        //     `Callback already exists with phone number ${phoneNumber}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
-        //   );
         try {
           const sourcedByName = await getSourceName(callback.sourcedBy);
           return res.status(400).send(
@@ -112,15 +106,9 @@ const updateCallBack = asyncHandler(async (req, res) => {
     if (err) {
       console.error("Error checking phone number:", err);
       return res.status(500).send("Error in Checking Phone Number");
-      // return res.status(500).json({ error: "Internal server error" });
     }
     if (result.length > 0) {
       const callback = result[0];
-      // return res
-      //   .status(409)
-      //   .send(
-      //     `Callback already exists with phone number ${phone}, created by - ${callback.createdBy}, callback id - ${callback.callBackId}, Buisness Name - ${callback.businessName}`
-      //   );
       try {
         const sourcedByName = await getSourceName(callback.sourcedBy);
         return res.status(400).send(
@@ -139,7 +127,6 @@ const updateCallBack = asyncHandler(async (req, res) => {
       if (updateErr) {
         console.error("updateCallBack error:", updateErr);
         return res.status(500).send("Error in Updating the Callback");
-        // return res.status(500).send("Internal server error");
       }
       return res.status(200).send(updateResult);
     });

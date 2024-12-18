@@ -62,18 +62,6 @@ const getLeadSources = asyncHandler(async (req, res) => {
   });
 });
 
-// const getLeadUsers = asyncHandler(async (req, res) => {
-//   let sql = "SELECT * FROM user";
-//   const filtersQuery = handleGlobalFilters(req.query);
-//   sql += filtersQuery;
-//   dbConnect.query(sql, (err, result) => {
-//     if (err) {
-//       console.log("getLeadUsers error in controller");
-//     }
-//     result = parseNestedJSON(result);
-//     res.status(200).send(result);
-//   });
-// });
 const getLeadById = asyncHandler((req, res) => {
   const sql = `SELECT * FROM leads WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
@@ -367,37 +355,6 @@ const getSourceName = async (userId) => {
     throw error;
   }
 };
-// const createLead = asyncHandler(async (req, res) => {
-//   const phoneNumber = req.body.primaryPhone;
-//   if (req.user.userType == 1) {
-//     createNewLead(req, res);
-//   } else {
-//     const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
-//     dbConnect.query(checkPhoneQuery, [phoneNumber], async (err, result) => {
-//       if (err) {
-//         console.error("Error checking phone number:", err);
-//         return res.status(500).send("Error in Checking Phone Number");
-//       } else {
-//         if (result.length > 0) {
-//           const lead = result[0];
-//           try {
-//             const sourcedByName = await getSourceName(lead.sourcedBy);
-//             res.status(500).send(
-//               `Lead already exists with phone number ${phoneNumber}, 
-//               Lead id - ${lead.id}, Business Name - ${lead.businessName}, 
-//               created by - ${lead.createdBy}, sourced By - ${sourcedByName}`
-//             );
-//           } catch (error) {
-//             console.error("Error fetching sourcedBy name:", error);
-//             res.status(500).send("Error fetching sourcedBy name");
-//           }
-//         } else {
-//           createNewLead(req, res);
-//         }
-//       }
-//     });
-//   }
-// });
 
 const createLead = asyncHandler(async (req, res) => {
   const phoneNumber = req.body.primaryPhone;
@@ -449,32 +406,6 @@ function createNewLead(req, res) {
   });
 }
 
-
-// const createLeadFromCallback = asyncHandler((req, res) => {
-//   const phoneNumber = req.body.primaryPhone;
-//   if (req.user.userType == 1) {
-//     createNewLeadFromCallback(req, res);
-//   } else {
-//     const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ?`;
-//     dbConnect.query(checkPhoneQuery, [phoneNumber], (err, result) => {
-//       if (err) {
-//         console.error("Error checking phone number:", err);
-//         res.status(500).json({ error: "Internal server error" });
-//       } else {
-//         if (result.length > 0) {
-//           const lead = result[0];
-//           res.status(500).send(
-//             `Lead already exists with phone number ${phoneNumber}, created by - ${lead.createdBy}, Lead id - ${lead.id}, Business Name - ${lead.businessName}`
-//           );
-//         } else {
-//           createNewLeadFromCallback(req, res);
-//         }
-//       }
-//     });
-//   }
-// });
-
-
 const createLeadFromCallback = asyncHandler(async (req, res) => {
   const phoneNumber = req.body.primaryPhone;
   if (req.user.userType == 1) {
@@ -525,39 +456,6 @@ function createNewLeadFromCallback(req, res) {
     res.status(200).json({ id: id });
   });
 }
-// const updateLead = asyncHandler((req, res) => {
-//   const id = req.params.id;
-//   const { primaryPhone } = req.body;
-//   const checkRequiredFields = handleRequiredFields("leads", req.body);
-//   if (!checkRequiredFields) {
-//     return res.status(422).send("Please fill all required fields");
-//   }
-//   const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ? AND id != ?`;
-//   dbConnect.query(checkPhoneQuery, [primaryPhone, id], (err, result) => {
-//     if (err) {
-//       console.error("Error checking phone number:", err);
-//       return res.status(500).json({ error: "Internal server error" });
-//     }
-//     if (result.length > 0) {
-//       const lead = result[0];
-//       return res
-//         .status(409)
-//         .send(
-//           `Lead already exists with phone number ${primaryPhone}, created by - ${lead.createdBy}, Lead ID - ${lead.id}, Business Name - ${lead.businessName}`
-//         );
-//     }
-//     const updateClause = updateClauseHandler(req.body);
-//     const updateSql = `UPDATE leads SET ${updateClause} WHERE id = ?`;
-//     dbConnect.query(updateSql, [id], (updateErr, updateResult) => {
-//       if (updateErr) {
-//         console.error("updateLead error in controller:", updateErr);
-//         return res.status(500).send("Internal server error");
-//       }
-//       return res.status(200).send(updateResult);
-//     });
-//   });
-// });
-
 
 function updateNewLead(req, res) {
   const id = req.params.id;
@@ -571,37 +469,6 @@ function updateNewLead(req, res) {
     return res.status(200).send(updateResult);
   });
 }
-// const updateLead = asyncHandler((req, res) => {
-//   const checkRequiredFields = handleRequiredFields("leads", req.body);
-//   if (!checkRequiredFields) {
-//     return res.status(422).send("Please fill all required fields");
-//   }
-//   if (req.user.userType == 1) {
-//     updateNewLead(req, res);
-//   } else {
-//     const { primaryPhone } = req.body;
-//     const id = req.params.id;
-//     const checkPhoneQuery = `SELECT * FROM leads WHERE primaryPhone = ? AND id != ?`;
-//     dbConnect.query(checkPhoneQuery, [primaryPhone, id], (err, result) => {
-//       if (err) {
-//         console.error("Error checking phone number:", err);
-//         return res.status(500).send("Error in Checking The Phone Number");
-//       }
-//       if (result.length > 0) {
-//         const lead = result[0];
-//         res
-//           .status(409)
-//           .send(
-//             `Lead already exists with phone number ${primaryPhone}, created by - ${lead.createdBy}, Lead ID - ${lead.id}, Business Name - ${lead.businessName}`
-//           );
-//       } else {
-//         updateNewLead(req, res);
-//       }
-//     });
-//   }
-// });
-
-
 
 const updateLead = asyncHandler(async (req, res) => {
   const checkRequiredFields = handleRequiredFields("leads", req.body);
@@ -695,7 +562,6 @@ const getCreditSummary = asyncHandler(async (req, res) => {
 module.exports = {
   getLeads,
   getLeadSources,
-  // getLeadUsers,
   getCreditSummary,
   getLeadsCount,
   getLeadById,

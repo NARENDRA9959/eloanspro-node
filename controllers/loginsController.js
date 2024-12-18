@@ -1,6 +1,5 @@
 const asyncHandler = require("express-async-handler");
 const dbConnect = require("../config/dbConnection");
-const moment = require('moment');
 const handleGlobalFilters = require("../middleware/filtersHandler");
 const parseNestedJSON = require("../middleware/parseHandler");
 const {
@@ -152,7 +151,6 @@ const getApprovedLeadCount = asyncHandler(async (req, res) => {
       if (err) {
         console.error("Error counting approved leads:", err);
         res.status(500).send("Error in Fetching the Approved Lead Counts");
-        // res.status(500).json({ error: "Error counting approved leads" });
         return;
       }
       const count = countResult[0].count;
@@ -179,7 +177,6 @@ const getDisbursalLeadCount = asyncHandler(async (req, res) => {
       if (err) {
         console.error("Error counting disbursal leads:", err);
         res.status(500).send("Error in Fetching the Disbursal Lead Counts");
-        // res.status(500).json({ error: "Error counting disbursal leads" });
         return;
       }
       const count = countResult[0].count;
@@ -197,7 +194,6 @@ const getFIPDetailsById = asyncHandler((req, res) => {
     if (err) {
       console.error("getLoginDetailsById error in controller:", err);
       return res.status(500).send("Error in Fetching Details");
-      // return res.status(500).json({ error: "Error fetching login details" });
     }
     result = result.map(parseNestedJSON);
     res.status(200).json(result);
@@ -217,7 +213,6 @@ const getApprovalsDetailsById = asyncHandler((req, res) => {
     if (err) {
       console.error("getApprovalsDetailsById error in controller:", err);
       return res.status(500).send("Error in Fetching Approval Details");
-      // return res.status(500).json({ error: "Error fetching login details" });
     }
     result = result.map(parseNestedJSON);
     res.status(200).json(result);
@@ -231,7 +226,7 @@ const getDisbursalsDetailsById = asyncHandler((req, res) => {
   //   WHERE leadId = ? AND approvedStatus = 'disbursed' AND fipStatus='approved'
   // `;
   const sql = `
-  SELECT id, businessName, approvalDate, disbursalDate, lan, program, bankName, bankId, processCode, productType,productTypeName, sanctionedAmount, disbursedAmount, sanctionedLetter, repaymentSchedule, payoutValue, revenueValue
+  SELECT *
     FROM logins
     WHERE leadId = ? AND approvedStatus = 'disbursed' AND fipStatus='approved'
   `;
@@ -240,7 +235,6 @@ const getDisbursalsDetailsById = asyncHandler((req, res) => {
     if (err) {
       console.error("getDisbursalsDetailsById error in controller:", err);
       return res.status(500).send("Error in Fetching Disbursal Details");
-      // return res.status(500).json({ error: "Error fetching login details" });
     }
     result = result.map(parseNestedJSON);
     res.status(200).json(result);
@@ -285,7 +279,6 @@ const updateFIPDetails = asyncHandler((req, res) => {
       if (sumErr) {
         console.error("Error updating sanctionedAmount and disbursedAmount in leads table:", sumErr);
         return res.status(500).send("Error in updating loginDate in leads");
-        // return res.status(500).json({ error: "Error updating leads table" });
       }
       res.status(200).json({ message: "FIP details updated successfully" });
     });
@@ -312,7 +305,6 @@ const updateRevenueDetails = asyncHandler((req, res) => {
     if (err) {
       console.error("updateRevenueDetails error in query:", err);
       return res.status(500).send("Error in updating Revenue details");
-      // return res.status(500).json({ error: "Error updating FIP details" });
     }
     res.status(200).json({ message: "Revenue details updated successfully" });
   });
@@ -357,7 +349,6 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
     if (err) {
       console.error("updateApprovalsDetails error in query:", err);
       return res.status(500).send("Error in updating Approval details");
-      // return res.status(500).json({ error: "Error updating approval details" });
     }
     const leadSumSql = `
       UPDATE leads
@@ -388,7 +379,6 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
       if (sumErr) {
         console.error("Error updating sanctionedAmount and disbursedAmount in leads table:", sumErr);
         return res.status(500).send("Error in updating details in Lead table");
-        // return res.status(500).json({ error: "Error updating leads table" });
       }
       res.status(200).json({ message: "Approval details and leads table updated successfully" });
     });
@@ -412,8 +402,6 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
       if (err) {
         console.error("Error fetching approval details:", err);
         return res.status(500).send("Error in Fetching Approvals");
-        // res.status(500).json({ error: "Error fetching approval details" });
-        // return;
       }
       result = parseNestedJSON(result);
       res.status(200).json(result);
@@ -458,8 +446,6 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
       if (err) {
         console.error("Error fetching disbursal details:", err);
         return res.status(500).send("Error in Fetching Disbursal Leads");
-        // res.status(500).json({ error: "Error fetching disbursal details" });
-        // return;
       }
       result = parseNestedJSON(result);
       res.status(200).json(result);
@@ -535,8 +521,6 @@ const getBankRejectsLeads = asyncHandler(async (req, res) => {
       if (err) {
         console.error("Error fetching approval details:", err);
         return res.status(500).send("Error in Fetching Bank Rejected Leads");
-        // res.status(500).json({ error: "Error fetching approval details" });
-        // return;
       }
       result = parseNestedJSON(result);
       res.status(200).json(result);
@@ -581,8 +565,6 @@ const getBankRejectedLeadCount = asyncHandler(async (req, res) => {
       if (err) {
         console.error("Error counting bank-rejected leads:", err);
         return res.status(500).send("Error in Fetching Bank Rejected Leads Count");
-        // res.status(500).json({ error: "Error counting bank-rejected leads" });
-        // return;
       }
       const count = countResult[0].count;
       res.status(200).send(String(count));
@@ -590,8 +572,6 @@ const getBankRejectedLeadCount = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("Error in countBankRejectedLeads function:", error);
     return res.status(500).send("Error in Fetching Leads");
-
-    // res.status(500).json({ error: "Error in countBankRejectedLeads function" });
   }
 });
 const getCNIRejectsLeads = asyncHandler(async (req, res) => {
@@ -611,8 +591,6 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
       if (err) {
         console.error("Error fetching cni rejected details:", err);
         return res.status(500).send("Error in Fetching CNI Rejected Leads");
-        // res.status(500).json({ error: "Error  getCNIRejectsLeads details" });
-        // return;
       }
       result = parseNestedJSON(result);
       res.status(200).json(result);
@@ -620,7 +598,6 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("Error in getCNIRejectsLeads function:", error);
     return res.status(500).send("Error in Fetching Leads ");
-    // res.status(500).json({ error: "Error in getCNIRejectsLeads function" });
   }
 });
 
@@ -658,8 +635,6 @@ const getCNIRejectedLeadCount = asyncHandler(async (req, res) => {
       if (err) {
         console.error("Error counting CNI-rejected leads:", err);
         return res.status(500).send("Error in Fetching CNI Rejected Leads Count");
-        // res.status(500).json({ error: "Error counting CNI-rejected leads" });
-        // return;
       }
       const count = countResult[0].count;
       res.status(200).send(String(count));
@@ -667,8 +642,6 @@ const getCNIRejectedLeadCount = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("Error in countCNIRejectedLeads function:", error);
     return res.status(500).send("Error in Fetching Leads");
-
-    // res.status(500).json({ error: "Error in countCNIRejectedLeads function" });
   }
 });
 
@@ -684,9 +657,6 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
     if (err) {
       console.error("getBankRejectsDetailsById error in controller:", err);
       return res.status(500).send("Error in Fetching Bank Rejects Details");
-      // return res
-      //   .status(500)
-      //   .json({ error: "Error fetching getBankRejectsDetailsById details" });
     }
     result = result.map(parseNestedJSON);
     res.status(200).json(result);
@@ -705,9 +675,6 @@ const getCNIRejectsDetailsById = asyncHandler((req, res) => {
     if (err) {
       console.error("getCNIRejectsDetailsById error in controller:", err);
       return res.status(500).send("Error in Fetching CNI Details");
-      // return res
-      //   .status(500)
-      //   .json({ error: "Error fetching getCNIRejectsDetailsById details" });
     }
     result = result.map(parseNestedJSON);
     res.status(200).json(result);
@@ -819,7 +786,6 @@ const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("Error in getFIPProcessDistinctLeads function:", error);
     return res.status(500).send("Error in Fetching Leads ");
-    // res.status(500).json({ error: "Error in getFIPProcessDistinctLeads function" });
   }
 });
 const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
@@ -838,15 +804,12 @@ const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
       if (err) {
         console.error("Error counting leads:", err);
         return res.status(500).send("Error in Fetching Files in Process Count");
-        // res.status(500).json({ error: "Error counting leads" });
-        // return;
       }
       res.status(200).send(String(result[0].count));
     });
   } catch (error) {
     console.error("Error in countFIPProcessDistinctLeads function:", error);
     return res.status(500).send("Error in Fetching Leads Count");
-    // res.status(500).json({ error: "Error in countFIPProcessDistinctLeads function" });
   }
 });
 

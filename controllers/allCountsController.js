@@ -12,8 +12,6 @@ const getLeadCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      // res.status(500).send("Internal Server Error");
-      // return;
       return res.status(500).send("Error in Fetching the Lead Count");
     }
     const leadCountStatus = result[0].leadCountStatus;
@@ -31,8 +29,6 @@ const getCallbackCountStatus = asyncHandler(async (req, res) => {
   dbConnect.query(sql, (err, result) => {
     if (err) {
       console.error("Error:", err);
-      // res.status(500).send("Internal Server Error");
-      // return;
       return res.status(500).send("Error in Fetching the Callback Count");
     }
     const callbackCountStatus = result[0].callbackCountStatus;
@@ -438,7 +434,6 @@ const getTwoMonthsAgoCallBacksCount = asyncHandler(async (req, res) => {
     (err, result) => {
       if (err) {
         console.error("Error:", err);
-        // res.status(500).send("Internal Server Error");
         res.status(500).send("Error in Fetching  Callbacks Count");
         return;
       }
@@ -642,16 +637,6 @@ async function fetchLeadIds(req) {
   });
 }
 const currentDate = new Date();
-// const lastMonthStartDate = moment(new Date(
-//   currentDate.getFullYear(),
-//   currentDate.getMonth() - 1,
-//   1
-// )).format('MM/DD/YYYY');
-// const lastMonthEndDate = moment(new Date(
-//   currentDate.getFullYear(),
-//   currentDate.getMonth(),
-//   0
-// )).format('MM/DD/YYYY');
 
 const lastMonthStartDate = moment(new Date(
   currentDate.getFullYear(),
@@ -734,16 +719,6 @@ const getuserLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
     res.status(500).send(" Error in Fetching Disbursed Amount");
   }
 });
-// const currentMonthStartDate = moment(new Date(
-//   currentDate.getFullYear(),
-//   currentDate.getMonth(),
-//   1
-// )).format('MM/DD/YYYY');
-// const currentMonthEndDate = moment(new Date(
-//   currentDate.getFullYear(),
-//   currentDate.getMonth() + 1,
-//   0
-// )).format('MM/DD/YYYY');
 
 const currentMonthStartDate = moment(new Date(
   currentDate.getFullYear(),
@@ -830,16 +805,6 @@ const getuserCurrentMonthDisbursedAmount = asyncHandler(async (req, res) => {
   }
 });
 
-// const lastLastMonthStartDate = moment(new Date(
-//   currentDate.getFullYear(),
-//   currentDate.getMonth() - 2,
-//   1
-// )).format('MM/DD/YYYY');
-// const lastLastMonthEndDate = moment(new Date(
-//   currentDate.getFullYear(),
-//   currentDate.getMonth() - 1,
-//   0
-// )).format('MM/DD/YYYY');
 
 const lastLastMonthStartDate = moment(new Date(
   currentDate.getFullYear(),
@@ -867,7 +832,6 @@ const getuserLastLastMonthSanctionedAmount = asyncHandler(async (req, res) => {
       AND approvalDate <= ?
       AND leadId IN (${placeholders})
   `;
-    // console.log(sql)
     dbConnect.query(
       sql,
       [lastLastMonthStartDate, lastLastMonthEndDate, ...leadIds],
@@ -923,17 +887,6 @@ const getuserLastLastMonthDisbursedAmount = asyncHandler(async (req, res) => {
   }
 });
 
-
-// const twoMonthsAgoStartDate = moment(new Date(
-//   currentDate.getFullYear(),
-//   currentDate.getMonth() - 3,
-//   1
-// )).format('MM/DD/YYYY');
-// const twoMonthsEgoEndDate = moment(new Date(
-//   currentDate.getFullYear(),
-//   currentDate.getMonth() - 2,
-//   0
-// )).format('MM/DD/YYYY');
 
 const twoMonthsAgoStartDate = moment(new Date(
   currentDate.getFullYear(),

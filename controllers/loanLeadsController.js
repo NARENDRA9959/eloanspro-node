@@ -67,7 +67,6 @@ const createLoanLead = asyncHandler((req, res) => {
         if (err) {
             console.error("Error checking phone number:", err);
             return res.status(500).send("Error in checking phone number");
-            // res.status(500).json({ error: "Internal server error" });
         } else {
             if (result.length > 0) {
                 const lead = result[0];
@@ -132,7 +131,6 @@ const updateLoanLead = asyncHandler((req, res) => {
             if (updateErr) {
                 console.error("updateLoanLead error in controller:", updateErr);
                 return res.status(500).send("Error in updating the Loan Lead");
-                // return res.status(500).send("Internal server error");
             }
             return res.status(200).send(updateResult);
         });
