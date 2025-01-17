@@ -162,17 +162,25 @@ const changeCallbackStatus = asyncHandler((req, res) => {
     }
   });
 });
-
+// const deleteCallBack = asyncHandler((req, res) => {
+//   const sql = `DELETE FROM callbacks WHERE id = ${req.params.id}`;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("deleteCallBack error:");
+//     }
+//     res.status(200).send("Callback Deleted Successfully");
+//   });
+// });
 const deleteCallBack = asyncHandler((req, res) => {
-  const sql = `DELETE FROM callbacks WHERE id = ${req.params.id}`;
+  const sql = `DELETE FROM callbacks WHERE callBackId = '${req.params.id}'`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      console.log("deleteCallBack error:");
+      console.log("deleteCallBack error:", err);
+      return res.status(500).send("Error In Deleting the Callback");
     }
-    res.status(200).send("Callback Deleted Successfully");
+    res.status(200).json({ message: "Callback Deleted Successfully" });
   });
 });
-
 module.exports = {
   getCallBacks,
   getCallBacksCount,

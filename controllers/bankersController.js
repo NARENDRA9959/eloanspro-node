@@ -163,17 +163,25 @@ const changeBankersStatus = asyncHandler((req, res) => {
     }
   });
 });
-
+// const deleteBanker = asyncHandler((req, res) => {
+//   const sql = `DELETE FROM bankers WHERE id = ${req.params.id}`;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("deleteBanker error:");
+//     }
+//     res.status(200).send("Banker Deleted Successfully");
+//   });
+// });
 const deleteBanker = asyncHandler((req, res) => {
-  const sql = `DELETE FROM bankers WHERE id = ${req.params.id}`;
+  const sql = `DELETE FROM bankers WHERE bankerId = '${req.params.id}'`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      console.log("deleteBanker error:");
+      console.log("deleteBanker error:", err);
+      return res.status(500).send("Error In Deleting the Lender");
     }
-    res.status(200).send("Banker Deleted Successfully");
+    res.status(200).json({ message: "Lender Deleted Successfully" });
   });
 });
-
 module.exports = {
   getBankers,
   getBankersCount,

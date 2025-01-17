@@ -813,6 +813,16 @@ const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
   }
 });
 
+const deleteLogin = asyncHandler((req, res) => {
+  const sql = `DELETE FROM logins WHERE id = ${req.params.id}`;
+  dbConnect.query(sql, (err, result) => {
+    if (err) {
+      console.log("deleteLead error:", err);
+      return res.status(500).send("Error In Deleting the Login Lead");
+    }
+    res.status(200).json({ message: "Login Lead Deleted Successfully" });
+  });
+});
 module.exports = {
   createLogin,
   getDistinctLeads,
@@ -845,4 +855,5 @@ module.exports = {
   fetchDistinctBankRejectedLeadIds,
   fetchDistinctCNIRejectedLeadIds,
   getLoginsDoneCount,
+  deleteLogin
 };

@@ -34,7 +34,7 @@ const createUsers = asyncHandler(async (req, res) => {
         return res.status(500).send("Error in Creating User");
       }
       const rbacValues = {
-        1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+        1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups,delete',
         2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
         3: 'leads,callbacks',
         4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
@@ -69,11 +69,9 @@ const updateUsers = asyncHandler(async (req, res) => {
     if (err) {
       console.log("updateUsers error in controller");
       return res.status(500).send("Error in Updating User");
-      // res.status(500).send("Internal Server Error");
-      // return;
     }
     const rbacValues = {
-      1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+      1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups,delete',
       2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
       3: 'leads,callbacks',
       4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
@@ -95,13 +93,24 @@ const updateUsers = asyncHandler(async (req, res) => {
   });
 });
 
+// const deleteUsers = asyncHandler((req, res) => {
+//   const sql = `DELETE FROM users WHERE id = ${req.params.id}`;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("deleteusers error in controller");
+//     }
+//     res.status(200).send("users Deleted Successfully");
+//   });
+// });
+
 const deleteUsers = asyncHandler((req, res) => {
   const sql = `DELETE FROM users WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      console.log("deleteusers error in controller");
+      console.log("deleteUsers error:", err);
+      return res.status(500).send("Error In Deleting the User");
     }
-    res.status(200).send("users Deleted Successfully");
+    res.status(200).json({ message: "User Deleted Successfully" });
   });
 });
 

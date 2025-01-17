@@ -503,14 +503,23 @@ const updateLead = asyncHandler(async (req, res) => {
     updateNewLead(req, res);
   });
 });
-
+// const deleteLead = asyncHandler((req, res) => {
+//   const sql = `DELETE FROM leads WHERE id = ${req.params.id}`;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("deleteLead error in controller");
+//     }
+//     res.status(200).send("Lead Deleted Successfully");
+//   });
+// });
 const deleteLead = asyncHandler((req, res) => {
   const sql = `DELETE FROM leads WHERE id = ${req.params.id}`;
   dbConnect.query(sql, (err, result) => {
     if (err) {
-      console.log("deleteLead error in controller");
+      console.log("deleteLead error:", err);
+      return res.status(500).send("Error In Deleting the Lead");
     }
-    res.status(200).send("Lead Deleted Successfully");
+    res.status(200).json({ message: "Lead Deleted Successfully" });
   });
 });
 

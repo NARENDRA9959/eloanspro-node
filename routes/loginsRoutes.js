@@ -26,7 +26,7 @@ const {
   getTotalSanctionedAmountSum,
   getFIPProcessDistinctLeads,
   getFIPProcessDistinctLeadsCount,
-  
+  deleteLogin
 } = require("../controllers/loginsController");
 const validateToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
@@ -74,4 +74,7 @@ router
   .put(validateToken, updateDisbursalDetails);
 
 router.route("/loginsDone").get(validateToken, getLoginsDoneById);
+router
+  .route("/:id")
+  .delete(validateToken, deleteLogin);
 module.exports = router;
