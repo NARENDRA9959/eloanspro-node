@@ -34,7 +34,7 @@ const createUsers = asyncHandler(async (req, res) => {
         return res.status(500).send("Error in Creating User");
       }
       const rbacValues = {
-        1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups,delete',
+        1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
         2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
         3: 'leads,callbacks',
         4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
@@ -71,7 +71,7 @@ const updateUsers = asyncHandler(async (req, res) => {
       return res.status(500).send("Error in Updating User");
     }
     const rbacValues = {
-      1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups,delete',
+      1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
       2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
       3: 'leads,callbacks',
       4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
