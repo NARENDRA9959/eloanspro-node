@@ -34,7 +34,7 @@ const createUsers = asyncHandler(async (req, res) => {
         return res.status(500).send("Error in Creating User");
       }
       const rbacValues = {
-        1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+        1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups,ipAddress',
         2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
         3: 'leads,callbacks',
         4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
@@ -71,7 +71,7 @@ const updateUsers = asyncHandler(async (req, res) => {
       return res.status(500).send("Error in Updating User");
     }
     const rbacValues = {
-      1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+      1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups,ipAddress',
       2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
       3: 'leads,callbacks',
       4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
@@ -140,9 +140,21 @@ const getUsers = asyncHandler(async (req, res) => {
     res.status(200).send(leadUsersData);
   });
 });
+function fetchUsers() {
+  return new Promise((resolve, reject) => {
+    dbConnect.query("SELECT * FROM users", (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      const leadUsersData = results;
+      resolve(leadUsersData);
+    });
+  });
+}
 const getSourceName = async (userId) => {
   try {
-    const leadUser = leadUsersData.find((user) => user.id == userId);
+    const leadUsers = await fetchUsers();
+    const leadUser = leadUsers.find((user) => user.id == userId);
     return leadUser ? leadUser.name : "";
   } catch (error) {
     console.error("Error getting sourcedBy names:", error);

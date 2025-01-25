@@ -57,7 +57,7 @@ const userLogoutforIp = asyncHandler(async (req, res) => {
     decodedToken,
     process.env.ACCESS_TOKEN_SECRET
   );
-  res.status(419).json({ message: "Logout successful" });
+  res.status(419).send("Access denied. IP not allowed");
   //if ip address based login then return the status 419 
   //and when the first api calls tatus is 419 then stop another api calls 
 });

@@ -78,6 +78,7 @@ module.exports = {
     LOGIN_FILES_COLUMNS: [
       { header: 'Id', key: 'id' },
       { header: 'Lead Id', key: 'leadId' },
+      { header: 'Sourced By', key: 'sourcedBy' },
       { header: 'Business Name', key: 'businessName' },
       { header: 'Lender', key: 'bankName' },
       { header: 'Program', key: 'program' },

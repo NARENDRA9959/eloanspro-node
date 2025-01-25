@@ -4,11 +4,11 @@ const cors = require("cors");
 const path = require("path");
 const app = express();
 const fs = require('fs');
+const ipWhitelist = require('./middleware/ipAddress.js');
 
 app.use(express.json());
 
 // const { scheduleCronJobs } = require('./controllers/nodemail.js');
-//const ipWhitelist = require('./middleware/ipAddress');
 app.use(
   cors({
     origin: "*",
@@ -22,9 +22,6 @@ const options = {
 };
 
 
-// app.use(ipWhitelist);
-// app.use("/user", ipWhitelist, require("./routes/userRoutes"));
-// app.use("/leads", ipWhitelist, require("./routes/leadsRoutes"));
 app.use("/user", require("./routes/userRoutes"));
 app.use("/leads", require("./routes/leadsRoutes"));
 app.use("/loanleads", require("./routes/loanLeadsRoutes.js"));

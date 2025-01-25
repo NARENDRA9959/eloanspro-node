@@ -1110,76 +1110,95 @@ const exportloginFiles = asyncHandler(async (req, res) => {
             res.status(500).json({ error: "Internal server error" });
             return;
         }
-        try {
+        const leadIds = result.map((login) => login.leadId);
+        const leadsSql = `SELECT id, sourcedBy FROM leads WHERE id IN (${leadIds.map((id) => dbConnect.escape(id)).join(',')})`;
+        dbConnect.query(leadsSql, async (leadsErr, leadsResult) => {
+            if (leadsErr) {
+                console.error("Error fetching sourcedBy values:", leadsErr);
+                res.status(500).json({ error: "Internal server error" });
+                return;
+            }
+            const sourcedByMap = {};
+            leadsResult.forEach((lead) => {
+                sourcedByMap[lead.id] = lead.sourcedBy;
+            });
             for (let i = 0; i < result.length; i++) {
-                result[i].approvalDate = result[i].approvalDate
-                    ? moment(result[i].approvalDate).format('YYYY-MM-DD')
-                    : result[i].approvalDate;
-                result[i].disbursalDate = result[i].disbursalDate
-                    ? moment(result[i].disbursalDate).format('YYYY-MM-DD')
-                    : result[i].disbursalDate;
-                result[i].loginDate = result[i].loginDate
-                    ? moment(result[i].loginDate).format('YYYY-MM-DD')
-                    : result[i].loginDate;
+                const login = result[i];
+                const sourcedById = sourcedByMap[login.leadId];
+                login.sourcedBy = await getSourceName(sourcedById); // Add sourcedBy name
             }
-            result = parseNestedJSON(result);
-            if (!fs.existsSync(uploadDirectory)) {
-                fs.mkdirSync(uploadDirectory, { recursive: true });
-            }
-            const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('loginFiles');
-            worksheet.columns = projectConstantsLocal.LOGIN_FILES_COLUMNS;
-            worksheet.addRows(result);
-            await workbook.xlsx.writeFile(excelFilePath);
-            console.log("Excel file created successfully at", excelFilePath);
-            const fileContent = fs.readFileSync(excelFilePath);
-            const FormData = require('form-data');
-            const formData = new FormData();
-            formData.append('files', fileContent, {
-                filename: excelFileName,
-                contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            });
-            const type = 'LOGINFILES';
-            const leadId = 'REPORTS';
-            const url = `https://files.thefintalk.in/files?type=${type}&leadId=${leadId}`;
-            const response = await axios.post(url, formData, {
-                headers: {
-                    ...formData.getHeaders(),
-                },
-            });
-            if (response.status === 200) {
-                if (response.data && response.data.links && response.data.links.length > 0) {
-                    const fileUrl = response.data.links[0];
-                    const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
-                    dbConnect.query(insertSql, values, (insertErr, insertResult) => {
-                        if (insertErr) {
-                            console.error("Error inserting report URL into the database:", insertErr);
-                            res.status(500).json({ error: "Internal server error" });
-                            return;
-                        }
-                        console.log("Report URL inserted successfully into the database");
-                        res.status(200).json({
-                            success: true,
-                            message: 'File uploaded successfully',
-                            fileUrl: fileUrl,
-                        });
-                    });
-                } else {
-                    console.warn("Server returned 200 status but no file URL in response.");
-                    res.status(500).json({ error: "Upload succeeded but no file URL returned" });
+            try {
+                console.log(result)
+                for (let i = 0; i < result.length; i++) {
+                    result[i].approvalDate = result[i].approvalDate
+                        ? moment(result[i].approvalDate).format('YYYY-MM-DD')
+                        : result[i].approvalDate;
+                    result[i].disbursalDate = result[i].disbursalDate
+                        ? moment(result[i].disbursalDate).format('YYYY-MM-DD')
+                        : result[i].disbursalDate;
+                    result[i].loginDate = result[i].loginDate
+                        ? moment(result[i].loginDate).format('YYYY-MM-DD')
+                        : result[i].loginDate;
                 }
-            } else {
-                console.error("Error uploading file:", response.data);
-                res.status(500).json({ error: "Error uploading file" });
+                result = parseNestedJSON(result);
+                if (!fs.existsSync(uploadDirectory)) {
+                    fs.mkdirSync(uploadDirectory, { recursive: true });
+                }
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('loginFiles');
+                worksheet.columns = projectConstantsLocal.LOGIN_FILES_COLUMNS;
+                worksheet.addRows(result);
+                await workbook.xlsx.writeFile(excelFilePath);
+                console.log("Excel file created successfully at", excelFilePath);
+                const fileContent = fs.readFileSync(excelFilePath);
+                const FormData = require('form-data');
+                const formData = new FormData();
+                formData.append('files', fileContent, {
+                    filename: excelFileName,
+                    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                });
+                const type = 'LOGINFILES';
+                const leadId = 'REPORTS';
+                const url = `https://files.thefintalk.in/files?type=${type}&leadId=${leadId}`;
+                const response = await axios.post(url, formData, {
+                    headers: {
+                        ...formData.getHeaders(),
+                    },
+                });
+                if (response.status === 200) {
+                    if (response.data && response.data.links && response.data.links.length > 0) {
+                        const fileUrl = response.data.links[0];
+                        const fileUrlArray = JSON.stringify([fileUrl]);
+                        const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
+                        const values = [reportId, type, fileUrlArray];
+                        dbConnect.query(insertSql, values, (insertErr, insertResult) => {
+                            if (insertErr) {
+                                console.error("Error inserting report URL into the database:", insertErr);
+                                res.status(500).json({ error: "Internal server error" });
+                                return;
+                            }
+                            console.log("Report URL inserted successfully into the database");
+                            res.status(200).json({
+                                success: true,
+                                message: 'File uploaded successfully',
+                                fileUrl: fileUrl,
+                            });
+                        });
+                    } else {
+                        console.warn("Server returned 200 status but no file URL in response.");
+                        res.status(500).json({ error: "Upload succeeded but no file URL returned" });
+                    }
+                } else {
+                    console.error("Error uploading file:", response.data);
+                    res.status(500).json({ error: "Error uploading file" });
+                }
+            } catch (error) {
+                console.error("Error processing leads:", error);
+                res.status(500).json({ error: "Internal server error" });
+            } finally {
+                cleanup(uploadDirectory, excelFilePath);
             }
-        } catch (error) {
-            console.error("Error processing leads:", error);
-            res.status(500).json({ error: "Internal server error" });
-        } finally {
-            cleanup(uploadDirectory, excelFilePath);
-        }
+        });
     });
 });
 module.exports = {
