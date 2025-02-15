@@ -20,8 +20,8 @@ const createDscrTable = asyncHandler(async (req, res) => {
           `ID ${id} already exists in dscr_values table just upload the files `
         );
     }
-    const sql = `INSERT INTO dscr_values (leadId, createdBy) VALUES (?, ?)`;
-    dbConnect.query(sql, [id, createdBy], (err, result) => {
+    const sql = `INSERT INTO dscr_values (leadId, createdBy, lastUpdatedBy) VALUES (?, ?, ?)`;
+    dbConnect.query(sql, [id, createdBy, createdBy], (err, result) => {
       if (err) {
         console.error("Error inserting data into dscr_values table:", err);
         return res.status(500).send("Internal server error");
@@ -43,8 +43,8 @@ const createleadDocumentsTable = asyncHandler(async (req, res) => {
     if (checkResult.length > 0) {
       return res.status(200).send(`ID ${id} already exists in leaddocuments table. Just upload the files.`);
     }
-    const sql = `INSERT INTO leaddocuments (leadId) VALUES (?)`;
-    dbConnect.query(sql, [id], (err, result) => {
+    const sql = `INSERT INTO leaddocuments (leadId,createdBy,lastUpdatedBy) VALUES (?,?,?)`;
+    dbConnect.query(sql, [id, req.user.name, req.user.name], (err, result) => {
       if (err) {
         console.error("Error inserting data into leaddocuments table:", err);
         return res.status(500).send("Internal server error");

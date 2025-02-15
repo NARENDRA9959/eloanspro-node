@@ -4,7 +4,7 @@ const handleGlobalFilters = require("../middleware/filtersHandler");
 const parseNestedJSON = require("../middleware/parseHandler");
 const {
   createClauseHandler,
-  updateClauseHandler,
+  updateClauseHandler
 } = require("../middleware/clauseHandler");
 
 const createLogin = asyncHandler((req, res) => {
@@ -32,7 +32,7 @@ const createLogin = asyncHandler((req, res) => {
       SELECT bankId, bankName
       FROM logins
       WHERE leadId = ?
-      AND bankId IN (${bankIds.map(() => '?').join(', ')})
+      AND bankId IN (${bankIds.map(() => "?").join(", ")})
   `;
   dbConnect.query(checkExistingQuery, [leadId, ...bankIds], (err, results) => {
     if (err) {
@@ -40,18 +40,26 @@ const createLogin = asyncHandler((req, res) => {
       return res.status(500).send("Error checking existing data");
     }
     if (results.length > 0) {
-      const existingBanks = results.map((row) => row.bankName);
-      return res.status(400).send(`${existingBanks.join(', ')} already exists for lead ID - ${leadId} , Business Name - ${businessName}`);
+      const existingBanks = results.map(row => row.bankName);
+      return res
+        .status(400)
+        .send(
+          `${existingBanks.join(
+            ", "
+          )} already exists for lead ID - ${leadId} , Business Name - ${businessName}`
+        );
     }
     const insertQueries = bankIds.map((bankId, index) => {
       const bankName = bankNames[index];
+      req.body["createdBy"] = req.user.name;
+      req.body["lastUpdatedBy"] = req.user.name;
       const rowData = { ...req.body, bankId, bankName };
       const createClause = createClauseHandler(rowData);
       const query = `INSERT INTO logins (${createClause[0]}) VALUES (${createClause[1]})`;
       return query;
     });
     let completedQueries = 0;
-    insertQueries.forEach((query) => {
+    insertQueries.forEach(query => {
       dbConnect.query(query, (err, result) => {
         if (err) {
           console.error("createLogin error:", err);
@@ -67,14 +75,13 @@ const createLogin = asyncHandler((req, res) => {
   });
 });
 
-
 const getDistinctLeads = asyncHandler(async (req, res) => {
   try {
     const distinctLeadIds = await fetchDistinctLeadIds();
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -103,7 +110,7 @@ async function fetchDistinctLeadIds() {
         reject(err);
         return;
       }
-      const leadIds = result.map((row) => row.leadId);
+      const leadIds = result.map(row => row.leadId);
       resolve(leadIds);
     });
   });
@@ -114,7 +121,7 @@ const getDistinctLeadCount = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json({ count: 0 });
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -141,7 +148,7 @@ const getApprovedLeadCount = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json({ count: 0 });
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -167,7 +174,7 @@ const getDisbursalLeadCount = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json({ count: 0 });
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -188,7 +195,8 @@ const getDisbursalLeadCount = asyncHandler(async (req, res) => {
   }
 });
 const getFIPDetailsById = asyncHandler((req, res) => {
-  const sql = `SELECT id, program, bankName, loginDate, fipStatus, fipRemarks FROM logins WHERE leadId = ${req.params.leadId}`;
+  const sql = `SELECT id, program, bankName, loginDate, fipStatus, fipRemarks FROM logins WHERE leadId = ${req
+    .params.leadId}`;
   const queryParams = [req.params.leadId];
   dbConnect.query(sql, queryParams, (err, result) => {
     if (err) {
@@ -199,7 +207,6 @@ const getFIPDetailsById = asyncHandler((req, res) => {
     res.status(200).json(result);
   });
 });
-
 
 const getApprovalsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
@@ -242,23 +249,38 @@ const getDisbursalsDetailsById = asyncHandler((req, res) => {
 });
 
 const updateFIPDetails = asyncHandler((req, res) => {
+  req.body = req.body.map(obj => ({
+    ...obj,
+    lastUpdatedBy: req.user.name
+  }));
   const updates = req.body;
   const { leadId } = req.params;
   let sql = `UPDATE logins SET `;
   let params = [];
   updates.forEach((update, index) => {
-    const { id, fipStatus, loginDate, fipRemarks } = update;
+    const { id, fipStatus, loginDate, fipRemarks, lastUpdatedBy } = update;
     sql += `
       fipStatus = CASE WHEN id = ? THEN ? ELSE fipStatus END,
       loginDate = CASE WHEN id = ? THEN ? ELSE loginDate END,
-      fipRemarks = CASE WHEN id = ? THEN ? ELSE fipRemarks END`;
-    params.push(id, fipStatus, id, loginDate, id, fipRemarks);
+      fipRemarks = CASE WHEN id = ? THEN ? ELSE fipRemarks END,
+      lastUpdatedBy = CASE WHEN id = ? THEN ? ELSE lastUpdatedBy END
+      `;
+    params.push(
+      id,
+      fipStatus,
+      id,
+      loginDate,
+      id,
+      fipRemarks,
+      id,
+      lastUpdatedBy
+    );
     if (index !== updates.length - 1) {
       sql += ", ";
     }
   });
-  sql += ` WHERE id IN (${updates.map((update) => "?").join(", ")})`;
-  params.push(...updates.map((update) => update.id));
+  sql += ` WHERE id IN (${updates.map(update => "?").join(", ")})`;
+  params.push(...updates.map(update => update.id));
 
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
@@ -277,7 +299,10 @@ const updateFIPDetails = asyncHandler((req, res) => {
     `;
     dbConnect.query(leadSumSql, [leadId, leadId], (sumErr, sumResult) => {
       if (sumErr) {
-        console.error("Error updating sanctionedAmount and disbursedAmount in leads table:", sumErr);
+        console.error(
+          "Error updating sanctionedAmount and disbursedAmount in leads table:",
+          sumErr
+        );
         return res.status(500).send("Error in updating loginDate in leads");
       }
       res.status(200).json({ message: "FIP details updated successfully" });
@@ -286,21 +311,27 @@ const updateFIPDetails = asyncHandler((req, res) => {
 });
 
 const updateRevenueDetails = asyncHandler((req, res) => {
+  req.body = req.body.map(obj => ({
+    ...obj,
+    lastUpdatedBy: req.user.name
+  }));
   const updates = req.body;
   let sql = `UPDATE logins SET `;
   let params = [];
   updates.forEach((update, index) => {
-    const { id, payoutValue, revenueValue } = update;
+    const { id, payoutValue, revenueValue, lastUpdatedBy } = update;
     sql += `
       payoutValue = CASE WHEN id = ? THEN ? ELSE payoutValue END,
-      revenueValue = CASE WHEN id = ? THEN ? ELSE revenueValue END`;
-    params.push(id, payoutValue, id, revenueValue);
+      revenueValue = CASE WHEN id = ? THEN ? ELSE revenueValue END,
+      lastUpdatedBy = CASE WHEN id = ? THEN ? ELSE lastUpdatedBy END
+      `;
+    params.push(id, payoutValue, id, revenueValue, id, lastUpdatedBy);
     if (index !== updates.length - 1) {
       sql += ", ";
     }
   });
-  sql += ` WHERE id IN (${updates.map((update) => "?").join(", ")})`;
-  params.push(...updates.map((update) => update.id));
+  sql += ` WHERE id IN (${updates.map(update => "?").join(", ")})`;
+  params.push(...updates.map(update => update.id));
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateRevenueDetails error in query:", err);
@@ -311,6 +342,10 @@ const updateRevenueDetails = asyncHandler((req, res) => {
 });
 
 const updateApprovalsDetails = asyncHandler((req, res) => {
+  req.body = req.body.map(obj => ({
+    ...obj,
+    lastUpdatedBy: req.user.name
+  }));
   const updates = req.body;
   const { leadId } = req.params;
   const fields = [
@@ -328,6 +363,7 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
     "disbursalDate",
     "approvedStatus",
     "approvedRemarks",
+    "lastUpdatedBy"
   ];
 
   let sql = "UPDATE logins SET ";
@@ -344,7 +380,7 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
     }
   });
   sql += ` WHERE id IN (${updates.map(() => "?").join(", ")})`;
-  params.push(...updates.map((update) => update.id));
+  params.push(...updates.map(update => update.id));
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateApprovalsDetails error in query:", err);
@@ -375,13 +411,26 @@ const updateApprovalsDetails = asyncHandler((req, res) => {
         )
       WHERE id = ?
     `;
-    dbConnect.query(leadSumSql, [leadId, leadId, leadId, leadId, leadId], (sumErr, sumResult) => {
-      if (sumErr) {
-        console.error("Error updating sanctionedAmount and disbursedAmount in leads table:", sumErr);
-        return res.status(500).send("Error in updating details in Lead table");
+    dbConnect.query(
+      leadSumSql,
+      [leadId, leadId, leadId, leadId, leadId],
+      (sumErr, sumResult) => {
+        if (sumErr) {
+          console.error(
+            "Error updating sanctionedAmount and disbursedAmount in leads table:",
+            sumErr
+          );
+          return res
+            .status(500)
+            .send("Error in updating details in Lead table");
+        }
+        res
+          .status(200)
+          .json({
+            message: "Approval details and leads table updated successfully"
+          });
       }
-      res.status(200).json({ message: "Approval details and leads table updated successfully" });
-    });
+    );
   });
 });
 
@@ -391,7 +440,7 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -423,7 +472,7 @@ async function fetchDistinctApprovedLeadIds() {
         reject(err);
         return;
       }
-      const leadIds = result.map((row) => row.leadId);
+      const leadIds = result.map(row => row.leadId);
       resolve(leadIds);
     });
   });
@@ -435,7 +484,7 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -467,38 +516,43 @@ async function fetchDistinctDisbursedLeadIds() {
         reject(err);
         return;
       }
-      const leadIds = result.map((row) => row.leadId);
+      const leadIds = result.map(row => row.leadId);
       resolve(leadIds);
     });
   });
 }
 const updateDisbursalDetails = asyncHandler((req, res) => {
+  req.body = req.body.map(obj => ({
+    ...obj,
+    lastUpdatedBy: req.user.name
+  }));
   const updates = req.body;
   let sql = `UPDATE logins SET `;
   let params = [];
   updates.forEach((update, index) => {
-    const { id, sanctionedLetter, repaymentSchedule } = update;
+    const { id, sanctionedLetter, repaymentSchedule, lastUpdatedBy } = update;
     sql += `
       sanctionedLetter = CASE WHEN id = ? THEN ? ELSE sanctionedLetter END,
-      repaymentSchedule = CASE WHEN id = ? THEN ? ELSE repaymentSchedule END`;
+      repaymentSchedule = CASE WHEN id = ? THEN ? ELSE repaymentSchedule END,
+      lastUpdatedBy = CASE WHEN id = ? THEN ? ELSE lastUpdatedBy END`;
     params.push(
       id,
       JSON.stringify(sanctionedLetter),
       id,
-      JSON.stringify(repaymentSchedule)
+      JSON.stringify(repaymentSchedule),
+      id,
+      lastUpdatedBy
     );
     if (index !== updates.length - 1) {
       sql += ", ";
     }
   });
-  sql += ` WHERE id IN (${updates.map((update) => "?").join(", ")})`;
-  params.push(...updates.map((update) => update.id));
+  sql += ` WHERE id IN (${updates.map(update => "?").join(", ")})`;
+  params.push(...updates.map(update => update.id));
   dbConnect.query(sql, params, (err, result) => {
     if (err) {
       console.error("updateDisbursalDetails error in query:", err);
-      return res
-        .status(500)
-        .send("Error in updating Disbursal Details");
+      return res.status(500).send("Error in updating Disbursal Details");
     }
     res.status(200).json({ message: "Disbursal details updated successfully" });
   });
@@ -510,7 +564,7 @@ const getBankRejectsLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -543,7 +597,7 @@ async function fetchDistinctBankRejectedLeadIds() {
         reject(err);
         return;
       }
-      const leadIds = result.map((row) => row.leadId);
+      const leadIds = result.map(row => row.leadId);
       resolve(leadIds);
     });
   });
@@ -555,7 +609,7 @@ const getBankRejectedLeadCount = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json({ count: 0 });
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -564,7 +618,9 @@ const getBankRejectedLeadCount = asyncHandler(async (req, res) => {
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
         console.error("Error counting bank-rejected leads:", err);
-        return res.status(500).send("Error in Fetching Bank Rejected Leads Count");
+        return res
+          .status(500)
+          .send("Error in Fetching Bank Rejected Leads Count");
       }
       const count = countResult[0].count;
       res.status(200).send(String(count));
@@ -580,7 +636,7 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -602,18 +658,22 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
 });
 
 async function fetchDistinctCNIRejectedLeadIds() {
-  const sql = `
-    SELECT DISTINCT leadId 
-    FROM logins
-    WHERE (fipStatus = 'approved' AND approvedStatus = 'cnis') OR fipStatus ='hold'
-  `;
+  // const sql = `
+  //   SELECT DISTINCT leadId
+  //   FROM logins
+  //   WHERE (fipStatus = 'approved' AND approvedStatus = 'cnis') OR fipStatus ='hold'
+  // `;
+  const sql = `SELECT DISTINCT leadId 
+FROM logins
+WHERE (fipStatus = 'approved' AND approvedStatus IN ('cnis', 'hold')) 
+   OR fipStatus = 'hold'`;
   return new Promise((resolve, reject) => {
     dbConnect.query(sql, (err, result) => {
       if (err) {
         reject(err);
         return;
       }
-      const leadIds = result.map((row) => row.leadId);
+      const leadIds = result.map(row => row.leadId);
       resolve(leadIds);
     });
   });
@@ -625,7 +685,7 @@ const getCNIRejectedLeadCount = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json({ count: 0 });
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let countSql = `SELECT COUNT(*) AS count FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -634,7 +694,9 @@ const getCNIRejectedLeadCount = asyncHandler(async (req, res) => {
     dbConnect.query(countSql, (err, countResult) => {
       if (err) {
         console.error("Error counting CNI-rejected leads:", err);
-        return res.status(500).send("Error in Fetching CNI Rejected Leads Count");
+        return res
+          .status(500)
+          .send("Error in Fetching CNI Rejected Leads Count");
       }
       const count = countResult[0].count;
       res.status(200).send(String(count));
@@ -665,10 +727,15 @@ const getBankRejectsDetailsById = asyncHandler((req, res) => {
 
 const getCNIRejectsDetailsById = asyncHandler((req, res) => {
   const leadId = req.params.leadId;
+  // const sql = `
+  // SELECT id,approvalDate, lan, program, bankName, loginDate, sanctionedAmount, roi, fipStatus, fipRemarks, approvedStatus, approvedRemarks
+  //   FROM logins
+  //   WHERE leadId = ? AND (approvedStatus = 'cnis' OR fipStatus = 'hold')
+  // `;
   const sql = `
   SELECT id,approvalDate, lan, program, bankName, loginDate, sanctionedAmount, roi, fipStatus, fipRemarks, approvedStatus, approvedRemarks
     FROM logins
-    WHERE leadId = ? AND (approvedStatus = 'cnis' OR fipStatus = 'hold')
+    WHERE leadId = ? AND (fipStatus = 'hold' OR approvedStatus IN ('cnis', 'hold'))
   `;
   const queryParams = [leadId];
   dbConnect.query(sql, queryParams, (err, result) => {
@@ -755,7 +822,7 @@ WHERE fipStatus NOT IN ('approved', 'rejected', 'hold');
         reject(err);
         return;
       }
-      const leadIds = result.map((row) => row.leadId);
+      const leadIds = result.map(row => row.leadId);
       resolve(leadIds);
     });
   });
@@ -767,7 +834,7 @@ const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json([]);
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
@@ -794,7 +861,7 @@ const getFIPProcessDistinctLeadsCount = asyncHandler(async (req, res) => {
     if (distinctLeadIds.length === 0) {
       return res.status(200).json({ count: 0 });
     }
-    const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
+    const inClause = distinctLeadIds.map(id => `${id}`).join(",");
     let sql = `SELECT COUNT(*) as count FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;

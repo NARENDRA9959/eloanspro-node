@@ -35,7 +35,7 @@ const getLeadsCount = asyncHandler(async (req, res) => {
 const getLeads = asyncHandler(async (req, res) => {
   let sql = "SELECT * FROM leads";
   const queryParams = req.query;
-  queryParams["sort"] = "lastUpdatedOn";
+  queryParams["sort"] = "createdOn";
   const filtersQuery = handleGlobalFilters(queryParams);
   sql += filtersQuery;
   dbConnect.query(sql, (err, result) => {
@@ -88,6 +88,7 @@ const getLeadDocumentsById = asyncHandler((req, res) => {
 
 const addDocumentData = asyncHandler((req, res) => {
   const id = req.params.leadId;
+  req.body["lastUpdatedBy"] = req.user.name;
   const updateClause = updateClauseHandler(req.body);
   const sql = `UPDATE leaddocuments SET ${updateClause} WHERE leadId = ${id}`;
   dbConnect.query(sql, (err, result) => {
@@ -101,6 +102,7 @@ const addDocumentData = asyncHandler((req, res) => {
 
 const addDscrValuesData = asyncHandler((req, res) => {
   const id = req.params.leadId;
+  req.body["lastUpdatedBy"] = req.user.name;
   const updateClause = updateClauseHandler(req.body);
   const sql = `UPDATE dscr_values SET ${updateClause} WHERE leadId = ${id}`;
   dbConnect.query(sql, (err, result) => {
@@ -129,6 +131,7 @@ const calculateGstProgram = asyncHandler((req, res) => {
   const monthlyPayment = monthlyInterest * 0.8;
   const finalMonthlyPayment = monthlyPayment - totalEmi - odCcInterestAy1;
   const gstValue = Math.round(finalMonthlyPayment);
+  req.body["lastUpdatedBy"] = req.user.name;
   const updateClause = updateClauseHandler(req.body);
   if (!updateClause) {
     return res.status(400).json({ error: "No update values provided" });
@@ -166,6 +169,7 @@ const calculateBalanceSheet = asyncHandler((req, res) => {
     debtDenominator !== 0 ? debtNumerator / debtDenominator : 0;
   const creditor_daysFirstYear =
     creditDenominator !== 0 ? creditNumerator / creditDenominator : 0;
+  req.body["lastUpdatedBy"] = req.user.name;
   const updateClause = updateClauseHandler(req.body);
   if (!updateClause) {
     return res.status(400).json({ error: "No update values provided" });
@@ -212,6 +216,7 @@ const calculateDscrRatio = asyncHandler((req, res) => {
   const denominator = (totalEmi + proposedEmi + odCcInterestAy1) * monthsAy1;
   const resultFirstYear =
     denominator !== 0 ? (numerator / denominator).toFixed(2) : 0;
+  req.body["lastUpdatedBy"] = req.user.name;
   const updateClause = updateClauseHandler(req.body);
   const extendedUpdateClause = `${updateClause},  resultFirstYear=${resultFirstYear}`;
   const sql = `
@@ -239,6 +244,7 @@ const calculateBTOProgram = asyncHandler((req, res) => {
   const monthlyPayment = monthlyInterest * 0.8; // 80% of monthly interest
   const finalMonthlyPayment = monthlyPayment - totalEmi - odCcInterestAy1;
   const btoValue = Math.round(finalMonthlyPayment);
+  req.body["lastUpdatedBy"] = req.user.name;
   const updateClause = updateClauseHandler(req.body);
   if (!updateClause) {
     return res.status(400).json({ error: "No update values provided" });
@@ -459,6 +465,7 @@ function createNewLeadFromCallback(req, res) {
 
 function updateNewLead(req, res) {
   const id = req.params.id;
+  req.body["lastUpdatedBy"] = req.user.name;
   const updateClause = updateClauseHandler(req.body);
   const updateSql = `UPDATE leads SET ${updateClause} WHERE id = ?`;
   dbConnect.query(updateSql, [id], (updateErr, updateResult) => {

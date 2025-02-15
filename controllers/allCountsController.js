@@ -245,7 +245,7 @@ const getLastMonthLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getFullYear(),
     currentDate.getMonth(),
     0
-  )).format('YYYY-MM-DD');
+  )).add(1, 'days').format('YYYY-MM-DD');
   let sql = `SELECT 
   COUNT(*) AS leadCount
 FROM leads`;
@@ -313,7 +313,7 @@ const getLastBeforeMonthLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getFullYear(),
     currentDate.getMonth() - 1,
     0
-  )).format('YYYY-MM-DD');
+  )).add(1, 'days').format('YYYY-MM-DD');
   let sql = `SELECT 
   COUNT(*) AS leadCount
   FROM leads`;
@@ -349,7 +349,7 @@ const getLastMonthCallBacksCount = asyncHandler(async (req, res) => {
     currentDate.getFullYear(),
     currentDate.getMonth(),
     0
-  )).format('YYYY-MM-DD');
+  )).add(1, 'days').format('YYYY-MM-DD');
   let sql = `SELECT 
   COUNT(*) AS count
 FROM callbacks`;
@@ -418,7 +418,7 @@ const getTwoMonthsAgoCallBacksCount = asyncHandler(async (req, res) => {
     currentDate.getFullYear(),
     currentDate.getMonth() - 1,
     0
-  )).format('YYYY-MM-DD');
+  )).add(1, 'days').format('YYYY-MM-DD');
   let sql = `SELECT 
   COUNT(*) AS count
   FROM callbacks`;
@@ -455,7 +455,7 @@ const getLast6MonthsLeadCountStatus = asyncHandler(async (req, res) => {
     currentDate.getFullYear(),
     currentDate.getMonth(),
     0
-  )).format('YYYY-MM-DD');
+  )).add(1, 'days').format('YYYY-MM-DD');
   let sql = `
       SELECT 
           COUNT(*) AS leadCount
@@ -492,7 +492,7 @@ const getLast6MonthsCallBacksCount = asyncHandler(async (req, res) => {
     currentDate.getFullYear(),
     currentDate.getMonth(),
     0
-  )).format('YYYY-MM-DD');
+  )).add(1, 'days').format('YYYY-MM-DD');
   let sql = `
       SELECT 
           COUNT(*) AS count
@@ -525,7 +525,7 @@ const getLastYearLeadCountStatus = asyncHandler(async (req, res) => {
     0,
     1
   )).format('YYYY-MM-DD');
-  const lastYearEndDate = moment(new Date(currentDate.getFullYear() - 1, 11, 31)).format('YYYY-MM-DD');
+  const lastYearEndDate = moment(new Date(currentDate.getFullYear() - 1, 11, 31)).add(1, 'days').format('YYYY-MM-DD');
   let sql = `
   SELECT 
       COUNT(*) AS leadCount
@@ -554,7 +554,7 @@ const getLastYearCallBacksCount = asyncHandler(async (req, res) => {
     0,
     1
   )).format('YYYY-MM-DD');
-  const lastYearEndDate = moment(new Date(currentDate.getFullYear() - 1, 11, 31)).format('YYYY-MM-DD');
+  const lastYearEndDate = moment(new Date(currentDate.getFullYear() - 1, 11, 31)).add(1, 'days').format('YYYY-MM-DD');
   let sql = `
   SELECT 
       COUNT(*) AS count
@@ -747,9 +747,9 @@ const getuserCurrentMonthSanctionedAmount = asyncHandler(async (req, res) => {
       AND approvalDate <= ?
       AND leadId IN (${placeholders})
   `;
-    console.log(currentMonthStartDate)
-    console.log(currentMonthEndDate)
-    console.log(sql);
+    // console.log(currentMonthStartDate)
+    // console.log(currentMonthEndDate)
+    // console.log(sql);
     dbConnect.query(
       sql,
       [currentMonthStartDate, currentMonthEndDate, ...leadIds],

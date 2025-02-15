@@ -91,6 +91,7 @@ const createBanker = asyncHandler((req, res) => {
     req.body["bankerId"] = bankerId;
     req.body["bankerInternalStatus"] = 1;
     req.body["lastBankerInternalStatus"] = 1;
+    req.body["createdBy"] = req.user.name;
     req.body["lastUpdatedBy"] = req.user.name;
     const checkSql = `SELECT * FROM bankers WHERE name = ?`;
     dbConnect.query(checkSql, [req.body.name], (checkErr, checkResult) => {
@@ -124,6 +125,7 @@ const updateBanker = asyncHandler((req, res) => {
     res.status(422).send("Please Fill all required fields");
     return;
   }
+  req.body["lastUpdatedBy"] = req.user.name;
   const updateClause = updateClauseHandler(req.body);
   const sql = `UPDATE bankers SET ${updateClause} WHERE id = ${id}`;
   dbConnect.query(sql, (err, result) => {

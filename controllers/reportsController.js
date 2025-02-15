@@ -68,6 +68,7 @@ const exportLeads = asyncHandler(async (req, res) => {
             for (let i = 0; i < result.length; i++) {
                 result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
                 result[i].createdOn = moment(result[i].createdOn).format('YYYY-MM-DD');
+                result[i].lastUpdatedOn = moment(result[i].lastUpdatedOn).format('YYYY-MM-DD');
             }
             result = parseNestedJSON(result);
             if (!fs.existsSync(uploadDirectory)) {
@@ -98,8 +99,9 @@ const exportLeads = asyncHandler(async (req, res) => {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
                     const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
+                    const createdBy = req.user.name;
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                    const values = [reportId, type, fileUrlArray, createdBy];
                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                         if (insertErr) {
                             console.error("Error inserting report URL into the database:", insertErr);
@@ -153,6 +155,7 @@ const exportCallbacks = asyncHandler(async (req, res) => {
             for (let i = 0; i < result.length; i++) {
                 result[i].sourcedBy = await getSourceName(result[i].sourcedBy);
                 result[i].createdOn = moment(new Date(result[i].createdOn)).format('YYYY-MM-DD');
+                result[i].lastUpdatedOn = moment(new Date(result[i].lastUpdatedOn)).format('YYYY-MM-DD');
                 result[i].date = moment(new Date(result[i].date)).format('YYYY-MM-DD');
             }
             result = parseNestedJSON(result);
@@ -184,8 +187,9 @@ const exportCallbacks = asyncHandler(async (req, res) => {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
                     const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
+                    const createdBy = req.user.name;
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                    const values = [reportId, type, fileUrlArray, createdBy];
                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                         if (insertErr) {
                             console.error("Error inserting report URL into the database:", insertErr);
@@ -272,8 +276,9 @@ const exportFilesInProcess = asyncHandler(async (req, res) => {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
                     const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
+                    const createdBy = req.user.name;
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                    const values = [reportId, type, fileUrlArray, createdBy];
                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                         if (insertErr) {
                             console.error("Error inserting report URL into the database:", insertErr);
@@ -359,8 +364,9 @@ const exportApprovalLeads = asyncHandler(async (req, res) => {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
                     const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
+                    const createdBy = req.user.name;
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                    const values = [reportId, type, fileUrlArray, createdBy];
                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                         if (insertErr) {
                             console.error("Error inserting report URL into the database:", insertErr);
@@ -447,8 +453,9 @@ const exportDisbursalLeads = asyncHandler(async (req, res) => {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
                     const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
+                    const createdBy = req.user.name;
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                    const values = [reportId, type, fileUrlArray, createdBy];
                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                         if (insertErr) {
                             console.error("Error inserting report URL into the database:", insertErr);
@@ -536,8 +543,9 @@ const exportBankRejectedLeads = asyncHandler(async (req, res) => {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
                     const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
+                    const createdBy = req.user.name;
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                    const values = [reportId, type, fileUrlArray, createdBy];
                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                         if (insertErr) {
                             console.error("Error inserting report URL into the database:", insertErr);
@@ -624,8 +632,9 @@ const exportCNILeads = asyncHandler(async (req, res) => {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
                     const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
+                    const createdBy = req.user.name;
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                    const values = [reportId, type, fileUrlArray, createdBy];
                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                         if (insertErr) {
                             console.error("Error inserting report URL into the database:", insertErr);
@@ -715,8 +724,9 @@ const exportSanctionDetails = asyncHandler(async (req, res) => {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
                     const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
+                    const createdBy = req.user.name;
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                    const values = [reportId, type, fileUrlArray, createdBy];
                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                         if (insertErr) {
                             console.error("Error inserting report URL into the database:", insertErr);
@@ -807,8 +817,9 @@ const exportDisbursalDetails = asyncHandler(async (req, res) => {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
                     const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
+                    const createdBy = req.user.name;
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                    const values = [reportId, type, fileUrlArray, createdBy];
                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                         if (insertErr) {
                             console.error("Error inserting report URL into the database:", insertErr);
@@ -860,6 +871,7 @@ const exportloginsDoneDetails = asyncHandler(async (req, res) => {
             for (let i = 0; i < result.length; i++) {
                 result[i].createdOn = moment(result[i].createdOn).format('YYYY-MM-DD');
                 result[i].loginDate = moment(result[i].loginDate).format('YYYY-MM-DD');
+                result[i].fipStatus = result[i].fipStatus.charAt(0).toUpperCase() + result[i].fipStatus.slice(1).toLowerCase();
             }
             result = parseNestedJSON(result);
             if (!fs.existsSync(uploadDirectory)) {
@@ -890,8 +902,9 @@ const exportloginsDoneDetails = asyncHandler(async (req, res) => {
                 if (response.data && response.data.links && response.data.links.length > 0) {
                     const fileUrl = response.data.links[0];
                     const fileUrlArray = JSON.stringify([fileUrl]);
-                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                    const values = [reportId, type, fileUrlArray];
+                    const createdBy = req.user.name;
+                    const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                    const values = [reportId, type, fileUrlArray, createdBy];
                     dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                         if (insertErr) {
                             console.error("Error inserting report URL into the database:", insertErr);
@@ -929,7 +942,7 @@ const exportCNILeadDetails = asyncHandler(async (req, res) => {
         return res.status(200).json([]);
     }
     const inClause = distinctLeadIds.map((id) => `${id}`).join(",");
-    let sqlLogins = `SELECT * FROM logins WHERE (leadId IN (${inClause})) AND (fipStatus = 'approved' AND approvedStatus = 'cnis') OR fipStatus ='hold'`;
+    let sqlLogins = `SELECT * FROM logins WHERE (leadId IN (${inClause})) AND (fipStatus = 'approved' AND approvedStatus IN ('cnis', 'hold')) OR fipStatus ='hold'`;
     const uploadDirectory = path.join(__dirname, '../excelFiles');
     const excelFileName = 'CNIDetails1.xlsx';
     const excelFilePath = path.join(uploadDirectory, excelFileName);
@@ -972,6 +985,10 @@ const exportCNILeadDetails = asyncHandler(async (req, res) => {
                 for (let i = 0; i < mergedResults.length; i++) {
                     mergedResults[i].sourcedBy = await getSourceName(mergedResults[i].sourcedBy);
                     mergedResults[i].createdOn = moment(mergedResults[i].createdOn).format('YYYY-MM-DD');
+                    // mergedResults[i].approvedStatus = mergedResults[i].approvedStatus.toUpperCase();
+                    // mergedResults[i].fipStatus = mergedResults[i].fipStatus.toUpperCase();
+                    mergedResults[i].approvedStatus = mergedResults[i].approvedStatus.charAt(0).toUpperCase() + mergedResults[i].approvedStatus.slice(1).toLowerCase();
+                    mergedResults[i].fipStatus = mergedResults[i].fipStatus.charAt(0).toUpperCase() + mergedResults[i].fipStatus.slice(1).toLowerCase();
                 }
                 const parsedResults = parseNestedJSON(mergedResults);
                 if (!fs.existsSync(uploadDirectory)) {
@@ -1000,8 +1017,9 @@ const exportCNILeadDetails = asyncHandler(async (req, res) => {
                     if (response.data && response.data.links && response.data.links.length > 0) {
                         const fileUrl = response.data.links[0];
                         const fileUrlArray = JSON.stringify([fileUrl]);
-                        const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                        const values = [reportId, type, fileUrlArray];
+                        const createdBy = req.user.name;
+                        const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                        const values = [reportId, type, fileUrlArray, createdBy];
                         dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                             if (insertErr) {
                                 console.error("Error inserting report URL into the database:", insertErr);
@@ -1139,6 +1157,14 @@ const exportloginFiles = asyncHandler(async (req, res) => {
                     result[i].loginDate = result[i].loginDate
                         ? moment(result[i].loginDate).format('YYYY-MM-DD')
                         : result[i].loginDate;
+                    result[i].createdOn = result[i].createdOn
+                        ? moment(result[i].createdOn).format('YYYY-MM-DD')
+                        : result[i].createdOn;
+                    result[i].lastUpdatedOn = result[i].lastUpdatedOn
+                        ? moment(result[i].lastUpdatedOn).format('YYYY-MM-DD')
+                        : result[i].lastUpdatedOn;
+                    result[i].approvedStatus = result[i].approvedStatus.charAt(0).toUpperCase() + result[i].approvedStatus.slice(1).toLowerCase();
+                    result[i].fipStatus = result[i].fipStatus.charAt(0).toUpperCase() + result[i].fipStatus.slice(1).toLowerCase();
                 }
                 result = parseNestedJSON(result);
                 if (!fs.existsSync(uploadDirectory)) {
@@ -1169,8 +1195,10 @@ const exportloginFiles = asyncHandler(async (req, res) => {
                     if (response.data && response.data.links && response.data.links.length > 0) {
                         const fileUrl = response.data.links[0];
                         const fileUrlArray = JSON.stringify([fileUrl]);
-                        const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl) VALUES (?, ?, ?)";
-                        const values = [reportId, type, fileUrlArray];
+                        console.log(req.user)
+                        const createdBy = req.user.name;
+                        const insertSql = "INSERT INTO reports (reportId, reportType, reportUrl, createdBy) VALUES (?, ?, ?,?)";
+                        const values = [reportId, type, fileUrlArray, createdBy];
                         dbConnect.query(insertSql, values, (insertErr, insertResult) => {
                             if (insertErr) {
                                 console.error("Error inserting report URL into the database:", insertErr);

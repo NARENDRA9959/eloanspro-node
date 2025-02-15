@@ -27,7 +27,7 @@ const getloanLeadsCount = asyncHandler(async (req, res) => {
 const getloanLeads = asyncHandler(async (req, res) => {
     let sql = "SELECT * FROM loanleads";
     const queryParams = req.query;
-    queryParams["sort"] = "lastUpdatedOn";
+    queryParams["sort"] = "createdOn";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
     dbConnect.query(sql, (err, result) => {
@@ -81,6 +81,7 @@ const createLoanLead = asyncHandler((req, res) => {
                 req.body["leadInternalStatus"] = 1;
                 req.body["lastLeadInternalStatus"] = 1;
                 req.body["createdBy"] = req.user.name;
+                req.body["lastUpdatedBy"] = req.user.name;
                 const createClause = createClauseHandler(req.body);
                 const sql = `INSERT INTO loanleads (${createClause[0]}) VALUES (${createClause[1]})`;
                 dbConnect.query(sql, (err, result) => {
@@ -125,6 +126,7 @@ const updateLoanLead = asyncHandler((req, res) => {
                     `Lead already exists with phone number ${primaryPhone}, created by - ${lead.sourcedByName}, Lead ID - ${lead.leadId}`
                 );
         }
+        req.body["lastUpdatedBy"] = req.user.name;
         const updateClause = updateClauseHandler(req.body);
         const updateSql = `UPDATE loanleads SET ${updateClause} WHERE leadId = ?`;
         dbConnect.query(updateSql, [id], (updateErr, updateResult) => {

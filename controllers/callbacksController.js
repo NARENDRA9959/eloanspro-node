@@ -121,6 +121,7 @@ const updateCallBack = asyncHandler(async (req, res) => {
         return res.status(500).send("Error fetching sourcedBy name");
       }
     }
+    req.body["lastUpdatedBy"] = req.user.name;
     const updateClause = updateClauseHandler(req.body);
     const updateSql = `UPDATE callbacks SET ${updateClause} WHERE id = ?`;
     dbConnect.query(updateSql, [id], (updateErr, updateResult) => {

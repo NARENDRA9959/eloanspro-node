@@ -23,6 +23,8 @@ module.exports = {
       { header: "Sourced By", key: "sourcedBy" },
       { header: "Created By", key: "createdBy" },
       { header: "Created On", key: "createdOn" },
+      { header: "Last Updated By", key: "lastUpdatedBy" },
+      { header: "Last Updated On", key: "lastUpdatedOn" },
     ],
     CNI_DETAILS_COLUMNS: [
       { header: 'Lead Id', key: 'leadId' },
@@ -73,7 +75,10 @@ module.exports = {
       { header: 'Callback Date', key: 'date' },
       { header: 'Remarks', key: 'remarks' },
       { header: 'Sourced By', key: 'sourcedBy' },
-      { header: 'Created On', key: 'createdOn' },
+      { header: "Created By", key: "createdBy" },
+      { header: "Created On", key: "createdOn" },
+      { header: "Last Updated By", key: "lastUpdatedBy" },
+      { header: "Last Updated On", key: "lastUpdatedOn" },
     ],
     LOGIN_FILES_COLUMNS: [
       { header: 'Id', key: 'id' },
@@ -96,6 +101,10 @@ module.exports = {
       { header: 'Disbursal Date', key: 'disbursalDate' },
       { header: 'Sanction Status', key: 'approvedStatus' },
       { header: 'Sanction Remarks', key: 'approvedRemarks' },
+      { header: "Login Created By", key: "createdBy" },
+      { header: "Login Created On", key: "createdOn" },
+      { header: "Last Login Updated By", key: "lastUpdatedBy" },
+      { header: "Last Login Updated On", key: "lastUpdatedOn" },
     ],
   },
 };
