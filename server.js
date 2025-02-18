@@ -8,7 +8,7 @@ const ipWhitelist = require('./middleware/ipAddress.js');
 
 app.use(express.json());
 
-// const { scheduleCronJobs } = require('./controllers/nodemail.js');
+const { scheduleCronJobs } = require('./controllers/nodemail.js');
 app.use(
   cors({
     origin: "*",
@@ -36,7 +36,7 @@ app.use("/createTable", ipWhitelist, require("./routes/createTableRoutes"));
 app.use("/ipAddress", ipWhitelist, require("./routes/ipAddressRoutes.js"));
 app.use("/uploads", ipWhitelist, express.static(path.join(__dirname, "uploads")));
 
-// scheduleCronJobs();
+scheduleCronJobs();
 // console.log(process.env.PORT)
 // app.listen(process.env.PORT, () => {
 //   console.log("Server Running Peacefully");
