@@ -35,10 +35,10 @@ const createUsers = asyncHandler(async (req, res) => {
       }
       const rbacValues = {
         1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups,ipAddress',
-        2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+        2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess,followups',
         3: 'leads,callbacks',
-        4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
-        5: 'leads,callbacks,files,partial,team,reports,followups'
+        4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess,followups',
+        5: 'leads,callbacks,files,partial,team,followups'
       };
       const rbacValue = rbacValues[req.body.userType];
       if (rbacValue) {
@@ -72,10 +72,10 @@ const updateUsers = asyncHandler(async (req, res) => {
     }
     const rbacValues = {
       1: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups,ipAddress',
-      2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
+      2: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess,followups',
       3: 'leads,callbacks',
-      4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,reports,filesinprocess,followups',
-      5: 'leads,callbacks,files,partial,team,reports,followups'
+      4: 'leads,callbacks,files,partial,team,credit,bankers,logins,approvals,disbursals,rejects,filesinprocess,followups',
+      5: 'leads,callbacks,files,partial,team,followups'
     };
     const rbacValue = rbacValues[req.body.userType];
     if (rbacValue) {
