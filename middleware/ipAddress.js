@@ -1,6 +1,6 @@
 const dbConnect = require("../config/dbConnection");
 const { userLogoutforIp } = require("../controllers/userController");
-
+const jwt = require("jsonwebtoken");
 function isUserLoggedIn(req) {
     return req.body.username == null;
 }
@@ -50,4 +50,31 @@ async function ipWhitelist(req, res, next) {
     }
 }
 
-module.exports = ipWhitelist;
+const applyIpWhitelist = async (req, res, next) => {
+    try {
+        const authHeader = req.headers["authorization"];
+        if (!authHeader) {
+            return res.status(401).send("Authorization header missing");
+        }
+        const token = authHeader.split(" ")[1];
+        const secretKey = process.env.ACCESS_TOKEN_SECRET;
+        try {
+            const decoded = jwt.verify(token, secretKey);
+            const userType = decoded?.user?.userType || "";
+            if (userType == 1) {
+                return next();
+            }
+            await ipWhitelist(req, res, next);
+        }
+        catch (error) {
+            if (error.name === "TokenExpiredError") {
+                return res.status(419).send("Session expired. Please log in again.");
+            } else {
+                return res.status(419).send("Invalid token. Authentication failed.");
+            }
+        }
+    } catch (error) {
+        res.status(500).send("Internal server error");
+    }
+}
+module.exports = applyIpWhitelist;

@@ -15,14 +15,12 @@ const transporter = nodemailer.createTransport({
 
 async function getActiveSourcedByIds() {
     const sql = `SELECT id FROM users WHERE userType = 3 AND status = "Active"`;
-
     return new Promise((resolve, reject) => {
         dbConnect.query(sql, (err, result) => {
             if (err) {
                 reject(err);
                 return;
             }
-
             const activeSourcedByIds = result.map(row => row.id);
             resolve(activeSourcedByIds);
         });
@@ -33,15 +31,12 @@ async function getLeadsAndCallbacksCountForActiveSources() {
     try {
         // Step 1: Get the active sourcedBy IDs from sources table
         const activeSourcedByIds = await getActiveSourcedByIds();
-
         if (activeSourcedByIds.length === 0) {
             console.log("No active sourcedBy IDs found.");
             return;
         }
-
         const today = moment().startOf('day').format('YYYY-MM-DD');
         const tomorrow = moment().add(1, 'days').startOf('day').format('YYYY-MM-DD');
-
         // Step 2: Get the count of leads for active sourcedBy IDs
         const sqlLeads = `
             SELECT sourcedBy, COUNT(*) AS count
@@ -62,7 +57,15 @@ async function getLeadsAndCallbacksCountForActiveSources() {
               AND callbackInternalStatus = 1
             GROUP BY sourcedBy
         `;
-
+        const sqlLoanLeads = `
+            SELECT sourcedBy, COUNT(*) AS count
+            FROM loanleads
+            WHERE createdOn >= ? 
+                AND createdOn < ? 
+                AND sourcedBy IN (?) 
+                AND leadInternalStatus = 1
+            GROUP BY sourcedBy
+    `;
         // Query leads count
         const leadsCountPromise = new Promise((resolve, reject) => {
             dbConnect.query(sqlLeads, [today, tomorrow, activeSourcedByIds], (err, result) => {
@@ -87,21 +90,33 @@ async function getLeadsAndCallbacksCountForActiveSources() {
             });
         });
 
+
+        const loanLeadsCountPromise = new Promise((resolve, reject) => {
+            dbConnect.query(sqlLoanLeads, [today, tomorrow, activeSourcedByIds], (err, result) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(result);
+            });
+        });
         // Wait for both queries to complete
-        const [leadsCounts, callbacksCounts] = await Promise.all([leadsCountPromise, callbacksCountPromise]);
+        const [leadsCounts, loanLeadsCounts, callbacksCounts] = await Promise.all([
+            leadsCountPromise, loanLeadsCountPromise, callbacksCountPromise
+        ]);
 
         // Prepare final counts
         const finalCounts = activeSourcedByIds.map(id => {
             const leads = leadsCounts.find(item => item.sourcedBy == id) || { count: 0 };
+            const loanLeads = loanLeadsCounts.find(item => item.sourcedBy == id) || { count: 0 };
             const callbacks = callbacksCounts.find(item => item.sourcedBy == id) || { count: 0 };
-
+            // console.log("loanLeads.count", loanLeads.count)
             return {
                 sourcedBy: id,
-                leadsCount: leads.count,
+                leadsCount: leads.count + loanLeads.count, // Combine counts from both tables
                 callbacksCount: callbacks.count
             };
         });
-
         return finalCounts;
     } catch (error) {
         console.error('Error getting leads and callbacks count:', error);
@@ -144,6 +159,7 @@ async function sendLeadsReport() {
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: 'ravi.n@winwaycreators.com, hema.p@winwaycreators.com, mudhiiguubbakalyonnii@gmail.com, cnarendra329@gmail.com',
+            // to: 'mudhiiguubbakalyonnii@gmail.com, cnarendra329@gmail.com',
             subject: `Today's Metrics: Leads and Callbacks Overview [ ${formattedDate} ]`,
             html: `
                 <h2>Today Counts</h2>
@@ -314,6 +330,13 @@ function scheduleCronJobs() {
         sendLeadsReport();
     });
 }
+
+// function scheduleCronJobs() {
+//     cron.schedule('30 12 * * *', () => {
+//         console.log('Running cron job for today\'s leads count at 8:00 PM');
+//         sendLeadsReport();
+//     });
+// }
 
 module.exports = {
     scheduleCronJobs,

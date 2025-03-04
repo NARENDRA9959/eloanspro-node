@@ -4,11 +4,12 @@ const cors = require("cors");
 const path = require("path");
 const app = express();
 const fs = require('fs');
-const ipWhitelist = require('./middleware/ipAddress.js');
+const applyIpWhitelist = require('./middleware/ipAddress.js');
 
 app.use(express.json());
 
 const { scheduleCronJobs } = require('./controllers/nodemail.js');
+const authMiddleware = require("./middleware/verifySuperAdmin.js");
 app.use(
   cors({
     origin: "*",
@@ -22,19 +23,19 @@ const options = {
 };
 
 
-app.use("/user", ipWhitelist, require("./routes/userRoutes"));
-app.use("/leads", ipWhitelist, require("./routes/leadsRoutes"));
-app.use("/loanleads", ipWhitelist, require("./routes/loanLeadsRoutes.js"));
-app.use("/callbacks", ipWhitelist, require("./routes/callbackRoutes"));
-app.use("/files", ipWhitelist, require("./routes/fileHandlerRoutes"));
-app.use("/counts", ipWhitelist, require("./routes/allCountRoutes"));
-app.use("/users", ipWhitelist, require("./routes/teamRoutes"));
-app.use("/logins", ipWhitelist, require("./routes/loginsRoutes"));
-app.use("/reports", ipWhitelist, require("./routes/reportsRoutes"));
-app.use("/bankers", ipWhitelist, require("./routes/bankersRoutes"));
-app.use("/createTable", ipWhitelist, require("./routes/createTableRoutes"));
-app.use("/ipAddress", ipWhitelist, require("./routes/ipAddressRoutes.js"));
-app.use("/uploads", ipWhitelist, express.static(path.join(__dirname, "uploads")));
+app.use("/user", require("./routes/userRoutes"));
+app.use("/leads", applyIpWhitelist, authMiddleware, require("./routes/leadsRoutes"));
+app.use("/loanleads", applyIpWhitelist, authMiddleware, require("./routes/loanLeadsRoutes.js"));
+app.use("/callbacks", applyIpWhitelist, authMiddleware, require("./routes/callbackRoutes"));
+app.use("/files", applyIpWhitelist, authMiddleware, require("./routes/fileHandlerRoutes"));
+app.use("/counts", applyIpWhitelist, authMiddleware, require("./routes/allCountRoutes"));
+app.use("/users", applyIpWhitelist, authMiddleware, require("./routes/teamRoutes"));
+app.use("/logins", applyIpWhitelist, authMiddleware, require("./routes/loginsRoutes"));
+app.use("/reports", applyIpWhitelist, authMiddleware, require("./routes/reportsRoutes"));
+app.use("/bankers", applyIpWhitelist, authMiddleware, require("./routes/bankersRoutes"));
+app.use("/createTable", applyIpWhitelist, authMiddleware, require("./routes/createTableRoutes"));
+app.use("/ipAddress", applyIpWhitelist, authMiddleware, require("./routes/ipAddressRoutes.js"));
+app.use("/uploads", applyIpWhitelist, authMiddleware, express.static(path.join(__dirname, "uploads")));
 
 scheduleCronJobs();
 // console.log(process.env.PORT)

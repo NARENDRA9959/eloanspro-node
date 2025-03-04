@@ -20,6 +20,7 @@ const userLogin = asyncHandler(async (req, res) => {
       (await bcrypt.compare(password, result[0].password))
     ) {
       const user = result[0];
+      delete user.token;
       const accessToken = jwt.sign(
         {
           user: user,
@@ -27,6 +28,14 @@ const userLogin = asyncHandler(async (req, res) => {
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "3h" }
       );
+      if (user.userType == 1) {
+        const updateTokenSQL = `UPDATE users SET token = ? WHERE id = ?`;
+        dbConnect.query(updateTokenSQL, [accessToken, user.id], (err) => {
+          if (err) {
+            console.log("Error updating token", err);
+          }
+        });
+      }
       res.status(200).json({ accessToken });
     } else {
       res.status(401).send("Username or Password Incorrect");
@@ -44,7 +53,6 @@ const userLogout = asyncHandler(async (req, res) => {
     process.env.ACCESS_TOKEN_SECRET
   );
   res.status(200).json({ message: "Logout successful" });
-
 });
 
 const userLogoutforIp = asyncHandler(async (req, res) => {
