@@ -132,7 +132,10 @@ async function sendLeadsReport() {
         // Calculate total leads and callbacks
         const totalLeads = counts.reduce((sum, item) => sum + item.leadsCount, 0);
         const totalCallbacks = counts.reduce((sum, item) => sum + item.callbacksCount, 0);
-
+        if (totalLeads === 0 && totalCallbacks === 0) {
+            console.log("No leads, callbacks, or loan leads today. Skipping email.");
+            return;
+        }
         // Generate the HTML for sourcedBy-wise counts
         const countsHTML = await Promise.all(counts.map(async (item, index) => {
             const SourcedByName = await getSourceName(item.sourcedBy)
