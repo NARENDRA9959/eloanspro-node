@@ -50,6 +50,34 @@ const getTotalLeadsCountArray = asyncHandler(async (req, res) => {
         res.status(200).json(responseArray);
     });
 });
+// const getStatusLeadsCountArray = asyncHandler(async (req, res) => {
+//     let sql = `
+//         SELECT 
+//             SUM(CASE WHEN loanType = 'homeLoan' AND employmentStatus = 'employed' THEN 1 ELSE 0 END) AS homeLoanCount,
+//             SUM(CASE WHEN loanType = 'homeLoan' AND employmentStatus = 'self-employed'  THEN 1 ELSE 0 END) AS homeLoanSelfCount,
+//             SUM(CASE WHEN loanType = 'lap' AND employmentStatus = 'employed' THEN 1 ELSE 0 END) AS lapLoanCount,
+//             SUM(CASE WHEN loanType = 'lap' AND employmentStatus = 'self-employed' THEN 1 ELSE 0 END) AS lapLoanSelfCount
+//         FROM loanleads
+//     `;
+//     const queryParams = req.query;
+//     // queryParams["leadInternalStatus-eq"] = 1; // Applying the internal status filter
+//     const filtersQuery = handleGlobalFilters(queryParams, true);
+//     sql += filtersQuery;
+//     dbConnect.query(sql, (err, result) => {
+//         if (err) {
+//             console.log("getStatusLeadsCountArray error in controller", err);
+//             return res.status(500).send("Error in fetching Loan Leads Employment Status Count");
+//         }
+//         const responseArray =
+//         {
+//             homeLoancount: result[0]["homeLoanCount"] || 0,
+//             homeLoanSelfcount: result[0]["homeLoanSelfCount"] || 0,
+//             LAPLoancount: result[0]["lapLoanCount"] || 0,
+//             LAPLoanSelfcount: result[0]["lapLoanSelfCount"] || 0,
+//         }
+//         res.status(200).json(responseArray);
+//     });
+// });
 const getloanLeads = asyncHandler(async (req, res) => {
     let sql = "SELECT * FROM loanleads";
     const queryParams = req.query;
@@ -226,4 +254,5 @@ module.exports = {
     changeLoanLeadStatus,
     addLoanLeadsDocumentData,
     getTotalLeadsCountArray
+    // ,getStatusLeadsCountArray
 };

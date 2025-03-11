@@ -161,7 +161,7 @@ async function sendLeadsReport() {
         // Compose the email
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: 'ravi.n@winwaycreators.com, hema.p@winwaycreators.com, mudhiiguubbakalyonnii@gmail.com, cnarendra329@gmail.com',
+            to: 'ravi.n@winwaycreators.com, hema.p@winwaycreators.com, hr@winwaycreators.com, mudhiiguubbakalyonnii@gmail.com, cnarendra329@gmail.com',
             // to: 'mudhiiguubbakalyonnii@gmail.com, cnarendra329@gmail.com',
             subject: `Today's Metrics: Leads and Callbacks Overview [ ${formattedDate} ]`,
             html: `

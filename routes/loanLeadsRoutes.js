@@ -9,6 +9,7 @@ const {
     deleteLoanLead,
     addLoanLeadsDocumentData,
     getTotalLeadsCountArray
+    //, getStatusLeadsCountArray
 } = require("../controllers/loanLeadsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -21,6 +22,7 @@ router
 router.route("/").get(validateToken, getloanLeads).post(validateToken, createLoanLead);
 router.route("/total").get(validateToken, getloanLeadsCount);
 router.route("/arraycount").get(validateToken, getTotalLeadsCountArray);
+// router.route("/statuscount").get(validateToken, getStatusLeadsCountArray);
 
 router
     .route("/:leadId/changestatus/:statusId")
