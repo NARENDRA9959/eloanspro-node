@@ -886,6 +886,16 @@ const exportloginsDoneDetails = asyncHandler(async (req, res) => {
         }
         try {
             for (let i = 0; i < result.length; i++) {
+                let leadId = result[i].leadId;
+                let contactSql = `SELECT primaryPhone FROM leads WHERE id = ?`;
+                const contactResult = await new Promise((resolve, reject) => {
+                    dbConnect.query(contactSql, [leadId], (contactErr, contactRes) => {
+                        if (contactErr) reject(contactErr);
+                        else resolve(contactRes);
+                    });
+                });
+                // Assign contact number to the result object
+                result[i].primaryPhone = contactResult.length > 0 ? contactResult[0].primaryPhone : 'N/A';
                 result[i].createdOn = moment(result[i].createdOn).format('YYYY-MM-DD');
                 result[i].loginDate = moment(result[i].loginDate).format('YYYY-MM-DD');
                 result[i].fipStatus = result[i].fipStatus.charAt(0).toUpperCase() + result[i].fipStatus.slice(1).toLowerCase();

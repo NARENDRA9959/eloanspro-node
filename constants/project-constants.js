@@ -52,6 +52,7 @@ module.exports = {
     LOGIN_DETAILS_COLUMNS: [
       { header: 'Lead Id', key: 'leadId' },
       { header: 'Business Name', key: 'businessName' },
+      { header: 'Primary Phone', key: 'primaryPhone' },
       { header: 'Bank Name', key: 'bankName' },
       { header: 'Program', key: 'program' },
       { header: 'Login Date', key: 'loginDate' },
