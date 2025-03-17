@@ -61,6 +61,7 @@ module.exports = {
     DISBURSED_DETAILS_COLUMNS: [
       { header: 'Lead Id', key: 'leadId' },
       { header: 'Business Name', key: 'businessName' },
+      { header: 'Primary Phone', key: 'primaryPhone' },
       { header: 'Disbursed Amount', key: 'totalDisbursedAmount' },
     ],
     SANCTIONED_DETAILS_COLUMNS: [

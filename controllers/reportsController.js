@@ -785,7 +785,24 @@ const exportDisbursalDetails = asyncHandler(async (req, res) => {
             return;
         }
         try {
+            // for (let i = 0; i < result.length; i++) {
+            //     result[i].createdOn = moment(result[i].createdOn).format('YYYY-MM-DD');
+            // }
             for (let i = 0; i < result.length; i++) {
+                let leadId = result[i].leadId;
+                let contactSql = `SELECT primaryPhone FROM leads WHERE id = ?`;
+    
+                const contactResult = await new Promise((resolve, reject) => {
+                    dbConnect.query(contactSql, [leadId], (contactErr, contactRes) => {
+                        if (contactErr) reject(contactErr);
+                        else resolve(contactRes);
+                    });
+                });
+    
+                // Assign contact number to the result object
+                result[i].primaryPhone = contactResult.length > 0 ? contactResult[0].primaryPhone : 'N/A';
+    
+                // Format date if needed
                 result[i].createdOn = moment(result[i].createdOn).format('YYYY-MM-DD');
             }
             result = parseNestedJSON(result);
