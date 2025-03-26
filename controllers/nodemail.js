@@ -27,175 +27,28 @@ async function getActiveSourcedByIds() {
     });
 }
 
-// async function getLeadsAndCallbacksCountForActiveSources() {
-//     try {
-//         // Step 1: Get the active sourcedBy IDs from sources table
-//         const activeSourcedByIds = await getActiveSourcedByIds();
-//         if (activeSourcedByIds.length === 0) {
-//             console.log("No active sourcedBy IDs found.");
-//             return;
-//         }
-//         const today = moment().startOf('day').format('YYYY-MM-DD');
-//         const tomorrow = moment().add(1, 'days').startOf('day').format('YYYY-MM-DD');
-//         // Step 2: Get the count of leads for active sourcedBy IDs
-//         const sqlLeads = `
-//             SELECT sourcedBy, COUNT(*) AS count
-//             FROM leads
-//             WHERE createdOn >= ? 
-//               AND createdOn < ? 
-//               AND sourcedBy IN (?) 
-//               AND leadInternalStatus = 1
-//             GROUP BY sourcedBy
-//         `;
+async function getJoiningDate(userId) {
+    try {
+        const sql = `SELECT joiningDate FROM users WHERE id = ?`;
 
-//         const sqlCallbacks = `
-//             SELECT sourcedBy, COUNT(*) AS count
-//             FROM callbacks
-//             WHERE createdOn >= ? 
-//               AND createdOn < ? 
-//               AND sourcedBy IN (?) 
-//               AND callbackInternalStatus = 1
-//             GROUP BY sourcedBy
-//         `;
-//         const sqlLoanLeads = `
-//             SELECT sourcedBy, COUNT(*) AS count
-//             FROM loanleads
-//             WHERE createdOn >= ? 
-//                 AND createdOn < ? 
-//                 AND sourcedBy IN (?) 
-//                 AND leadInternalStatus = 1
-//             GROUP BY sourcedBy
-//     `;
-//         // Query leads count
-//         const leadsCountPromise = new Promise((resolve, reject) => {
-//             dbConnect.query(sqlLeads, [today, tomorrow, activeSourcedByIds], (err, result) => {
-//                 if (err) {
-//                     reject(err);
-//                     return;
-//                 }
-//                 console.log(result)
-//                 resolve(result);
+        const result = await new Promise((resolve, reject) => {
+            dbConnect.query(sql, [userId], (err, result) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(result);
+            });
+        });
 
-//             });
-//         });
-
-//         // Query callbacks count
-//         const callbacksCountPromise = new Promise((resolve, reject) => {
-//             dbConnect.query(sqlCallbacks, [today, tomorrow, activeSourcedByIds], (err, result) => {
-//                 if (err) {
-//                     reject(err);
-//                     return;
-//                 }
-//                 resolve(result);
-//             });
-//         });
-
-
-//         const loanLeadsCountPromise = new Promise((resolve, reject) => {
-//             dbConnect.query(sqlLoanLeads, [today, tomorrow, activeSourcedByIds], (err, result) => {
-//                 if (err) {
-//                     reject(err);
-//                     return;
-//                 }
-//                 resolve(result);
-//             });
-//         });
-//         // Wait for both queries to complete
-//         const [leadsCounts, loanLeadsCounts, callbacksCounts] = await Promise.all([
-//             leadsCountPromise, loanLeadsCountPromise, callbacksCountPromise
-//         ]);
-
-//         // Prepare final counts
-//         const finalCounts = activeSourcedByIds.map(id => {
-//             const leads = leadsCounts.find(item => item.sourcedBy == id) || { count: 0 };
-//             const loanLeads = loanLeadsCounts.find(item => item.sourcedBy == id) || { count: 0 };
-//             const callbacks = callbacksCounts.find(item => item.sourcedBy == id) || { count: 0 };
-//             // console.log("loanLeads.count", loanLeads.count)
-//             return {
-//                 sourcedBy: id,
-//                 leadsCount: leads.count + loanLeads.count, // Combine counts from both tables
-//                 callbacksCount: callbacks.count
-//             };
-//         });
-//         return finalCounts;
-//     } catch (error) {
-//         console.error('Error getting leads and callbacks count:', error);
-//         return [];
-//     }
-// }
-
-// async function sendLeadsReport() {
-//     try {
-//         // Get the final leads and callbacks counts for active sourcedBy IDs
-//         const counts = await getLeadsAndCallbacksCountForActiveSources();
-
-//         // Calculate total leads and callbacks
-//         const totalLeads = counts.reduce((sum, item) => sum + item.leadsCount, 0);
-//         const totalCallbacks = counts.reduce((sum, item) => sum + item.callbacksCount, 0);
-//         if (totalLeads === 0 && totalCallbacks === 0) {
-//             console.log("No leads, callbacks, or loan leads today. Skipping email.");
-//             return;
-//         }
-//         // Generate the HTML for sourcedBy-wise counts
-//         const countsHTML = await Promise.all(counts.map(async (item, index) => {
-//             const SourcedByName = await getSourceName(item.sourcedBy)
-//             return `
-//                 <tr>
-//                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
-//                         ${index + 1} <!-- Row index (1-based) -->
-//                     </td>
-//                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
-//                         ${SourcedByName.toUpperCase()} <!-- Fetch sourcedBy name -->
-//                     </td>
-//                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
-//                         ${item.leadsCount} 
-//                     </td>
-//                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
-//                         ${item.callbacksCount} 
-//                     </td>
-//                 </tr>
-//             `;
-//         }));
-//         const today = new Date();
-//         const formattedDate = today.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); // Example: "Feb 18, 2025"
-//         // Compose the email
-//         const mailOptions = {
-//             from: process.env.EMAIL_USER,
-//             to: 'ravi.n@winwaycreators.com, hema.p@winwaycreators.com, hr@winwaycreators.com, mudhiiguubbakalyonnii@gmail.com, cnarendra329@gmail.com',
-//             // to: 'mudhiiguubbakalyonnii@gmail.com, cnarendra329@gmail.com',
-//             subject: `Today's Metrics: Leads and Callbacks Overview [ ${formattedDate} ]`,
-//             html: `
-//                 <h2>Today Counts</h2>
-//                 <p><strong>Today Leads:</strong> ${totalLeads}</p>
-//                 <p><strong>Today Callbacks:</strong> ${totalCallbacks}</p>
-//                 <h2>Sourced By - Leads and Callbacks Summary</h2>
-//                 <table style="min-width: 50%; border-collapse: collapse;">
-//                     <thead>
-//                         <tr>
-//                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">ID</th>
-//                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Sourced By</th>
-//                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Leads Count</th>
-//                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Callbacks Count</th>
-//                         </tr>
-//                     </thead>
-//                     <tbody>
-//                         ${countsHTML.join('')}
-//                     </tbody>
-//                 </table>
-//             `,
-//         };
-
-//         // Send the email
-//         transporter.sendMail(mailOptions, (error, info) => {
-//             if (error) {
-//                 return console.error('Error sending email:', error);
-//             }
-//             console.log('Email sent:', info.response);
-//         });
-//     } catch (error) {
-//         console.error('Error generating leads report:', error);
-//     }
-// }
+        if (result.length === 0) return 'N/A';
+        // Format the joining date to 'MMM DD, YYYY' (e.g., Aug 20, 2024)
+        return moment(result[0].joiningDate).format('MMM DD, YYYY');
+    } catch (error) {
+        console.error('Error fetching joining date:', error);
+        return 'N/A';
+    }
+}
 
 async function getLeadsAndCallbacksCountForActiveSources() {
     try {
@@ -334,6 +187,7 @@ async function sendLeadsReport() {
         }
         const countsHTML = await Promise.all(counts.map(async (item, index) => {
             const SourcedByName = await getSourceName(item.sourcedBy)
+            const joiningDate = await getJoiningDate(item.sourcedBy)
             return `
                 <tr>
                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
@@ -341,6 +195,9 @@ async function sendLeadsReport() {
                     </td>
                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
                         ${SourcedByName.toUpperCase()} <!-- Fetch sourcedBy name -->
+                    </td>
+                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
+                        ${joiningDate} <!-- Fetch sourcedBy name -->
                     </td>
                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
                         ${item.leadsCount} 
@@ -378,6 +235,7 @@ async function sendLeadsReport() {
                         <tr>
                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">ID</th>
                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Sourced By</th>
+                            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Joining Date</th>
                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Today Leads</th>
                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Today Callbacks</th>
                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">${currentMonthName} Leads</th>

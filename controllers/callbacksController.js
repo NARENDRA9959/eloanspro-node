@@ -182,6 +182,63 @@ const deleteCallBack = asyncHandler((req, res) => {
     res.status(200).json({ message: "Callback Deleted Successfully" });
   });
 });
+
+
+
+// const getTotalCallbacksCountArray = asyncHandler(async (req, res) => {
+//   let sql = `
+//       SELECT 
+//       SUM(CASE WHEN loanType = 'businessLoan' THEN 1 ELSE 0 END) AS businessCount,
+//           SUM(CASE WHEN loanType = 'personalLoan' THEN 1 ELSE 0 END) AS personalCount,
+//           SUM(CASE WHEN loanType = 'homeLoan' THEN 1 ELSE 0 END) AS homeLoanCount,
+//           SUM(CASE WHEN loanType = 'lap' THEN 1 ELSE 0 END) AS lapLoanCount
+//       FROM callbacks
+//   `;
+//   const queryParams = req.query;
+//   const filtersQuery = handleGlobalFilters(queryParams, true);
+//   sql += filtersQuery;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("getTotalCallbacksCountArray error in controller", err);
+//       return res.status(500).send("Error in fetching Callbacks Count");
+//     }
+//     const responseArray =
+//     {
+//       businesscount: result[0]["businessCount"] || 0,
+//       personalcount: result[0]["personalCount"] || 0,
+//       homeLoancount: result[0]["homeLoanCount"] || 0,
+//       LAPLoancount: result[0]["lapLoanCount"] || 0,
+//     }
+//     res.status(200).json(responseArray);
+//   });
+// });
+// const getStatusCallbacksCountArray = asyncHandler(async (req, res) => {
+//   let sql = `
+//       SELECT 
+//           SUM(CASE WHEN loanType = 'homeLoan' AND employmentStatus = 'employed' THEN 1 ELSE 0 END) AS homeLoanCount,
+//           SUM(CASE WHEN loanType = 'homeLoan' AND employmentStatus = 'self-employed'  THEN 1 ELSE 0 END) AS homeLoanSelfCount,
+//           SUM(CASE WHEN loanType = 'lap' AND employmentStatus = 'employed' THEN 1 ELSE 0 END) AS lapLoanCount,
+//           SUM(CASE WHEN loanType = 'lap' AND employmentStatus = 'self-employed' THEN 1 ELSE 0 END) AS lapLoanSelfCount
+//       FROM callbacks
+//   `;
+//   const queryParams = req.query;
+//   const filtersQuery = handleGlobalFilters(queryParams, true);
+//   sql += filtersQuery;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("getStatusLeadsCountArray error in controller", err);
+//       return res.status(500).send("Error in fetching Callbacks Employment Status Count");
+//     }
+//     const responseArray =
+//     {
+//       homeLoancount: result[0]["homeLoanCount"] || 0,
+//       homeLoanSelfcount: result[0]["homeLoanSelfCount"] || 0,
+//       LAPLoancount: result[0]["lapLoanCount"] || 0,
+//       LAPLoanSelfcount: result[0]["lapLoanSelfCount"] || 0,
+//     }
+//     res.status(200).json(responseArray);
+//   });
+// });
 module.exports = {
   getCallBacks,
   getCallBacksCount,
@@ -190,4 +247,6 @@ module.exports = {
   updateCallBack,
   deleteCallBack,
   changeCallbackStatus,
+  // getTotalCallbacksCountArray,
+  // getStatusCallbacksCountArray
 };
