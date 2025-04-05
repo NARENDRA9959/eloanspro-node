@@ -87,6 +87,7 @@ module.exports = {
       { header: 'Lead Id', key: 'leadId' },
       { header: 'Sourced By', key: 'sourcedBy' },
       { header: 'Business Name', key: 'businessName' },
+      { header: 'Primary Phone', key: 'primaryPhone' },
       { header: 'Lender', key: 'bankName' },
       { header: 'Program', key: 'program' },
       { header: 'Login Date', key: 'loginDate' },

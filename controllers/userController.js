@@ -26,7 +26,7 @@ const userLogin = asyncHandler(async (req, res) => {
           user: user,
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "3h" }
+        { expiresIn: "10h" }
       );
       if (user.userType == 1) {
         const updateTokenSQL = `UPDATE users SET token = ? WHERE id = ?`;

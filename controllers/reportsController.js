@@ -1111,10 +1111,12 @@ const getReportsCount = asyncHandler(async (req, res) => {
 const exportloginFiles = asyncHandler(async (req, res) => {
     let reportId = "R-" + generateRandomNumber(6);
     const queryParams = req.query;
-    const sourcedByFilter = queryParams["sourcedBy-eq"];
+    const sourcedByFilter = queryParams["sourcedBy-eq"] || queryParams["sourcedBy-or"];
     let leadIds = [];
     if (sourcedByFilter) {
-        const leadsSql = `SELECT id FROM leads WHERE sourcedBy = ${dbConnect.escape(sourcedByFilter)}`;
+        // const leadsSql = `SELECT id FROM leads WHERE sourcedBy = ${dbConnect.escape(sourcedByFilter)}`;
+        const sourcedByArray = sourcedByFilter.split(',').map(Number).join(',');
+        const leadsSql = `SELECT id FROM leads WHERE sourcedBy IN (${sourcedByArray})`;
         console.log(leadsSql);
         const [leadsErr, leadsResult] = await new Promise((resolve) => {
             dbConnect.query(leadsSql, (err, result) => resolve([err, result]));
@@ -1133,6 +1135,7 @@ const exportloginFiles = asyncHandler(async (req, res) => {
     }
     const filteredQueryParams = { ...queryParams };
     delete filteredQueryParams["sourcedBy-eq"];
+    delete filteredQueryParams["sourcedBy-or"];
     let sql = `SELECT * FROM logins`;
     const filtersQuery = handleGlobalFilters(filteredQueryParams);
     sql += filtersQuery;
@@ -1175,6 +1178,16 @@ const exportloginFiles = asyncHandler(async (req, res) => {
             try {
                 console.log(result)
                 for (let i = 0; i < result.length; i++) {
+                    let leadId = result[i].leadId;
+                    let contactSql = `SELECT primaryPhone FROM leads WHERE id = ?`;
+                    const contactResult = await new Promise((resolve, reject) => {
+                        dbConnect.query(contactSql, [leadId], (contactErr, contactRes) => {
+                            if (contactErr) reject(contactErr);
+                            else resolve(contactRes);
+                        });
+                    });
+                    // Assign contact number to the result object
+                    result[i].primaryPhone = contactResult.length > 0 ? contactResult[0].primaryPhone : 'N/A';
                     result[i].approvalDate = result[i].approvalDate
                         ? moment(result[i].approvalDate).format('YYYY-MM-DD')
                         : result[i].approvalDate;
