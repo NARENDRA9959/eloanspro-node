@@ -112,7 +112,7 @@ async function getLeadsAndCallbacksCountForActiveSources() {
                 AND leadInternalStatus = 1
             GROUP BY sourcedBy
 `;
-        const [leadsCounts, loanLeadsCounts, callbacksCounts, leadsCountsThisMonth, loanleadsCountsThisMonth, callbacksCountsThisMonth] = await Promise.all([
+        const [leadsCounts, loanLeadsCounts, callbacksCounts, leadsCountsThisMonth, loanleadsCountsThisMonth, callbacksCountsThisMonth, docsToday, docsThisMonth] = await Promise.all([
             new Promise((resolve, reject) => {
                 dbConnect.query(sqlLeads, [today, tomorrow, activeSourcedByIds], (err, result) => {
                     if (err) reject(err);
@@ -148,8 +148,66 @@ async function getLeadsAndCallbacksCountForActiveSources() {
                     if (err) reject(err);
                     else resolve(result);
                 });
+            }),
+            new Promise((resolve, reject) => {
+                dbConnect.query(
+                    `SELECT leadId FROM leaddocuments WHERE createdOn >= ? AND createdOn < ?`,
+                    [today, tomorrow],
+                    (err, result) => (err ? reject(err) : resolve(result))
+                );
+            }),
+            new Promise((resolve, reject) => {
+                dbConnect.query(
+                    `SELECT leadId FROM leaddocuments WHERE createdOn >= ? AND createdOn < ?`,
+                    [firstDayOfMonth, nextMonth],
+                    (err, result) => (err ? reject(err) : resolve(result))
+                );
             })
         ]);
+        const leadIdsToday = [...new Set(docsToday.map(d => d.leadId))];
+        const leadIdsThisMonth = [...new Set(docsThisMonth.map(d => d.leadId))];
+        const allLeadIds = [...new Set([...leadIdsToday, ...leadIdsThisMonth])];
+
+        if (allLeadIds.length === 0) {
+            return activeSourcedByIds.map(id => ({
+                sourcedBy: id,
+                filesToday: 0,
+                filesThisMonth: 0
+            }));
+        }
+        // Step 3: Get sourcedBy for all involved leadIds
+        const [leadSourcing] = await new Promise((resolve, reject) => {
+            dbConnect.query(
+                `SELECT id, sourcedBy FROM leads WHERE id IN (${allLeadIds.map(() => '?').join(',')})`,
+                allLeadIds,
+                (err, result) => (err ? reject(err) : resolve([result]))
+            );
+        });
+        console.log(leadSourcing)
+        const sourcedByMap = {};
+        leadSourcing.forEach(lead => {
+            sourcedByMap[lead.id] = lead.sourcedBy;
+        });
+
+        // Step 4: Count files for today and this month by sourcedBy
+        const countBySource = {};
+        activeSourcedByIds.forEach(id => {
+            countBySource[id] = { filesToday: 0, filesThisMonth: 0 };
+        });
+
+        docsToday.forEach(doc => {
+            const sourcedBy = sourcedByMap[doc.leadId];
+            if (sourcedBy && countBySource[sourcedBy]) {
+                countBySource[sourcedBy].filesToday += 1;
+            }
+        });
+
+        docsThisMonth.forEach(doc => {
+            const sourcedBy = sourcedByMap[doc.leadId];
+            if (sourcedBy && countBySource[sourcedBy]) {
+                countBySource[sourcedBy].filesThisMonth += 1;
+            }
+        });
 
         // Prepare final counts
         const finalCounts = activeSourcedByIds.map(id => {
@@ -164,7 +222,9 @@ async function getLeadsAndCallbacksCountForActiveSources() {
                 leadsCount: leads.count + loanLeads.count,
                 callbacksCount: callbacks.count,
                 thisMonthLeadsCount: leadsThisMonth.count + loanleadsThisMonth.count,
-                thisMonthCallbacksCount: callbacksThisMonth.count
+                thisMonthCallbacksCount: callbacksThisMonth.count,
+                filesToday: countBySource[id].filesToday,
+                filesThisMonth: countBySource[id].filesThisMonth
             };
         });
         return finalCounts;
@@ -178,10 +238,12 @@ async function sendLeadsReport() {
     try {
         const counts = await getLeadsAndCallbacksCountForActiveSources();
         const totalLeads = counts.reduce((sum, item) => sum + item.leadsCount, 0);
+        const totalFiles = counts.reduce((sum, item) => sum + item.filesToday, 0);
         const totalCallbacks = counts.reduce((sum, item) => sum + item.callbacksCount, 0);
         const totalLeadsThisMonth = counts.reduce((sum, item) => sum + item.thisMonthLeadsCount, 0);
         const totalCallbacksThisMonth = counts.reduce((sum, item) => sum + item.thisMonthCallbacksCount, 0);
-        if (totalLeads === 0 && totalCallbacks === 0) {
+        const totalFilesThisMonth = counts.reduce((sum, item) => sum + item.filesThisMonth, 0);
+        if (totalLeads === 0 && totalCallbacks === 0 && totalFiles === 0) {
             console.log("No leads, callbacks, or loan leads today. Skipping email.");
             return;
         }
@@ -205,11 +267,17 @@ async function sendLeadsReport() {
                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
                         ${item.callbacksCount} 
                     </td>
+                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
+                        ${item.filesToday} 
+                    </td>
                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
                         ${item.thisMonthLeadsCount} 
                     </td>
                     <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
                         ${item.thisMonthCallbacksCount} 
+                    </td>
+                      <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
+                        ${item.filesThisMonth} 
                     </td>
                 </tr>
             `;
@@ -228,8 +296,10 @@ async function sendLeadsReport() {
                 <h2>Today Counts</h2>
                 <p><strong>Today Leads:</strong> ${totalLeads}</p>
                 <p><strong>Today Callbacks:</strong> ${totalCallbacks}</p>
+                <p><strong>Today Files:</strong> ${totalFiles}</p>
                 <p><strong>${currentMonthName} Leads:</strong> ${totalLeadsThisMonth}</p>
                 <p><strong>${currentMonthName} Callbacks:</strong> ${totalCallbacksThisMonth}</p>
+                <p><strong>${currentMonthName} Files:</strong> ${totalFilesThisMonth}</p>
                 <h2>Sourced By - Leads and Callbacks Summary</h2>
                 <table style="min-width: 50%; border-collapse: collapse;">
                     <thead>
@@ -239,8 +309,10 @@ async function sendLeadsReport() {
                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Joining Date</th>
                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Today Leads</th>
                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Today Callbacks</th>
+                            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Today Files</th>
                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">${currentMonthName} Leads</th>
                             <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">${currentMonthName} Callbacks</th>
+                            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">${currentMonthName} Files</th>
                         </tr>
                     </thead>
                     <tbody>
