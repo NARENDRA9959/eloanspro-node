@@ -245,6 +245,62 @@ const addLoanLeadsDocumentData = asyncHandler((req, res) => {
         res.status(200).send({ success: "Documents Saved Successfully" });
     });
 });
+
+const createLoanLeadFromCallback = asyncHandler(async (req, res) => {
+    const phoneNumber = req.body.primaryPhone;
+    if (req.user.userType == 1) {
+        return createNewLoanLeadFromCallback(req, res);
+    }
+    let checkPhoneQuery = `SELECT * FROM loanleads`;
+    const queryParams = req.query;
+    queryParams["primaryPhone-eq"] = phoneNumber;
+    queryParams["loanType-eq"] = req.body.loanType;
+    queryParams["employmentStatus-eq"] = req.body.employmentStatus;
+    const filtersQuery = handleGlobalFilters(queryParams);
+    checkPhoneQuery += filtersQuery;
+    console.log(checkPhoneQuery)
+    dbConnect.query(checkPhoneQuery, async (err, result) => {
+        if (err) {
+            console.error("Error checking phone number:", err);
+            return res.status(500).send("Error in Checking the Phone Number");
+        }
+        if (result.length > 0) {
+            const lead = result[0];
+            try {
+                const sourcedByName = await getSourceName(lead.sourcedBy);
+                return res.status(400).send(
+                    `Lead already exists with phone number ${phoneNumber}, 
+         Lead ID - ${lead.id}, Business Name - ${lead.businessName}, 
+         Created By - ${lead.createdBy},  Sourced By - ${sourcedByName}`
+                );
+            } catch (error) {
+                console.error("Error fetching sourcedBy name:", error);
+                return res.status(500).send("Error fetching sourcedBy name");
+            }
+        }
+        createNewLeadFromCallback(req, res);
+    });
+});
+
+function createNewLoanLeadFromCallback(req, res) {
+    let leadId = generateRandomNumber(5);
+    req.body["leadId"] = leadId;
+    req.body["leadInternalStatus"] = 1;
+    req.body["lastLeadInternalStatus"] = 1;
+    req.body["createdBy"] = req.user.name;
+    req.body["lastUpdatedBy"] = req.user.name;
+    const createClause = createClauseHandler(req.body);
+    const sql = `INSERT INTO loanleads (${createClause[0]}) VALUES (${createClause[1]})`;
+    dbConnect.query(sql, (err, result) => {
+        if (err) {
+            console.error("Error inserting data into leads table:", err);
+            res.status(500).send("Internal server error");
+            return;
+        }
+        console.log(leadId)
+        res.status(200).json({ leadId: leadId });
+    });
+}
 module.exports = {
     getloanLeads,
     getloanLeadsCount,
@@ -255,5 +311,6 @@ module.exports = {
     changeLoanLeadStatus,
     addLoanLeadsDocumentData,
     getTotalLeadsCountArray,
-    getStatusLeadsCountArray
+    getStatusLeadsCountArray,
+    createLoanLeadFromCallback
 };

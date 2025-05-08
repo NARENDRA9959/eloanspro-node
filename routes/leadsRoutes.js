@@ -19,7 +19,8 @@ const {
   calculateBTOProgram,
   getCreditSummary,
   calculateDscrRatio,
-  createLeadFromCallback
+  createLeadFromCallback,
+  getAllLeadData
 } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -34,6 +35,7 @@ router.route("/search").get(validateToken, searchLeads);
 router.route("/total").get(validateToken, getLeadsCount);
 
 router.route("/sources").get(validateToken, getLeadSources);
+router.route("/lead-data/:leadId").get(validateToken, getAllLeadData);
 
 router
   .route("/:leadId/changestatus/:statusId")

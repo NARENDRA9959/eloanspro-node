@@ -2,7 +2,7 @@ const express = require("express");
 const {
   getLeadCountStatus,
   getFilesCountStatus,
-  getPartialCountStatus,
+  // getPartialCountStatus,
   getCreditEvaluationCountStatus,
   getMonthWiseLeadCountStatus,
   getMonthWiseCallBacksCount,
@@ -37,7 +37,7 @@ const validateToken = require("../middleware/validateTokenHandler");
 router.route("/leads").get(validateToken, getLeadCountStatus);
 router.route("/callback").get(validateToken, getCallbackCountStatus);
 router.route("/files").get(validateToken, getFilesCountStatus);
-router.route("/partial").get(validateToken, getPartialCountStatus);
+// router.route("/partial").get(validateToken, getPartialCountStatus);
 router.route("/rejects").get(validateToken, getRejectedCountStatus);
 router.route("/logins").get(validateToken, getLoginsCountStatus);
 router.route("/credit").get(validateToken, getCreditEvaluationCountStatus);

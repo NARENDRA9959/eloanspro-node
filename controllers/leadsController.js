@@ -574,6 +574,56 @@ const getCreditSummary = asyncHandler(async (req, res) => {
     res.status(200).json({ creditSummary });
   });
 });
+const getAllLeadData = asyncHandler(async (req, res) => {
+  console.log(req.params.leadId)
+  const leadId = req.params.leadId;
+
+  // Query to get lead details
+  const leadQuery = `SELECT * FROM leads WHERE id = ?`;
+  const documentsQuery = `SELECT * FROM leaddocuments WHERE leadId = ?`;
+  const crditsQuery = `SELECT * FROM dscr_values WHERE leadId = ?`;
+  const loginsQuery = `SELECT * FROM logins WHERE leadId = ?`;
+
+  // Start by getting lead details
+  dbConnect.query(leadQuery, [leadId], (err, leadResults) => {
+    if (err) return res.status(500).json({ error: 'Error fetching lead details' });
+
+    if (leadResults.length === 0) return res.status(404).json({ message: 'Lead not found' });
+
+    const leadData = leadResults[0]; // Assuming one result for leadId
+
+    // Now get the documents associated with the lead
+    dbConnect.query(documentsQuery, [leadId], (err, documentResults) => {
+      if (err) return res.status(500).json({ error: 'Error fetching document details' });
+
+      // Now get credit details
+      dbConnect.query(crditsQuery, [leadId], (err, creditsResults) => {
+        if (err) return res.status(500).json({ error: 'Error fetching credit details' });
+
+        // Now get login details
+        dbConnect.query(loginsQuery, [leadId], (err, loginResults) => {
+          if (err) return res.status(500).json({ error: 'Error fetching login details' });
+
+          // If no login data found, set it as an empty array
+          const loginData = loginResults.length > 0 ? loginResults : [];
+          const documentData = documentResults[0];
+          const creditData = creditsResults[0];
+          // Combine all data into one response
+          const responseData = {
+            leadData,
+            documents: documentData ? documentData : null,
+            logins: loginData, // Handling multiple rows for logins
+            credits: creditData ? creditData : null// Handling multiple rows for credits
+          };
+
+
+          const result = parseNestedJSON(responseData);
+          res.status(200).send(result);
+        });
+      });
+    });
+  });
+});
 
 module.exports = {
   getLeads,
@@ -595,5 +645,6 @@ module.exports = {
   calculateBTOProgram,
   searchLeads,
   createLeadFromCallback,
-  getSourceName
+  getSourceName,
+  getAllLeadData
 };

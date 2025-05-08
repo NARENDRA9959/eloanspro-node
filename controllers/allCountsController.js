@@ -95,25 +95,25 @@ const getLoginsCountStatus = asyncHandler(async (req, res) => {
   });
 });
 
-const getPartialCountStatus = asyncHandler(async (req, res) => {
-  let sql = `
-      SELECT COUNT(*) AS partialCountStatus
-      FROM leads
-  `;
-  const queryParams = req.query;
-  queryParams["leadInternalStatus-eq"] = "4";
-  const filtersQuery = handleGlobalFilters(queryParams);
-  sql += filtersQuery;
-  dbConnect.query(sql, (err, result) => {
-    if (err) {
-      console.error("Error:", err);
-      res.status(500).send("Error in Fetching the Partials Count");
-      return;
-    }
-    const partialCountStatus = result[0].partialCountStatus;
-    res.status(200).send(String(partialCountStatus));
-  });
-});
+// const getPartialCountStatus = asyncHandler(async (req, res) => {
+//   let sql = `
+//       SELECT COUNT(*) AS partialCountStatus
+//       FROM leads
+//   `;
+//   const queryParams = req.query;
+//   queryParams["leadInternalStatus-eq"] = "4";
+//   const filtersQuery = handleGlobalFilters(queryParams);
+//   sql += filtersQuery;
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.error("Error:", err);
+//       res.status(500).send("Error in Fetching the Partials Count");
+//       return;
+//     }
+//     const partialCountStatus = result[0].partialCountStatus;
+//     res.status(200).send(String(partialCountStatus));
+//   });
+// });
 
 
 const getCreditEvaluationCountStatus = asyncHandler(async (req, res) => {
@@ -972,7 +972,7 @@ const getuserTwoMonthsAgoDisbursedAmount = asyncHandler(async (req, res) => {
 module.exports = {
   getLeadCountStatus,
   getFilesCountStatus,
-  getPartialCountStatus,
+  // getPartialCountStatus,
   getCreditEvaluationCountStatus,
   getMonthWiseLeadCountStatus,
   getMonthWiseCallBacksCount,
