@@ -20,7 +20,8 @@ const {
   getCreditSummary,
   calculateDscrRatio,
   createLeadFromCallback,
-  getAllLeadData
+  getAllLeadData,
+  getInhouseRejectedLeads
 } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -42,6 +43,7 @@ router
   .put(validateToken, changeLeadStatus);
 
 // router.route("/users").get(validateToken, getLeadUsers);
+router.route("/inHouseRejects").get(validateToken, getInhouseRejectedLeads);
 
 router
   .route("/documents/:leadId")

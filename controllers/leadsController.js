@@ -574,53 +574,182 @@ const getCreditSummary = asyncHandler(async (req, res) => {
     res.status(200).json({ creditSummary });
   });
 });
+// const getAllLeadData = asyncHandler(async (req, res) => {
+//   console.log(req.params.leadId)
+//   const leadId = req.params.leadId;
+
+//   // Query to get lead details
+//   const leadQuery = `SELECT * FROM leads WHERE id = ?`;
+//   const documentsQuery = `SELECT * FROM leaddocuments WHERE leadId = ?`;
+//   const crditsQuery = `SELECT * FROM dscr_values WHERE leadId = ?`;
+//   const loginsQuery = `SELECT * FROM logins WHERE leadId = ?`;
+
+//   // Start by getting lead details
+//   dbConnect.query(leadQuery, [leadId], (err, leadResults) => {
+//     if (err) return res.status(500).json({ error: 'Error fetching lead details' });
+
+//     if (leadResults.length === 0) return res.status(404).json({ message: 'Lead not found' });
+
+//     const leadData = leadResults[0]; // Assuming one result for leadId
+
+//     // Now get the documents associated with the lead
+//     dbConnect.query(documentsQuery, [leadId], (err, documentResults) => {
+//       if (err) return res.status(500).json({ error: 'Error fetching document details' });
+
+//       // Now get credit details
+//       dbConnect.query(crditsQuery, [leadId], (err, creditsResults) => {
+//         if (err) return res.status(500).json({ error: 'Error fetching credit details' });
+
+//         // Now get login details
+//         dbConnect.query(loginsQuery, [leadId], (err, loginResults) => {
+//           if (err) return res.status(500).json({ error: 'Error fetching login details' });
+
+//           // If no login data found, set it as an empty array
+//           const loginData = loginResults.length > 0 ? loginResults : [];
+//           const documentData = documentResults[0];
+//           const creditData = creditsResults[0];
+//           // Combine all data into one response
+//           const responseData = {
+//             leadData,
+//             documents: documentData ? documentData : null,
+//             logins: loginData, // Handling multiple rows for logins
+//             credits: creditData ? creditData : null// Handling multiple rows for credits
+//           };
+
+
+//           const result = parseNestedJSON(responseData);
+//           res.status(200).send(result);
+//         });
+//       });
+//     });
+//   });
+// });
 const getAllLeadData = asyncHandler(async (req, res) => {
-  console.log(req.params.leadId)
   const leadId = req.params.leadId;
 
   // Query to get lead details
   const leadQuery = `SELECT * FROM leads WHERE id = ?`;
   const documentsQuery = `SELECT * FROM leaddocuments WHERE leadId = ?`;
-  const crditsQuery = `SELECT * FROM dscr_values WHERE leadId = ?`;
+  const creditsQuery = `SELECT * FROM dscr_values WHERE leadId = ?`;
   const loginsQuery = `SELECT * FROM logins WHERE leadId = ?`;
 
-  // Start by getting lead details
-  dbConnect.query(leadQuery, [leadId], (err, leadResults) => {
-    if (err) return res.status(500).json({ error: 'Error fetching lead details' });
+  try {
+    // Fetch lead details
+    const [leadResults] = await dbConnect.promise().query(leadQuery, [leadId]);
+    if (leadResults.length === 0) {
+      return res.status(404).json({ message: 'Lead not found' });
+    }
+    const leadData = leadResults[0]; // Lead details
 
-    if (leadResults.length === 0) return res.status(404).json({ message: 'Lead not found' });
+    // Fetch distinct lead IDs for status determination
+    const approvedLeadIds = await fetchDistinctApprovedLeadIds();
+    const fipLeadsIds = await fetchFIPProcessDistinctLeadIds();
+    const bankRejectedLeadsIds = await fetchDistinctBankRejectedLeadIds();
+    const disbursalIds = await fetchDistinctDisbursedLeadIds();
+    const cniIds = await fetchDistinctCNIRejectedLeadIds();
 
-    const leadData = leadResults[0]; // Assuming one result for leadId
+    // Function to get status name based on internal status
+    const getLeadStatusName = (lead) => {
+      const leadIdStr = lead.id.toString();
+      const internalStatus = lead.leadInternalStatus;
 
-    // Now get the documents associated with the lead
-    dbConnect.query(documentsQuery, [leadId], (err, documentResults) => {
-      if (err) return res.status(500).json({ error: 'Error fetching document details' });
+      if (internalStatus == 12) { // Files In Process block
+        if (approvedLeadIds.includes(leadIdStr) && disbursalIds.includes(leadIdStr)) {
+          return "Disbursed";
+        } else if (approvedLeadIds.includes(leadIdStr)) {
+          return "Sanctions";
+        } else if (fipLeadsIds.includes(leadIdStr)) {
+          return "Files In Process";
+        } else if (bankRejectedLeadsIds.includes(leadIdStr)) {
+          return "Bank Rejects";
+        } else if (cniIds.includes(leadIdStr)) {
+          return "CNI";
+        } else {
+          return internalStatus; // Fallback
+        }
+      } else {
+        return internalStatus; // Fallback for other statuses
+      }
+    };
 
-      // Now get credit details
-      dbConnect.query(crditsQuery, [leadId], (err, creditsResults) => {
-        if (err) return res.status(500).json({ error: 'Error fetching credit details' });
+    // Fetch additional data based on the lead's status
+    const [documentResults] = await dbConnect.promise().query(documentsQuery, [leadId]);
+    const [creditsResults] = await dbConnect.promise().query(creditsQuery, [leadId]);
+    const [loginResults] = await dbConnect.promise().query(loginsQuery, [leadId]);
 
-        // Now get login details
-        dbConnect.query(loginsQuery, [leadId], (err, loginResults) => {
-          if (err) return res.status(500).json({ error: 'Error fetching login details' });
+    const loginData = loginResults.length > 0 ? loginResults : [];
+    const documentData = documentResults.length > 0 ? documentResults[0] : null;
+    const creditData = creditsResults.length > 0 ? creditsResults[0] : null;
 
-          // If no login data found, set it as an empty array
-          const loginData = loginResults.length > 0 ? loginResults : [];
-          const documentData = documentResults[0];
-          const creditData = creditsResults[0];
-          // Combine all data into one response
-          const responseData = {
-            leadData,
-            documents: documentData ? documentData : null,
-            logins: loginData, // Handling multiple rows for logins
-            credits: creditData ? creditData : null// Handling multiple rows for credits
-          };
+    // If leadInternalStatus is 12, include leadStatusName
+    if (leadData.leadInternalStatus == 12) {
+      const leadStatusName = getLeadStatusName(leadData); // Get status name
+
+      // Combine all data into one response
+      const responseData = {
+        leadData,
+        leadStatusName,
+        documents: documentData,
+        logins: loginData,
+        credits: creditData
+      };
+      return res.status(200).send(parseNestedJSON(responseData));
+    }
+
+    // If leadInternalStatus is not 12, proceed without leadStatusName
+    const responseData = {
+      leadData,
+      documents: documentData,
+      logins: loginData,
+      credits: creditData
+    };
+    return res.status(200).send(parseNestedJSON(responseData));
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Error fetching lead data' });
+  }
+});
 
 
-          const result = parseNestedJSON(responseData);
-          res.status(200).send(result);
-        });
+const getInhouseRejectedLeads = asyncHandler(async (req, res) => {
+  let sql = "SELECT * FROM leads";
+  const queryParams = req.query;
+  const filtersQuery = handleGlobalFilters(queryParams);
+  sql += filtersQuery;
+
+  dbConnect.query(sql, async (err, leads) => {
+    if (err) {
+      console.log("Error fetching leads");
+      return res.status(500).send("Error in Fetching the Leads");
+    }
+
+    leads = parseNestedJSON(leads);
+    const leadIds = leads.map((lead) => lead.id);
+    if (leadIds.length === 0) return res.status(200).send([]);
+
+    // Step 1: Fetch creditSheetSummary for each leadId
+    const creditSql = `
+      SELECT leadId, creditSummary 
+      FROM dscr_values 
+      WHERE leadId IN (?)
+    `;
+    dbConnect.query(creditSql, [leadIds], (err, creditRows) => {
+      if (err) {
+        console.log("Error fetching credit sheet summaries");
+        return res.status(500).send("Error fetching credit summary data");
+      }
+      // Step 2: Map credit summaries to leadId
+      const creditMap = {};
+      creditRows.forEach((row) => {
+        creditMap[row.leadId] = row.creditSummary;
       });
+      // Step 3: Merge into leads
+      const result = leads.map((lead) => ({
+        ...lead,
+        creditSummary: creditMap[lead.id] || null,
+      }));
+      res.status(200).send(result);
     });
   });
 });
@@ -646,5 +775,6 @@ module.exports = {
   searchLeads,
   createLeadFromCallback,
   getSourceName,
-  getAllLeadData
+  getAllLeadData,
+  getInhouseRejectedLeads
 };

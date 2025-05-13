@@ -69,10 +69,9 @@ async function getLeadsAndCallbacksCountForActiveSources() {
             WHERE createdOn >= ? 
               AND createdOn < ? 
               AND sourcedBy IN (?) 
-              AND leadInternalStatus = 1
+              AND (leadInternalStatus = 1 OR leadInternalStatus = 16)
             GROUP BY sourcedBy
         `;
-
         const sqlCallbacks = `
             SELECT sourcedBy, COUNT(*) AS count
             FROM callbacks
@@ -178,7 +177,7 @@ async function getLeadsAndCallbacksCountForActiveSources() {
         // Step 3: Get sourcedBy for all involved leadIds
         const [leadSourcing] = await new Promise((resolve, reject) => {
             dbConnect.query(
-                `SELECT id, sourcedBy FROM leads WHERE id IN (${allLeadIds.map(() => '?').join(',')})`,
+                `SELECT id, sourcedBy FROM leads WHERE id IN (${allLeadIds.map(() => '?').join(',')}) AND leadInternalStatus != 4`,
                 allLeadIds,
                 (err, result) => (err ? reject(err) : resolve([result]))
             );
