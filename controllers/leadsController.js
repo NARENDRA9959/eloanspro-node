@@ -130,7 +130,7 @@ const getFiles = asyncHandler(async (req, res) => {
   const docFilterQuery = handleGlobalFilters(docParams);
 
   // Step 1: Get leadIds from documents matching docFilterQuery
-  let docSql = `SELECT leadId, createdOn FROM leadDocuments`;
+  let docSql = `SELECT leadId, createdOn FROM leaddocuments`;
   if (docFilterQuery.trim().length > 0) {
     docSql += ` ${docFilterQuery}`;
   }
@@ -220,7 +220,7 @@ const getFilesCount = asyncHandler(async (req, res) => {
     // Build WHERE clause for leadId IN (...)
     const idsInClause = `leadId IN (${leadIds.map(id => dbConnect.escape(id)).join(",")})`;
 
-    let docSql = `SELECT COUNT(DISTINCT leadId) AS count FROM leadDocuments WHERE ${idsInClause}`;
+    let docSql = `SELECT COUNT(DISTINCT leadId) AS count FROM leaddocuments WHERE ${idsInClause}`;
 
     const docExtraFilters = docFilterQuery.trim();
     if (docExtraFilters.length > 0) {
