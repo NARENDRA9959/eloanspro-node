@@ -21,13 +21,17 @@ const {
   calculateDscrRatio,
   createLeadFromCallback,
   getAllLeadData,
-  getInhouseRejectedLeads
+  getInhouseRejectedLeads,
+  getFiles,
+  getFilesCount
 } = require("../controllers/leadsController");
 const validateToken = require("../middleware/validateTokenHandler");
 
 const router = express.Router();
 
 router.route("/").get(validateToken, getLeads).post(validateToken, createLead);
+router.route("/files").get(validateToken, getFiles);
+router.route("/files-count").get(validateToken, getFilesCount);
 
 
 router.route("/callbacktolead").post(validateToken, createLeadFromCallback);

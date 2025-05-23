@@ -6,7 +6,7 @@ const {
   createClauseHandler,
   updateClauseHandler,
 } = require("../middleware/clauseHandler");
-
+// const { io, superAdminSockets } = require('../server');
 const handleRequiredFields = require("../middleware/requiredFieldsChecker");
 const { generateRandomNumber } = require("../middleware/valueGenerator");
 const { fetchDistinctApprovedLeadIds } = require("../controllers/loginsController")
@@ -45,6 +45,196 @@ const getLeads = asyncHandler(async (req, res) => {
     }
     result = parseNestedJSON(result);
     res.status(200).send(result);
+  });
+});
+
+// const getFiles = asyncHandler(async (req, res) => {
+//   const queryParams = req.query;
+
+//   // Separate filters for leads and leadDocuments
+//   const leadParams = {};
+//   const docParams = {};
+
+//   for (const key in queryParams) {
+//     if (key.startsWith("docs.")) {
+//       docParams[key.replace("docs.", "")] = queryParams[key];
+//     } else {
+//       leadParams[key] = queryParams[key];
+//     }
+//   }
+
+//   // Build queries using existing filter functions
+//   const leadFilterQuery = handleGlobalFilters(leadParams);
+//   const docFilterQuery = handleGlobalFilters(docParams);
+
+//   const leadSql = `SELECT * FROM leads${leadFilterQuery}`;
+
+//   dbConnect.query(leadSql, (leadErr, leadResult) => {
+//     if (leadErr) {
+//       console.error("Leads query error:", leadErr);
+//       return res.status(500).send("Error fetching leads");
+//     }
+
+//     leadResult = parseNestedJSON(leadResult);
+//     const leadIds = leadResult.map(l => l.id);
+//     if (leadIds.length === 0) return res.status(200).send([]);
+
+//     // Base WHERE clause for leadId IN (...)
+//     const idsInClause = `leadId IN (${leadIds.map(id => dbConnect.escape(id)).join(",")})`;
+
+//     // Check if docFilterQuery is not empty
+//     const docExtraFilters = docFilterQuery.trim();
+//     console.log(docExtraFilters)
+//     let docSql = `SELECT leadId, createdOn FROM leadDocuments WHERE ${idsInClause}`;
+//     if (docExtraFilters.length > 0) {
+//       docSql += docExtraFilters.replace(/^WHERE/i, ' AND');
+//     }
+//     console.log(docSql)
+//     dbConnect.query(docSql, (docErr, docResult) => {
+//       if (docErr) {
+//         console.error("leadDocuments query error:", docErr);
+//         return res.status(500).send("Error fetching document data");
+//       }
+//       const docMap = {};
+//       docResult.forEach(doc => {
+//         if (!docMap[doc.leadId]) {
+//           docMap[doc.leadId] = doc.createdOn;
+//         }
+//       });
+//       const finalResult = leadResult.map(lead => ({
+//         ...lead,
+//         uploadedDate: docMap[lead.id] || null
+//       }));
+//       res.status(200).send(finalResult);
+//     });
+//   });
+// });
+
+
+const getFiles = asyncHandler(async (req, res) => {
+  const queryParams = req.query;
+
+  // Separate filters for leads and leadDocuments
+  const leadParams = {};
+  const docParams = {};
+
+  for (const key in queryParams) {
+    if (key.startsWith("docs.")) {
+      docParams[key.replace("docs.", "")] = queryParams[key];
+    } else {
+      leadParams[key] = queryParams[key];
+    }
+  }
+
+  const leadFilterQuery = handleGlobalFilters(leadParams);
+  const docFilterQuery = handleGlobalFilters(docParams);
+
+  // Step 1: Get leadIds from documents matching docFilterQuery
+  let docSql = `SELECT leadId, createdOn FROM leadDocuments`;
+  if (docFilterQuery.trim().length > 0) {
+    docSql += ` ${docFilterQuery}`;
+  }
+
+  dbConnect.query(docSql, (docErr, docResult) => {
+    if (docErr) {
+      console.error("leadDocuments query error:", docErr);
+      return res.status(500).send("Error fetching document data");
+    }
+
+    if (!docResult.length) return res.status(200).send([]); // No documents match
+
+    // Step 2: Create map for uploadedDate and leadId list
+    const docMap = {};
+    const docLeadIds = [];
+
+    docResult.forEach(doc => {
+      if (!docMap[doc.leadId] || doc.createdOn > docMap[doc.leadId]) {
+        docMap[doc.leadId] = doc.createdOn;
+      }
+      if (!docLeadIds.includes(doc.leadId)) {
+        docLeadIds.push(doc.leadId);
+      }
+    });
+
+    // Step 3: Get leads that match lead filters AND leadId IN (...)
+    const leadIdFilter = `id IN (${docLeadIds.map(id => dbConnect.escape(id)).join(",")})`;
+    console.log("leadIdFilter", leadIdFilter)
+    console.log(leadFilterQuery)
+    let fullLeadQuery = `SELECT * FROM leads`;
+
+    if (leadFilterQuery && leadFilterQuery.trim()) {
+      // Remove leading WHERE to avoid double WHERE
+      const cleanedFilter = leadFilterQuery.trim().replace(/^WHERE\s*/i, '');
+
+      fullLeadQuery += ` WHERE ${leadIdFilter} AND ${cleanedFilter}`;
+    } else {
+      fullLeadQuery += ` WHERE ${leadIdFilter}`;
+    }
+    dbConnect.query(fullLeadQuery, (leadErr, leadResult) => {
+      if (leadErr) {
+        console.error("Leads query error:", leadErr);
+        return res.status(500).send("Error fetching leads");
+      }
+      console.log(fullLeadQuery)
+      leadResult = parseNestedJSON(leadResult);
+      const finalResult = leadResult.map(lead => ({
+        ...lead,
+        uploadedDate: docMap[lead.id] || null
+      }));
+
+      res.status(200).send(finalResult);
+    });
+  });
+});
+
+const getFilesCount = asyncHandler(async (req, res) => {
+  const queryParams = req.query;
+
+  // Separate filters for leads and leadDocuments
+  const leadParams = {};
+  const docParams = {};
+
+  for (const key in queryParams) {
+    if (key.startsWith("docs.")) {
+      docParams[key.replace("docs.", "")] = queryParams[key];
+    } else {
+      leadParams[key] = queryParams[key];
+    }
+  }
+
+  // Build queries using existing filter functions
+  const leadFilterQuery = handleGlobalFilters(leadParams, true);
+  const docFilterQuery = handleGlobalFilters(docParams, true);
+
+  const leadSql = `SELECT id FROM leads ${leadFilterQuery}`;
+
+  dbConnect.query(leadSql, (leadErr, leadResult) => {
+    if (leadErr) {
+      console.error("Leads query error:", leadErr);
+      return res.status(500).send("Error fetching leads");
+    }
+
+    const leadIds = leadResult.map(l => l.id);
+    if (leadIds.length === 0) return res.status(200).send({ count: 0 });
+
+    // Build WHERE clause for leadId IN (...)
+    const idsInClause = `leadId IN (${leadIds.map(id => dbConnect.escape(id)).join(",")})`;
+
+    let docSql = `SELECT COUNT(DISTINCT leadId) AS count FROM leadDocuments WHERE ${idsInClause}`;
+
+    const docExtraFilters = docFilterQuery.trim();
+    if (docExtraFilters.length > 0) {
+      docSql += docExtraFilters.replace(/^WHERE/i, ' AND');
+    }
+
+    dbConnect.query(docSql, (docErr, docResult) => {
+      if (docErr) {
+        console.error("leadDocuments count query error:", docErr);
+        return res.status(500).send("Error fetching document count");
+      }
+      const count = docResult[0]?.count || 0;
+      res.status(200).send(String(count));
+    });
   });
 });
 
@@ -100,6 +290,33 @@ const addDocumentData = asyncHandler((req, res) => {
   });
 });
 
+// const addDocumentData = asyncHandler((req, res) => {
+//   const id = req.params.leadId;
+//   req.body["lastUpdatedBy"] = req.user.name;
+//   console.log(req.body)
+//   const updateClause = updateClauseHandler(req.body);
+//   const sql = `UPDATE leaddocuments SET ${updateClause} WHERE leadId = ${id}`;
+
+//   dbConnect.query(sql, (err, result) => {
+//     if (err) {
+//       console.log("addDocumentData error in controller");
+//       return res.status(500).send("Error in Adding the Documents");
+//     }
+
+//     // Emit only to Super Admins
+//     console.log("superAdminSockets", global.superAdminSockets)
+
+//     for (let key in global.superAdminSockets) {
+//       global.superAdminSockets[key].socket.emit('documentAdded', {
+//         message: `New document updated by ${req.user.name} for lead ${id}`,
+//         leadId: id,
+//         updatedBy: req.user.name
+//       });
+//     }
+
+//     res.status(200).send({ success: "Documents Saved Successfully" });
+//   });
+// });
 const addDscrValuesData = asyncHandler((req, res) => {
   const id = req.params.leadId;
   req.body["lastUpdatedBy"] = req.user.name;
@@ -776,5 +993,7 @@ module.exports = {
   createLeadFromCallback,
   getSourceName,
   getAllLeadData,
-  getInhouseRejectedLeads
+  getInhouseRejectedLeads,
+  getFiles,
+  getFilesCount
 };
