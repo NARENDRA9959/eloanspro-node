@@ -93,7 +93,7 @@ async function getLeadsAndCallbacksCountForActiveSources() {
         const sqlLeadsThisMonth = `
             SELECT sourcedBy, COUNT(*) AS count
             FROM leads
-            WHERE createdOn >= ? AND createdOn < ? AND sourcedBy IN (?) AND leadInternalStatus = 1
+            WHERE createdOn >= ? AND createdOn < ? AND sourcedBy IN (?) AND (leadInternalStatus = 1 OR leadInternalStatus = 16)
             GROUP BY sourcedBy
 `;
         const sqlCallbacksThisMonth = `
