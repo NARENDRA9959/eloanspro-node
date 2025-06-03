@@ -236,12 +236,12 @@ async function getLeadsAndCallbacksCountForActiveSources() {
 async function sendLeadsReport() {
     try {
         const counts = await getLeadsAndCallbacksCountForActiveSources();
-        const totalLeads = counts.reduce((sum, item) => sum + item.leadsCount, 0);
-        const totalFiles = counts.reduce((sum, item) => sum + item.filesToday, 0);
-        const totalCallbacks = counts.reduce((sum, item) => sum + item.callbacksCount, 0);
-        const totalLeadsThisMonth = counts.reduce((sum, item) => sum + item.thisMonthLeadsCount, 0);
-        const totalCallbacksThisMonth = counts.reduce((sum, item) => sum + item.thisMonthCallbacksCount, 0);
-        const totalFilesThisMonth = counts.reduce((sum, item) => sum + item.filesThisMonth, 0);
+        const totalLeads = counts.reduce((sum, item) => (sum + item.leadsCount || 0), 0);
+        const totalFiles = counts.reduce((sum, item) => (sum + item.filesToday || 0), 0);
+        const totalCallbacks = counts.reduce((sum, item) => (sum + item.callbacksCount || 0), 0);
+        const totalLeadsThisMonth = counts.reduce((sum, item) => (sum + item.thisMonthLeadsCount || 0), 0);
+        const totalCallbacksThisMonth = counts.reduce((sum, item) => (sum + item.thisMonthCallbacksCount || 0), 0);
+        const totalFilesThisMonth = counts.reduce((sum, item) => (sum + item.filesThisMonth || 0), 0);
         if (totalLeads === 0 && totalCallbacks === 0 && totalFiles === 0) {
             console.log("No leads, callbacks, or loan leads today. Skipping email.");
             return;
