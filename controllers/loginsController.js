@@ -444,7 +444,7 @@ const getApprovalsLeads = asyncHandler(async (req, res) => {
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
-    queryParams["sort"] = "createdOn";
+    queryParams["sort"] = "approvalDate";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
     dbConnect.query(sql, (err, result) => {
@@ -488,7 +488,7 @@ const getDisbursalLeads = asyncHandler(async (req, res) => {
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
-    queryParams["sort"] = "createdOn";
+    queryParams["sort"] = "disbursalDate";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
     dbConnect.query(sql, queryParams, (err, result) => {
@@ -568,7 +568,7 @@ const getBankRejectsLeads = asyncHandler(async (req, res) => {
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
-    queryParams["sort"] = "createdOn";
+    queryParams["sort"] = "loginDate";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
     dbConnect.query(sql, queryParams, (err, result) => {
@@ -640,7 +640,7 @@ const getCNIRejectsLeads = asyncHandler(async (req, res) => {
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
-    queryParams["sort"] = "createdOn";
+    queryParams["sort"] = "loginDate";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
     dbConnect.query(sql, queryParams, (err, result) => {
@@ -838,7 +838,7 @@ const getFIPProcessDistinctLeads = asyncHandler(async (req, res) => {
     let sql = `SELECT * FROM leads`;
     const queryParams = req.query || {};
     queryParams["id-or"] = inClause;
-    queryParams["sort"] = "createdOn";
+    queryParams["sort"] = "loginDate";
     const filtersQuery = handleGlobalFilters(queryParams);
     sql += filtersQuery;
     dbConnect.query(sql, (err, result) => {
